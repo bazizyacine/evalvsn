@@ -1,0 +1,6 @@
+# Build artefacts
+*.o
+*.so
+*.a
+bin/
+build/
