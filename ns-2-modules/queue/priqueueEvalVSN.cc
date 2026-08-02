@@ -618,7 +618,12 @@ int priqueueEvalVSN::computeCongestionThreshold(Packet *p)
     }
 
     // Facteur selon la priorité (plus la priorité est haute, plus le congestionThreshold est bas)
-    double prio_factor = 1.0 - (double(priority) / double(aomdv_qpv_agent_->mac_->phy_->getMaxPrioNb())); // suppose priorité de 0 (haut) à 10 (bas)
+    // priority.cc affecte dataPriority de 1 (la plus critique) a getMaxPrioNb()
+    // (la moins critique) ; la valeur 0 n'est jamais produite. Avec 1 - p/max le
+    // dernier niveau obtenait exactement zero, donc un seuil ramene au minimum
+    // par le max(1) plus bas : il etait declare congestionne des la premiere
+    // unite d'occupation. Le +1 le laisse decroitre sans degenerer.
+    double prio_factor = double(aomdv_qpv_agent_->mac_->phy_->getMaxPrioNb() + 1 - priority) / double(aomdv_qpv_agent_->mac_->phy_->getMaxPrioNb());
 
     // Facteur selon la taille de la file d'attente (plus la file est longue, plus le congestionThreshold baisse)
     double queue_factor = 1.0;

@@ -1201,7 +1201,9 @@ void WirelessPhyEvalVSN::adjustPhyMetrics(Packet *p)
 
 	// 3) Poids dynamiques selon frameType et priority
 	double w1, w2, w3;
-	double prioBoost = double(getMaxPrioNb() - priority) / double(getMaxPrioNb());
+	// Priorites de 1 (critique) a getMaxPrioNb() ; le +1 evite que le dernier
+	// niveau annule la ponderation, comme dans aomdv_qpv.cc et priqueueEvalVSN.cc.
+	double prioBoost = double(getMaxPrioNb() + 1 - priority) / double(getMaxPrioNb());
 
 	if (packetType == PT_VIDEO)
 	{
@@ -1385,7 +1387,7 @@ void WirelessPhyEvalVSN::adjustTxPower(packet_t packetType, char frameType, int 
 		frameBoost = 1.2;
 	}
 
-	prioBoost = double(getMaxPrioNb() - priority) / double(getMaxPrioNb());
+	prioBoost = double(getMaxPrioNb() + 1 - priority) / double(getMaxPrioNb());
 
 	// 3) Calcul du pas de variation
 	double currentPt = getPt();

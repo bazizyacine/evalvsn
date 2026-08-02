@@ -2490,7 +2490,13 @@ DynamicWeights AOMDV_QPV::getDynamicWeights(packet_t packetType, char frameType,
 	}
 
 	// adjust PRR weight by priority (higher priority -> more weight)
-	double prioFactor = double(mac_->phy_->getMaxPrioNb() - priority) / double(mac_->phy_->getMaxPrioNb());
+	// Les priorites vont de 1 (la plus critique) a getMaxPrioNb(), et non de 0 :
+	// avec (max - p) / max le dernier niveau obtenait exactement zero, ce qui
+	// annulait wPRR et le retirait de la metrique. Le +1 lui laisse un poids
+	// faible mais non nul -- 1,0 au niveau 1 et 0,077 au niveau 13 pour
+	// getMaxPrioNb() = 13 -- de sorte que la ponderation decroisse sans jamais
+	// degenerer.
+	double prioFactor = double(mac_->phy_->getMaxPrioNb() + 1 - priority) / double(mac_->phy_->getMaxPrioNb());
 
 	dw.wPRR *= prioFactor;
 

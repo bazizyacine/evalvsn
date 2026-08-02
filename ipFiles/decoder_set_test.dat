@@ -1,2 +1,0 @@
-#|simId|Encoder|imageResolution|imagesNb|videoDuration|FPS|Threshold|gopCoef|qualityCoef|priorityNb|DCT|zoneSize|rleLevel|binLevel|rcvFile|
-0.001-1 MMPEG 144x176 300 12 1 0 0.001 0.01 1 CLA 8 RLE1 EG rt-packet.dat

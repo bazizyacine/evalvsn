@@ -68,10 +68,11 @@ while read -r simId encoder resolution imagesNb videoDuration fps threshold \
 
     bash ns2.sh -st st-packet.dat -rt "$rtName" -vd "$videoDuration" \
                 -nn "${ARG[nn]}" -rp "${ARG[rp]}" -dbg "$DBG" \
+                -seed "${ARG[seed]:-0}" \
       || die "the ns-2 simulation failed for $simId"
 
     if [[ "${ARG[rp]}" == "AOMDV_QPV" ]]; then
-      bash ns2TrStats.sh -tr st-packet.tr
+      bash ../metrics/ns2TrStats.sh -tr st-packet.tr
     fi
 
     mkdir -p "$stPath"

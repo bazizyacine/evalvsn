@@ -3,6 +3,7 @@
 # Runs an ns-2 simulation from a packet file.
 #
 # Usage: ns2.sh -st st-packet.dat -rt rtName -vd videoDuration -nn nodes -rp protocol
+#        [-dbg 0|1] [-seed N]   seed 0 = ns-2 default sequence
 
 source "$(dirname "$(readlink -f "$0")")/lib/common.sh"
 
@@ -27,9 +28,10 @@ require_cmds ns
 require_files "${ARG[st]}" evalvsn.tcl
 
 ns evalvsn.tcl \
-  -st   "${ARG[st]}" \
-  -rt   "${ARG[rt]}" \
-  -simt "${ARG[vd]}" \
-  -nn   "${ARG[nn]}" \
-  -rp   "${ARG[rp]}" \
-  -dbg  "${ARG[dbg]:-1}"
+  -st      "${ARG[st]}" \
+  -rt      "${ARG[rt]}" \
+  -simt    "${ARG[vd]}" \
+  -nn      "${ARG[nn]}" \
+  -rp      "${ARG[rp]}" \
+  -dbg     "${ARG[dbg]:-1}" \
+  -rndSeed "${ARG[seed]:-0}"

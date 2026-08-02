@@ -53,32 +53,32 @@ BEGIN {
 
   ############################################
   # Pour Tab1 + Tab2/Tab3 :
-  #   - uniqueUIDs[u] : marquer tous les UIDs de pertes uniques
+  #   - uniqueUIDs[u]: flag every UID counted as a unique loss
   #   - uniqueUIDList : liste CSV d’UIDs uniques perdus
   ############################################
   delete uniqueUIDs
   uniqueUIDList = ""
 
   ############################################
-  # Tab2 : détails des drops
-  #   - tab2Map[label] = nombre total de drops (pour tous les UIDs)
-  #   - tab2UIDList[label] = liste CSV (tous les UIDs) pour chaque label
-  #   - tab2Seen[key2]  : pour éviter de compter plusieurs fois (UID, label)
+  # Tab2: drop detail
+  #   - tab2Map[label] = total drops, across all UIDs
+  #   - tab2UIDList[label] = CSV list of all UIDs, per label
+  #   - tab2Seen[key2]: guards against counting a (UID, label) pair twice
   ############################################
   delete tab2Map
   delete tab2UIDList
   delete tab2Seen
-  delete dropUIDs    # marquer tout UID qui a subi un drop (quel qu’il soit)
+  delete dropUIDs    # flag any UID that was dropped, for whatever reason
 
   ############################################
-  # Tab3 : regroupement de tous les drops (pour tous les UIDs initiaux)
-  #   - grouping[key] = compteur où
+  # Tab3: all drops grouped, over every initial UID
+  #   - grouping[key] = counter, where
   #     key = label SUBSEP UID SUBSEP packetType SUBSEP frameType SUBSEP priority
   ############################################
   delete grouping
 
   ############################################
-  # Tab4 : délai moyen bout-à-bout et métriques d’énergie
+  # Tab4: mean end-to-end delay and the energy metrics
   ############################################
   sumDelay           = 0
   recvnum            = 0
@@ -105,9 +105,9 @@ BEGIN {
   }
 
   ###################################
-  # Phase A : Tab1 corrigé + Tab4 (collecte énergie)
+  # Phase A: corrected Tab1, plus the energy collection Tab4 needs
   ###################################
-  # Ligne "s" : envoi AGT de paquet vidéo → mémoriser UID envoyé
+  # "s" line: AGT sends a video packet -> remember the UID sent
   if ($1 == "s" && kv2["Nl"] == "AGT" && kv2["It"] == "video") {
     sends++
     u = kv2["Ii"]
@@ -117,7 +117,7 @@ BEGIN {
     }
   }
 
-  # Ligne "r" : réception AGT de paquet vidéo → mémoriser UID reçu
+  # "r" line: AGT receives a video packet -> remember the UID received
   if ($1 == "r" && kv2["Nl"] == "AGT" && kv2["It"] == "video") {
     recvs++
     u = kv2["Ii"]
@@ -131,7 +131,7 @@ BEGIN {
   }
 
   ###################################
-  # Phase B : Tab2 (collecte brute de tous les drops) + remplissage tab2Map / tab2UIDList
+  # Phase B: Tab2, every drop collected raw, filling tab2Map and tab2UIDList
   ###################################
   if ($1 == "d" && kv2["It"] == "video") {
     L = kv2["Nl"]
@@ -179,11 +179,11 @@ BEGIN {
     u    = kv2["Ii"]
     key2 = u SUBSEP label
 
-    # -- Comptage brut (pour Tab2 originale) --
+    # -- Raw count, for the original Tab2 --
     if (!(key2 in tab2Seen)) {
       tab2Seen[key2] = 1
       tab2Map[label]++
-      # Stocker tous les UIDs (pas seulement uniques) pour chaque catégorie
+      # Store every UID, not only the unique ones, per category
       if (tab2UIDList[label] == "") {
         tab2UIDList[label] = u
       } else {
@@ -191,18 +191,18 @@ BEGIN {
       }
     }
 
-    # Marquer tout UID qui a subi au moins un drop (pour Tab3)
+    # Flag any UID dropped at least once, for Tab3
     dropUIDs[u] = 1
   }
 
   ###################################
-  # Phase C : Tab3 (Grouping de tous les drops vidéo)
+  # Phase C: Tab3, grouping every video drop
   ###################################
   if ($1 == "d" && kv2["It"] == "video") {
     L = kv2["Nl"]
     R = kv2["Nw"]
 
-    # Reconstruction du label (même qu’à Tab2)
+    # Rebuild the label, as Tab2 does
     label = ""
     if (R == "END")                                       label = "DROP_END_OF_SIMULATION"
     else if (L == "PHY" && R == "INT")                    label = "DROP_PHY_INT"
@@ -241,18 +241,18 @@ BEGIN {
     else if (R == "OUT")                                  label = "DROP_OUTSIDE_SUBNET"
     else                                                  label = "DROP_UNKNOWN"
 
-    uidFld    = kv2["Ii"] + 0        # valeur numérique pour le tri
+    uidFld    = kv2["Ii"] + 0        # numeric, for sorting
     pktTypeFld= kv2["It"]            # "video"
     frTypeFld = kv2["Frt"]           # type de trame
-    prioFld   = kv2["Pri"]           # priorité
+    prioFld   = kv2["Pri"]           # priority
 
-    # Comptage brut de grouping (pour tous les UIDs)
+    # Raw grouping count, over all UIDs
     key = label SUBSEP uidFld SUBSEP pktTypeFld SUBSEP frTypeFld SUBSEP prioFld
     grouping[key]++
   }
 
   ###################################
-  # Phase D : Tab4 (collecte énergie)
+  # Phase D: Tab4, energy collection
   ###################################
   if ($1 == "N") {
     node   = $5 + 0
@@ -266,8 +266,8 @@ BEGIN {
 
 END {
   ########################################
-  # 1) Tab1 corrigé :
-  #    - calcul des UIDs perdus (uniques) : ceux présents dans sentUID mais pas dans recvUID
+  # 1) Corrected Tab1:
+  #    - unique lost UIDs: those in sentUID but not in recvUID
   #    - construction de uniqueUIDList (CSV)
   ########################################
   uniqueCount = 0
@@ -287,13 +287,13 @@ END {
   # Impression : Tab1
   ########################################
   print ""
-  print "=== Tab1 : stats générales des paquets vidéo ==="
-  # En-tête à 3 colonnes : Description | Liste (UIDs) | Valeur
+  print "=== Tab1: overall video packet statistics ==="
+  # Three-column header: Description | UID list | Value
   printf "%-40s| %-30s| %10s\n", "Description", "Liste (UIDs)", "Valeur"
   printf "%-40s-+-%-30s-+-%10s\n", "----------------------------------------", "------------------------------", "----------"
   printf "%-40s| %-30s| %10d\n",  "nb. of video packets sends",       "", sends
   printf "%-40s| %-30s| %10d\n",  "nb. of video packets recvs",       "", recvs
-  # Ajout des parenthèses autour de la liste
+  # Parenthesise the list
   printf "%-40s| %-30s| %10d\n",
          "nb. of unique video packet drops",
          "(" uniqueUIDList ")",
@@ -301,11 +301,11 @@ END {
   printf "%-40s| %-30s| %10.4f\n", "nb. normalized routing overhead",   "", (recvs > 0 ? overheads/recvs : 0)
 
   ########################################
-  # 2) Tab2 : ne traiter que les UIDs perdus uniques
+  # 2) Tab2: only the unique lost UIDs
   #    - on ne garde plus la colonne Count, seulement Drop Reason et Liste (UIDs)
   ########################################
-  delete tab2UniqueUIDs     # tab2UniqueUIDs[label] = CSV des UIDs uniques pour ce label
-  delete tab2UniqueCount    # tab2UniqueCount[label] = nombre d’UIDs uniques pour ce label
+  delete tab2UniqueUIDs     # tab2UniqueUIDs[label] = CSV of unique UIDs for that label
+  delete tab2UniqueCount    # tab2UniqueCount[label] = how many unique UIDs for that label
 
   for (label in tab2UIDList) {
     split(tab2UIDList[label], allUIDs, ",")
@@ -328,14 +328,14 @@ END {
     }
   }
 
-  # Tri décroissant par nombre d’UIDs uniques (même si on n’affiche plus Count,
-  # on l’utilise pour le tri)
+  # Sorted by unique UID count, descending (Count is no longer printed,
+  # but it still drives the ordering)
   n2 = asorti(tab2UniqueCount, sorted2, "@val_num_desc")
 
   print ""
-  print "=== Tab2 : détails des drops vidéo (uniques) par raison / couche (tri décroissant) ==="
-  # En-tête AVEC colonne Count
-  printf "%-50s| %-30s| %10s\n", "Drop Reason (Catégorie)", "Liste (UIDs)", "Count"
+  print "=== Tab2: unique video drops by reason and layer, descending ==="
+  # Header, Count column included
+  printf "%-50s| %-30s| %10s\n", "Drop Reason (category)", "UID list", "Count"
   printf "%-50s-+-%-30s-+-%10s\n", "--------------------------------------------------", "------------------------------", "----------"
   for (i = 1; i <= n2; i++) {
     label = sorted2[i]
@@ -345,7 +345,7 @@ END {
   }
 
   ########################################
-  # 3) Tab3 : appliquer grouping **uniquement** sur les UIDs perdus uniques
+  # 3) Tab3: group ONLY the unique lost UIDs
   ########################################
   idx3 = 0
   for (gk in grouping) {
@@ -367,7 +367,7 @@ END {
   n3 = asorti(groupingUID, sorted3, "@val_num_asc")
 
   print ""
-  print "=== Tab3 : tableau de regroupement (“Grouping”) pour UIDs uniques perdus (trié par UID ascendant) ==="
+  print "=== Tab3: grouping table for the unique lost UIDs, by ascending UID ==="
   printf "%-10s| %-25s| %-10s| %-10s| %-10s| %5s\n", 
          "UID", "dropReason", "packetType", "frameType", "priority", "Count"
   printf "%-10s-+-%-25s-+-%-10s-+-%-10s-+-%-10s-+-%-5s\n",
@@ -377,7 +377,7 @@ END {
   }
 
   ########################################
-  # 4) Tab4 : délai bout-à-bout et métriques d’énergie (inchangé)
+  # 4) Tab4: end-to-end delay and the energy metrics, unchanged
   ########################################
   for (u in end_time) {
     dt = end_time[u] - start_time[u]
@@ -418,14 +418,14 @@ END {
   energyPerPkt = (recvs > 0 ? total_energy/recvs : 0)
 
   print ""
-  print "=== Tab4 : délai moyen bout-à-bout et métriques d’énergie ==="
+  print "=== Tab4: mean end-to-end delay and energy metrics ==="
   printf "%-40s| %10s\n", "Description", "Valeur"
   printf "%-40s-+-%10s\n", "----------------------------------------", "----------"
   printf "%-40s| %10.4f\n", "average end to end delay",           avgDelay
   printf "%-40s| %10.4f\n", "total energy consumed (all nodes)",    total_energy
   printf "%-40s| %10.4f\n", "energy consumed per node (mean)",      moyenne
-  printf "%-40s| %10.4f\n", "écart-type consommation par nœud",    ecartType
-  printf "%-40s| %10.4f\n", "ratio de l’énergie résiduelle min (%)", ratioMin
+  printf "%-40s| %10.4f\n", "per-node consumption, standard deviation",    ecartType
+  printf "%-40s| %10.4f\n", "minimum residual energy ratio (%)", ratioMin
   printf "%-40s| %10.4f\n", "energy consumed per packet",            energyPerPkt
 }
 ' "$traceFile"

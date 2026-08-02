@@ -25,8 +25,28 @@ die() {
   exit 1
 }
 
-log_step() { echo -e "\n=== $* ==="; }
-log_info() { echo "$*"; }
+# Progress goes to the terminal AND, when PROGRESS_LOG names a file, to that
+# file. Without the second destination a long run leaves nothing behind: the
+# headings live only in the terminal that started it, so a campaign launched in
+# the background is indistinguishable from one that never started, and once the
+# terminal is gone there is no way to tell how far it got.
+#
+# The per-set log is a different thing: it collects the raw output of ffmpeg,
+# EvalVSN and ns-2, not the progress. Both are needed.
+log_to_progress() {
+  [[ -n "${PROGRESS_LOG:-}" ]] || return 0
+  printf '%s\n' "$*" >>"$PROGRESS_LOG" 2>/dev/null || true
+}
+
+log_step() {
+  echo -e "\n=== $* ==="
+  log_to_progress "[$(date '+%H:%M:%S')] === $* ==="
+}
+
+log_info() {
+  echo "$*"
+  log_to_progress "[$(date '+%H:%M:%S')] $*"
+}
 
 script_dir() {
   dirname "$(readlink -f "${BASH_SOURCE[1]}")"
