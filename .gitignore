@@ -4,3 +4,7 @@
 *.a
 bin/
 build/
+
+# Internal review reports, written here by audit.sh. Not part of what the
+# article's Data Availability statement promises, and not for publication.
+AUDIT-*.md
