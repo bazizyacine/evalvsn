@@ -127,7 +127,7 @@ public:
                 // CHANGE
                 error = false;
                 // CHANGE
-                path_cost = 0.0; // Ajouté
+                path_cost = 0.0; // Added
         }
         void printPath()
         {
@@ -153,7 +153,7 @@ protected:
         // CHANGE
         bool error;
         // CHANGE
-        double path_cost; // Ajouté : coût cumulé du chemin
+        double path_cost; // Added: cumulative cost of the path
 };
 
 LIST_HEAD(aomdv_qpv_paths, AOMDV_QPV_Path);

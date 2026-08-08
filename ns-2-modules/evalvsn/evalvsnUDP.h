@@ -11,10 +11,10 @@ public:
     virtual void sendmsg(int nbytes, AppData *data, const char *flags = 0);
     virtual void recv(Packet *pkt, Handler *);
     virtual int command(int argc, const char *const *argv);
-    void print_status(); // Ajout de la méthode
+    void print_status(); // Added method
 
 protected:
     char *SenderTraceBuffer;
     FILE *SenderTraceFile;
-    int TotalPacketsSent; // Ajout du compteur
+    int TotalPacketsSent; // Added counter
 };

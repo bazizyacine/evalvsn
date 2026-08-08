@@ -137,7 +137,7 @@ struct hdr_mac802_11
 	u_char dh_body[0]; // size of 1 for ANSI compatibility
 };
 
-// Structure pour accumuler LQI/SNR
+// Accumulator for LQI and SNR
 struct LinkMetrics
 {
 	double lqi_sum;

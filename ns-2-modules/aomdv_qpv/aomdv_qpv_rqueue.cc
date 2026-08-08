@@ -95,7 +95,7 @@ aomdv_qpv_rqueue::aomdv_qpv_rqueue() : head_(0), tail_(0),
 {
 }
 
-// Enqueue avec drop prioritaire si plein
+// Enqueue, dropping by priority when the queue is full
 /**
  * @brief Enqueues a packet into the AOMDV QPV routing queue with priority handling.
  *
@@ -111,16 +111,16 @@ void aomdv_qpv_rqueue::enque(Packet *p)
 {
   struct hdr_cmn *ch = HDR_CMN(p);
 
-  // Purge des paquets expirés
+  // Purge the expired packets
   purge();
 
-  // File pleine → on sacrifie le paquet de plus faible priorité
+  // Queue full: sacrifice the lowest-priority packet
   if (len_ >= limit_)
   {
     Packet *lowestPrioPkt = findLowestPriorityPacket();
     Packet *prev = 0, *cur = head_;
 
-    // Si aucun paquet à faible priorité trouvé, on retire la tête
+    // If no low-priority packet was found, drop the head
     if (!lowestPrioPkt)
       lowestPrioPkt = head_;
 
@@ -131,7 +131,7 @@ void aomdv_qpv_rqueue::enque(Packet *p)
     }
     else
     {
-      // Recherche du précédent
+      // Find the predecessor
       while (cur && cur != lowestPrioPkt)
       {
         prev = cur;
@@ -149,7 +149,7 @@ void aomdv_qpv_rqueue::enque(Packet *p)
       }
     }
 
-    // Drop avec raison appropriée
+    // Drop with the appropriate reason
     if (HDR_CMN(lowestPrioPkt)->ts_ > CURRENT_TIME)
     {
       drop(lowestPrioPkt, agent_->mac_->phy_->dropReason(lowestPrioPkt, DROP_RTR_QFULL));
@@ -181,7 +181,7 @@ void aomdv_qpv_rqueue::enque(Packet *p)
 #endif // QDEBUG
 }
 
-// Déqueue tête
+// Dequeue the head
 /**
  * @brief Dequeues the first packet from the routing queue.
  *
@@ -209,7 +209,7 @@ Packet *aomdv_qpv_rqueue::deque()
   return p;
 }
 
-// Déqueue du premier pour dst donné
+// Dequeue the first packet for a given destination
 Packet *aomdv_qpv_rqueue::deque(nsaddr_t dst)
 {
   Packet *p, *prev;
@@ -265,7 +265,7 @@ char aomdv_qpv_rqueue::find(nsaddr_t dst)
   Private Routines
 */
 
-// Retire et retourne la tête
+// Removes and returns the head
 /**
  * @brief Removes and returns the packet at the head of the queue.
  *
@@ -295,7 +295,7 @@ Packet *aomdv_qpv_rqueue::remove_head()
   return p;
 }
 
-// Recherche par destination
+// Look up by destination
 void aomdv_qpv_rqueue::findPacketWithDst(nsaddr_t dst, Packet *&p, Packet *&prev)
 {
   p = prev = 0;
@@ -311,7 +311,7 @@ void aomdv_qpv_rqueue::findPacketWithDst(nsaddr_t dst, Packet *&p, Packet *&prev
   }
 }
 
-// Vérification interne
+// Internal consistency check
 /**
  * @brief Verifies the integrity of the packet queue.
  *
@@ -350,7 +350,7 @@ void aomdv_qpv_rqueue::purge()
 }
 */
 
-// Retourne 1 si un paquet est expiré (ts_ < CURRENT_TIME)
+// Returns 1 if a packet has expired (ts_ < CURRENT_TIME)
 /**
  * @brief Searches the queue for an aged (expired) packet.
  *
@@ -381,7 +381,7 @@ bool aomdv_qpv_rqueue::findAgedPacket(Packet *&p, Packet *&prev)
   return false;
 }
 
-// Purge des paquets expirés
+// Purge the expired packets
 /**
  * @brief Removes all aged (expired) packets from the queue.
  *
@@ -463,7 +463,7 @@ Packet *aomdv_qpv_rqueue::findLowestPriorityPacket()
     char frameType = ch->frameType_[0];
     int prio = ch->prioNb_;
 
-    int pktClass = 0; // non-video par défaut
+    int pktClass = 0; // non-video by default
     if (packetType == PT_VIDEO)
     {
       if (frameType == 'D')
@@ -472,7 +472,7 @@ Packet *aomdv_qpv_rqueue::findLowestPriorityPacket()
         pktClass = 1; // video-M
     }
 
-    // On ne sacrifie jamais un non-vidéo s'il reste du vidéo
+    // A non-video packet is never sacrificed while video packets remain
     if (pktClass == 0)
     {
       if (lowest && lowestClass > 0)
@@ -482,7 +482,7 @@ Packet *aomdv_qpv_rqueue::findLowestPriorityPacket()
       continue;
     }
 
-    // Pour D ou M : prioNb élevé d'abord
+    // For D or M: highest prioNb first
     if (pktClass > lowestClass ||
         (pktClass == lowestClass && prio > lowestPrio))
     {
@@ -495,7 +495,7 @@ Packet *aomdv_qpv_rqueue::findLowestPriorityPacket()
   return lowest;
 }
 
-// Délié un nœud arbitraire
+// Unlinks an arbitrary node
 void aomdv_qpv_rqueue::removeNode(Packet *target)
 {
   Packet *prev = 0;

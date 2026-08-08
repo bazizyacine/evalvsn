@@ -99,7 +99,7 @@ void evalvsnUDP::sendmsg(int nbytes, AppData *data, const char *flags)
 
     idle();
 
-    TotalPacketsSent++; // Incrémentation du compteur
+    TotalPacketsSent++; // Bump the counter
 }
 
 void evalvsnUDP::recv(Packet *pkt, Handler *)

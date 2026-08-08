@@ -92,7 +92,7 @@ const struct ModulationParamEvalVSN modulation_tableEvalVSN[4] = {
 	 "QAM16", 15, 31.6228, 96},
 	{3, "QAM64", 25, 316.2278, 192}};
 
-// ------- Plage autorisée selon type & priorité -------
+// ------- Allowed range, by frame type and priority -------
 struct Range
 {
 	int min;
@@ -270,9 +270,9 @@ private:
 	double SINR_Th_RX; // SINR threshold for decode data according to the modulation scheme
 	double power_RX;
 
-	int MAX_PRIO_NB; // nombre de priorités
+	int MAX_PRIO_NB; // number of priority levels
 
-	// Pour l’hystérésis du schéma de modulation
+	// For the hysteresis of the modulation scheme
 	int HYST_COUNT;
 	int modHystCount_;
 	int lastModScheme_;
@@ -316,17 +316,17 @@ public:
 	void setPowerLevel(double);
 	double SINR(double Pr);
 	void expire(Event *);				// virtual function, which must be implemented
-	double measureRSSI(double Pr);		// Méthode pour calculer le RSSI
-	double measureSNR(double Pr);		// Méthode pour calculer le SNR
-	double measurePER(double sinr);		// Méthode pour calculer le PER
-	double measurePERfromPr(double Pr); // Méthode pour calculer le PER à partir de Pr
+	double measureRSSI(double Pr);		// Computes the RSSI
+	double measureSNR(double Pr);		// Computes the SNR
+	double measurePER(double sinr);		// Computes the PER
+	double measurePERfromPr(double Pr); // Computes the PER from Pr
 	/**
-	 * Calcule un indicateur LQI (0–255) à partir de la puissance reçue Pr.
-	 * Combine un ratio d’énergie et un ratio SINR pour refléter à la fois
-	 * la force du signal et son rapport par rapport au bruit/interférences.
+	 * Computes an LQI indicator (0-255) from the received power Pr.
+	 * It combines an energy ratio and a SINR ratio, so as to reflect both
+	 * the strength of the signal and its ratio to noise and interference.
 	 *
-	 * @param Pr  : puissance reçue instantanée (W)
-	 * @return    : LQI normalisé entre 0 (mauvais) et 255 (excellent)
+	 * @param Pr  instantaneous received power (W)
+	 * @return    LQI normalised between 0 (poor) and 255 (excellent)
 	 */
 	UINT_8 measureLQI(double Pr);
 

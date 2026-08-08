@@ -185,7 +185,7 @@ void priqueueEvalVSN::enque(Packet *p)
                 p_type = 0;
             }
 
-            // Priorité : 0 (non-video) > 1 (M) > 2 (D)
+            // Priority: 0 (non-video) > 1 (M) > 2 (D)
             if (p_type < lp_type)
                 replace = true;
             else if (p_type == lp_type && hdr_cmn::access(p)->prioNb_ < hdr_cmn::access(lowest)->prioNb_)
@@ -233,7 +233,7 @@ Packet *priqueueEvalVSN::findLowestPriorityPacket()
         char frameType = ch->frameType_[0];
         int prio = ch->prioNb_;
 
-        int pktClass = 0; // non-video par défaut
+        int pktClass = 0; // non-video by default
 
         if (packetType == PT_VIDEO)
         {
@@ -243,7 +243,7 @@ Packet *priqueueEvalVSN::findLowestPriorityPacket()
                 pktClass = 1; // video-M
         }
 
-        // On ne sacrifie jamais un non-vidéo s'il reste du vidéo
+        // A non-video packet is never sacrificed while video packets remain
         if (pktClass == 0)
         {
             if (lowest && lowestClass > 0)
@@ -253,7 +253,7 @@ Packet *priqueueEvalVSN::findLowestPriorityPacket()
             continue;
         }
 
-        // Pour D ou M : prioNb élevé d'abord
+        // For D or M: highest prioNb first
         if (pktClass > lowestClass ||
             (pktClass == lowestClass && prio > lowestPrio))
         {
@@ -288,7 +288,7 @@ Packet *priqueueEvalVSN::findLowestPriorityPacket()
 void priqueueEvalVSN::insertSorted(Packet *p)
 {
     int insert_pos = q_->length();
-    int p_type = 1; // 0: Non-vidéo, 1: Vidéo-M, 2: Vidéo-D
+    int p_type = 1; // 0: non-video, 1: video-M, 2: video-D
 
     if (hdr_cmn::access(p)->ptype() == PT_VIDEO)
     {
@@ -321,19 +321,19 @@ void priqueueEvalVSN::insertSorted(Packet *p)
             pi_type = 0;
         }
 
-        // Non-vidéo toujours en tête
+        // Non-video always goes first
         if (p_type == 0 && pi_type != 0)
         {
             insert_pos = i;
             break;
         }
-        // Vidéo-M avant Vidéo-D
+        // Video-M before video-D
         else if (p_type == 1 && pi_type == 2)
         {
             insert_pos = i;
             break;
         }
-        // Même type, priorité croissante
+        // Same type, by increasing priority
         else if (p_type == pi_type && hdr_cmn::access(p)->prioNb_ < hdr_cmn::access(pi)->prioNb_)
         {
             insert_pos = i;
@@ -443,7 +443,7 @@ PacketCountStats priqueueEvalVSN::countPackets()
         if (hdr_cmn::access(p)->ptype() == PT_VIDEO)
         {
             stats.video++;
-            // frameType_ est un tableau de char, on regarde le premier caractère
+            // frameType_ is a char array; only the first character matters
             char frameType = hdr_cmn::access(p)->frameType_[0];
 
             if (frameType == 'M')
@@ -457,7 +457,7 @@ PacketCountStats priqueueEvalVSN::countPackets()
         }
     }
 
-    // Affichage des statistiques de comptage des paquets
+    // Print the packet-count statistics
     if (IFQ_DBG)
     {
         char msg[1000];
@@ -546,26 +546,26 @@ bool priqueueEvalVSN::notifyCongestionThreshold(Packet *p, PacketCountStats &sta
     {
         if (frameType == 'M')
         {
-            // Main frame : congestionThreshold sur les main frames et la priorité
+            // Main frame: congestionThreshold over the main frames and the priority
             if ((stats.video_M >= congestionThreshold) || (prio_count >= congestionThreshold))
                 congestedThreshold = true;
         }
         else if (frameType == 'D')
         {
-            // Diff frame : congestionThreshold sur les diff frames et la priorité
+            // Diff frame: congestionThreshold over the diff frames and the priority
             if ((stats.video_D >= congestionThreshold) || (prio_count >= congestionThreshold))
                 congestedThreshold = true;
         }
         else
         {
-            // Autre vidéo : congestionThreshold sur tous les paquets vidéo et la priorité
+            // Other video: congestionThreshold over all video packets and the priority
             if ((stats.video >= congestionThreshold) || (prio_count >= congestionThreshold))
                 congestedThreshold = true;
         }
     }
     else
     {
-        // Non vidéo : congestionThreshold sur les paquets non-vidéo et la priorité
+        // Non-video: congestionThreshold over the non-video packets and the priority
         if ((stats.non_video >= congestionThreshold) || (prio_count >= congestionThreshold))
             congestedThreshold = true;
     }
@@ -598,15 +598,15 @@ int priqueueEvalVSN::computeCongestionThreshold(Packet *p)
     // Base threshold
     double base = 10.0;
 
-    // Facteur selon le type de paquet
+    // Packet-type factor
     double type_factor = (packetType == PT_VIDEO) ? 0.7 : 1.0;
 
-    // Facteur selon le type de frame (3 cas : autre, M, D)
+    // Frame-type factor (three cases: other, M, D)
     double frame_factor;
 
     if (packetType != PT_VIDEO)
     {
-        frame_factor = 1.0; // autre (non vidéo)
+        frame_factor = 1.0; // anything else (non-video)
     }
     else if (frameType == 'M')
     {
@@ -617,20 +617,21 @@ int priqueueEvalVSN::computeCongestionThreshold(Packet *p)
         frame_factor = 0.6; // D
     }
 
-    // Facteur selon la priorité (plus la priorité est haute, plus le congestionThreshold est bas)
-    // priority.cc affecte dataPriority de 1 (la plus critique) a getMaxPrioNb()
-    // (la moins critique) ; la valeur 0 n'est jamais produite. Avec 1 - p/max le
-    // dernier niveau obtenait exactement zero, donc un seuil ramene au minimum
-    // par le max(1) plus bas : il etait declare congestionne des la premiere
-    // unite d'occupation. Le +1 le laisse decroitre sans degenerer.
+    // Priority factor: the higher the priority, the lower the congestionThreshold
+    // priority.cc assigns dataPriority from 1 (the most critical) to
+    // getMaxPrioNb() (the least critical); the value 0 is never produced. With
+    // 1 - p/max the last level came out at exactly zero, hence a threshold
+    // pulled down to the minimum by the max(1) below: it was declared congested
+    // from the first unit of occupancy. The +1 lets it decrease without
+    // degenerating.
     double prio_factor = double(aomdv_qpv_agent_->mac_->phy_->getMaxPrioNb() + 1 - priority) / double(aomdv_qpv_agent_->mac_->phy_->getMaxPrioNb());
 
-    // Facteur selon la taille de la file d'attente (plus la file est longue, plus le congestionThreshold baisse)
+    // Queue-length factor: the longer the queue, the lower the congestionThreshold
     double queue_factor = 1.0;
 
     if (qlim_ > 0)
     {
-        // Exemple : congestionThreshold réduit linéairement si la file dépasse q_->length() paquets (pour un max de qlim_)
+        // For instance: congestionThreshold falls linearly once the queue exceeds q_->length() packets, up to qlim_
         queue_factor = 1.0 - min(0.5, double(getQueueLength()) / double(getQlim()));
     }
 

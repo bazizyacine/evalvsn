@@ -69,16 +69,15 @@ set val(nn)   100
 set val(rp)  "AOMDV_QPV"
 set val(dbg)  1
 
-# Graine du générateur aléatoire de ns-2. Zéro — le défaut — laisse ns-2 à son
-# comportement d'origine, de sorte que les jeux déjà produits restent
-# reproductibles à l'identique. Une valeur strictement positive active le
-# tirage : c'est ce qui permet de répéter une même configuration sur plusieurs
-# réalisations et d'en moyenner les résultats.
+# Seed of the ns-2 random generator. Zero - the default - leaves ns-2 to its
+# own behaviour, so that sets already computed stay reproducible bit for bit. A
+# strictly positive value turns the draw on: that is what makes it possible to
+# repeat one configuration over several realisations and average the results.
 set val(rndSeed) 0
 
 #––– 2. Check arguments –––––
-# Les options vont par paires « -clé valeur » : on exige un nombre pair plutôt
-# qu'un compte figé, pour que l'ajout d'une option comme -dbg reste possible.
+# Options come in "-key value" pairs: an even count is required rather than a
+# fixed one, so that adding an option such as -dbg stays possible.
 if {$argc == 0} {
     puts "Starting with all default parameters."
 } elseif {$argc % 2 != 0} {
@@ -102,13 +101,13 @@ proc getval {argc argv} {
 
 getval $argc $argv
 
-# Fonction pour obtenir le maxPrioNb et le nombre total de paquets vidéo (maxSeqNb)
+# Reads maxPrioNb and the total number of video packets (maxSeqNb) from a trace.
 proc getPrioAndPktCount {filename} {
     set maxPrioNb 0
     set maxSeqNb 0
     set file [open $filename r]
     while {[gets $file line] >= 0} {
-        # Sauter les lignes de commentaire
+        # Skip comment lines
         if {[string match "#*" $line]} {
             continue
         }
@@ -126,20 +125,20 @@ proc getPrioAndPktCount {filename} {
         }
     }
     close $file
-    # maxSeqNb commence à 0, donc +1 pour le nombre total de paquets
+    # maxSeqNb starts at 0, hence +1 for the total number of packets
     return [list $maxPrioNb [expr {$maxSeqNb + 1}]]
 }
 
-# Utilisation de la nouvelle fonction
+# Read the trace
 set prio_pkt [getPrioAndPktCount $val(st)]
 set maxPrioNb_ [lindex $prio_pkt 0]
 set maxSeqNb_ [lindex $prio_pkt 1]
 puts "Max Priority Number (maxPrioNb_): $maxPrioNb_"
-puts "Nombre de paquets vidéo à transmettre (maxSeqNb_): $maxSeqNb_"
+puts "Number of video packets to transmit (maxSeqNb_): $maxSeqNb_"
 
-# Calcule dynamiquement la taille de la file d'attente IFQ selon la formule demandée
+# Computes the interface queue length dynamically, from the packet rate.
 proc lower_pow2 {n} {
-    # Trouve la puissance de 2 la plus proche en bas de n
+    # Largest power of two not greater than n
     set pow 1
     while {$pow * 2 <= $n} {
         set pow [expr {$pow * 2}]
@@ -147,11 +146,11 @@ proc lower_pow2 {n} {
     return $pow
 }
 
-# Utilisation de la fonction pour calculer val(ifqlen)
+# Compute val(ifqlen): packets per second of simulated time,
 set ifqlen_calc [expr {int(ceil(double($maxSeqNb_) / $val(simt)))}]
-# Trouver la puissance de 2 la plus proche en bas
+# rounded down to a power of two
 set ifqlen_ [lower_pow2 $ifqlen_calc]
-puts "Taille dynamique de la file d'attente IFQ (val(ifqlen)) : $ifqlen_"
+puts "Dynamic interface queue length (val(ifqlen)): $ifqlen_"
 
 #––– 4. Echo all five parameters –––
 puts "Simulation time: $val(simt) sec, \
@@ -220,7 +219,7 @@ if {$val(rp) == "AOMDV_QPV"} {
     Agent/$val(rp) set aomdv_qpv_prim_alt_path_len_diff_    [expr 2 * $maxPrioNb_] 
     Agent/$val(rp) set AOMDV_QPV_DBG                        $val(dbg)
 
-    # --- Création d'un fichier de tr pour AOMDV ---
+    # --- Routing trace file for AOMDV ---
     set aomdv_qpv_tr [open aomdv_qpv.tr w]
     set aomdv_qpv_trace [new Trace/Generic]
     $aomdv_qpv_trace attach $aomdv_qpv_tr
@@ -246,11 +245,11 @@ puts "\n*** $val(st) ***\n"
 # *** Initialize Simulator ***
 set ns_ [new Simulator]
 
-# Graine du générateur aléatoire. Sans graine explicite (rndSeed = 0), ns-2
-# conserve sa séquence par défaut et deux exécutions de la même configuration
-# donnent le même résultat — ce qui est reproductible, mais ne dit rien de la
-# variabilité. Une graine strictement positive fixe une réalisation parmi
-# d'autres ; moyenner sur plusieurs graines sépare le signal du bruit.
+# Random generator seed. Without an explicit seed (rndSeed = 0), ns-2 keeps its
+# default sequence and two runs of the same configuration give the same result -
+# reproducible, but silent about variability. A strictly positive seed fixes one
+# realisation among many; averaging over several seeds separates the signal from
+# the noise.
 if {$val(rndSeed) > 0} {
     ns-random $val(rndSeed)
     puts "Random seed set to $val(rndSeed)"
@@ -320,18 +319,18 @@ for {set i 0} {$i < $val(nn)} {incr i} {
      $node_($i) random-motion 0
 }
 
-# --- Attacher le log-target à chaque agent AOMDV_QPV et lier MAC/PHY/IFQ (mono-interface) ---
+# --- Attach the log target to every AOMDV_QPV agent and bind MAC/PHY/IFQ (single interface) ---
 if {$val(rp) == "AOMDV_QPV"} {
     for {set i 0} {$i < $val(nn)} {incr i} {
-        # Récupérer l'agent de routage AOMDV_QPV du noeud
+        # The node's AOMDV_QPV routing agent
         set agentAOMDV_QPV [$node_($i) set ragent_]
-        # Récupérer le MAC du noeud (mono-interface)
+        # The node's MAC (single interface)
         set macEvalVSN [$node_($i) set mac_(0)]
-        # Récupérer le PHY du noeud (mono-interface)
+        # The node's PHY (single interface)
         set phyEvalVSN [$node_($i) set netif_(0)]
-        # Récupérer la file d'attente du noeud (mono-interface)
+        # The node's interface queue (single interface)
         set ifqEvalVSN [$node_($i) set ifq_(0)]
-        # Lie l'IFQ à AOMDV_QPV en passant l'adresse
+        # Bind the IFQ to AOMDV_QPV by passing its address
         set nexthop_addr [$node_($i) id]
 
         if {$agentAOMDV_QPV != ""} {

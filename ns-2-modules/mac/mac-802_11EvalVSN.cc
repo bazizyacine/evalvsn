@@ -1550,8 +1550,8 @@ double Mac802_11EvalVSN::txtime(int)
 //-------rx coordination-------//
 
 // ------- Link Metrics -------
-// Mise à jour des métriques de lien pour un voisin donné
-// (LQI et SNR cumulés sur le nombre d’échantillons)
+// Updates the link metrics for a given neighbour
+// (LQI and SNR accumulated over the number of samples)
 /**
  * @brief Updates the link quality metrics (LQI and SNR) for a given neighbor.
  *
@@ -1582,7 +1582,7 @@ void Mac802_11EvalVSN::update_link_metrics(nsaddr_t neighbor, double lqi, double
 	}
 }
 
-// Récupération de la valeur moyenne de LQI pour un voisin donné
+// Mean LQI for a given neighbour
 /**
  * @brief Calculates the average Link Quality Indicator (LQI) for a given neighbor.
  *
@@ -1617,7 +1617,7 @@ double Mac802_11EvalVSN::get_average_lqi(nsaddr_t neighbor)
 	return avg;
 }
 
-// Récupération de la valeur moyenne de SNR pour un voisin donné
+// Mean SNR for a given neighbour
 /**
  * @brief Calculates the average Signal-to-Noise Ratio (SNR) for a given neighbor.
  *
