@@ -135,10 +135,10 @@ public:
 
 protected:
         /**
-         * Sélection du paquet à sacrifier :
-         *   1) paquets video-D, prioNb élevé → bas
-         *   2) paquets video-M, prioNb élevé → bas
-         *   3) paquets non-vidéo (contrôle), jamais sacrifiés tant qu'il reste du vidéo
+         * Choice of the packet to sacrifice:
+         *   1) video-D packets, highest prioNb down to lowest
+         *   2) video-M packets, highest prioNb down to lowest
+         *   3) non-video (control) packets, never sacrificed while video remains
          */
         Packet *findLowestPriorityPacket();
         void removeNode(Packet *pkt);
@@ -150,13 +150,13 @@ protected:
         bool findAgedPacket(Packet *&p, Packet *&prev);
 
 private:
-        Packet *head_; // tête de la file
+        Packet *head_; // head of the queue
         Packet *tail_; // queue de la file
         int len_;
         int limit_;
         double timeout_;
 
-        AOMDV_QPV *agent_; // Ajout du pointeur vers l'agent parent
+        AOMDV_QPV *agent_; // Added: pointer to the parent agent
 };
 
 #endif /* __aomdv_qpv_rqueue_h__ */

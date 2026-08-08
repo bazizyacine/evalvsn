@@ -137,7 +137,7 @@ struct hdr_aomdv_qpv_request
                                // AOMDV_QPV code
         nsaddr_t rq_first_hop; // First Hop taken by the RREQ
 
-        double rq_cost_cumule; // Ajouté : coût cumulé du chemin
+        double rq_cost_cumule; // Added: cumulative cost of the path
 
         // This define turns on gratuitous replies- see aodv.cc for implementation contributed by
         // Anant Utgikar, 09/16/02.
@@ -181,7 +181,7 @@ struct hdr_aomdv_qpv_reply
         u_int32_t rp_bcast_id; // Broadcast ID of the corresponding RREQ
         nsaddr_t rp_first_hop;
 
-        double rp_cost_cumule; // Ajouté : coût cumulé du chemin
+        double rp_cost_cumule; // Added: cumulative cost of the path
 
         inline int size()
         {

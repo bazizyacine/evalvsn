@@ -57,7 +57,7 @@ $val(netif) set DataCaptureSwitch_       0
 $val(netif) set SINR_PreambleCapture_    2.5118;     ;# 4 dB
 $val(netif) set SINR_DataCapture_        100.0;      ;# 10 dB
 $val(netif) set trace_dist_              1e6         ;# PHY trace until distance of 1 Mio. km ("infinty")
-$val(netif) set PHY_DBG_                 $val(dbg)   ;# piloté par -dbg
+$val(netif) set PHY_DBG_                 $val(dbg)   ;# driven by -dbg
 $val(netif) set MAX_PRIO_NB              $maxPrioNb_
 
 # ------------------------------------------------------------------------------
@@ -75,4 +75,4 @@ $val(mac) set SymbolDuration_            0.000004
 $val(mac) set BasicModulationScheme_     0
 $val(mac) set use_802_11a_flag_          true
 $val(mac) set RTSThreshold_              3000        ;# bytes
-$val(mac) set MAC_DBG                    $val(dbg)   ;# piloté par -dbg
+$val(mac) set MAC_DBG                    $val(dbg)   ;# driven by -dbg

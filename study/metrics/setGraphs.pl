@@ -266,7 +266,7 @@ sub setGraphs {
         my $unit = $metrics_unit{$metric} // '';
 
         # Plot generation
-        graph_Metric($metric, $xLabel, $unit, ['eps', 'pdf']);
+        graph_Metric($metric, $xLabel, $unit, ['eps', 'pdf', 'png']);
     }
 
     # Multi-plot. A combined plot needs every one of its metrics; when -metrics
@@ -290,7 +290,7 @@ sub setGraphs {
         my ($names, $yLabel, $title, $target) = @$plot;
         next if grep { !exists $metrics_data{$_} } @$names;
         graph_Multi_Metrics($names, $xLabel, $yLabel, $title, $target,
-                            ['eps', 'pdf']);
+                            ['eps', 'pdf', 'png']);
     }
 }
 
@@ -698,10 +698,30 @@ sub calculate_Total_Packets_Sent {
     record_Metric('Total Packets Sent', '', $total_pkts, $simId);
 }
 
+# PNG at 600 dpi is what the article ships: MDPI lists PNG, JPEG and TIFF, and
+# PDF is not on that list even though it is vector.
+#
+# The PNG is rendered from the PDF, not re-plotted. gnuplot's png terminal
+# re-lays the figure out at different font metrics, and at the size 600 dpi
+# demands the twelve rotated x tick labels collide into an unreadable smear.
+# Rendering the PDF keeps the drawing gnuplot already validated, pixel for
+# pixel. 17cm x 10cm at 600 dpi is 4009 x 2359 px.
+sub render_png {
+    my ($pdf, $png) = @_;
+    unless (-f $pdf) {
+        warn "render_png: $pdf missing, PNG skipped\n";
+        return;
+    }
+    (my $base = $png) =~ s/\.png$//;
+    system('pdftoppm', '-png', '-r', 600, '-singlefile', $pdf, $base) == 0
+        or warn "render_png: pdftoppm failed on $pdf - is poppler-utils installed?\n";
+}
+
 # Graphes
 sub graph_Metric {
     my ($metric, $xlabel, $unit, $formats) = @_;
-    $formats ||= ['eps', 'pdf'];
+    # pdf before png: the PNG is rendered from the PDF written on the pass before.
+    $formats ||= ['eps', 'pdf', 'png'];
     my $folder = "$working_folder/$metric";
     my $datafile = "$folder/$metric.dat";
     my $title = "EvalVSN - $metric";
@@ -711,13 +731,17 @@ sub graph_Metric {
 
     foreach my $fmt (@$formats) {
         my $outfile = "$folder/$metric.$fmt";
+        if ($fmt eq 'png') {
+            render_png("$folder/$metric.pdf", $outfile);
+            next;
+        }
         my $terminal;
         if ($fmt eq 'pdf') {
             $terminal = "set terminal pdf dashed size 17cm,10cm";
         } elsif ($fmt eq 'eps') {
             $terminal = "set terminal postscript eps color dashed size 17cm,10cm";
         } else {
-            $terminal = "set terminal png size 1700,1000"; # fallback for other formats
+            die "graph_Metric: unsupported format '$fmt'\n";
         }
 
         open my $GNUPLOT, "|-", "gnuplot" or die "Cannot open gnuplot: $!";
@@ -742,7 +766,8 @@ gnuplot_commands
 
 sub graph_Multi_Metrics {
     my ($metrics, $xlabel, $ylabel, $title, $outfile, $formats) = @_;
-    $formats ||= ['eps', 'pdf'];
+    # pdf before png: the PNG is rendered from the PDF written on the pass before.
+    $formats ||= ['eps', 'pdf', 'png'];
     my @plot_cmds;
     my $i = 1;
 
@@ -756,14 +781,19 @@ sub graph_Multi_Metrics {
     foreach my $fmt (@$formats) {
         my $out = $outfile;
         $out =~ s/\.\w+$//; # remove extension if present
+        my $stem = $out;
         $out = "$out.$fmt";
+        if ($fmt eq 'png') {
+            render_png("$stem.pdf", $out);
+            next;
+        }
         my $terminal;
         if ($fmt eq 'pdf') {
             $terminal = "set terminal pdf dashed size 17cm,10cm";
         } elsif ($fmt eq 'eps') {
             $terminal = "set terminal postscript eps color dashed size 17cm,10cm";
         } else {
-            $terminal = "set terminal png size 1700,1000"; # fallback for other formats
+            die "graph_Multi_Metrics: unsupported format '$fmt'\n";
         }
 
         open my $GNUPLOT, "|-", "gnuplot" or die "Cannot open gnuplot: $!";

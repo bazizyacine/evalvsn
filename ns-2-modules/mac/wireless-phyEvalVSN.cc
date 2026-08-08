@@ -218,16 +218,16 @@ void WirelessPhyEvalVSN::sendDown(Packet *p)
 	 */
 	assert(initialized());
 
-	// Gestion complète et réaliste de l'énergie (inspirée de WirelessPhy)
+	// Full, realistic energy accounting (modelled on WirelessPhy)
 	if (em())
 	{
-		// Si le noeud est OFF, on libère le paquet et on quitte
+		// Node OFF: free the packet and leave
 		if (!Is_node_on())
 		{
 			Packet::free(p);
 			return;
 		}
-		// Si le noeud est ON mais en sommeil, décrémenter l'énergie de sommeil
+		// Node ON but asleep: charge the sleep energy
 		if (Is_node_on() && Is_sleeping())
 		{
 			em()->DecrSleepEnergy(NOW - update_energy_time_, P_sleep_);
@@ -235,7 +235,7 @@ void WirelessPhyEvalVSN::sendDown(Packet *p)
 		}
 	}
 
-	// Décrémentation de l'énergie selon le temps de transmission effectif
+	// Charge the energy for the actual transmission time
 	if (em())
 	{
 		if (em()->energy() > 0)
@@ -245,14 +245,14 @@ void WirelessPhyEvalVSN::sendDown(Packet *p)
 			double end_time = MAX(channel_idle_time_, NOW + txtime);
 			double actual_txtime = end_time - start_time;
 
-			// Décrémentation de l'énergie idle si besoin
+			// Charge the idle energy if needed
 			if (start_time > update_energy_time_)
 			{
 				em()->DecrIdleEnergy(start_time - update_energy_time_, P_idle_);
 				update_energy_time_ = start_time;
 			}
 
-			// Vérification de recouvrement temporel
+			// Check for time overlap
 			double temp = MAX(NOW, last_send_time_);
 			double begin_adjust_time = MIN(channel_idle_time_, temp);
 			double finish_adjust_time = MIN(channel_idle_time_, NOW + txtime);
@@ -261,10 +261,10 @@ void WirelessPhyEvalVSN::sendDown(Packet *p)
 			if (gap_adjust_time < 0.0)
 				gap_adjust_time = 0.0;
 
-			// Décrémentation de l'énergie de transmission
+			// Charge the transmission energy
 			em()->DecrTxEnergy(actual_txtime, Pt_consume_);
 
-			// ----------- Log l'énergie restante -----------
+			// ----------- Log the remaining energy -----------
 			if (em()->energy() > 0)
 				((MobileNode *)node_)->log_energy(1);
 			else if (em()->energy() <= 0)
@@ -273,7 +273,7 @@ void WirelessPhyEvalVSN::sendDown(Packet *p)
 		}
 		else
 		{
-			// ----------- Log l'énergie restante -----------
+			// ----------- Log the remaining energy -----------
 			if (em()->energy() > 0)
 				((MobileNode *)node_)->log_energy(1);
 			else if (em()->energy() <= 0)
@@ -386,24 +386,24 @@ int WirelessPhyEvalVSN::sendUp(Packet *p)
 	PacketStamp s;
 	double Pr;
 
-	// Gestion complète et réaliste de l'énergie (inspirée de WirelessPhy)
+	// Full, realistic energy accounting (modelled on WirelessPhy)
 	if (em())
 	{
-		// Si le noeud est OFF, on libère le paquet et on quitte
+		// Node OFF: free the packet and leave
 		if (!Is_node_on())
 		{
 			Packet::free(p);
 			return 0;
 		}
 
-		// Si le noeud est ON mais en sommeil, décrémenter l'énergie de sommeil
+		// Node ON but asleep: charge the sleep energy
 		if (Is_node_on() && Is_sleeping())
 		{
 			em()->DecrSleepEnergy(NOW - update_energy_time_, P_sleep_);
 			update_energy_time_ = NOW;
 		}
 
-		// Si l'énergie est à zéro, on libère le paquet et on quitte
+		// Energy exhausted: free the packet and leave
 		if (em()->energy() <= 0)
 		{
 			((MobileNode *)node_)->log_energy(0);
@@ -459,13 +459,13 @@ int WirelessPhyEvalVSN::sendUp(Packet *p)
 			log("Sendup", msg);
 		}
 
-		// Décrémentation de l'énergie de réception (réaliste)
+		// Charge the reception energy (realistic)
 		if (em() && em()->energy() > 0)
 		{
 			double rxtime = cmh->txtime();
 			em()->DecrRcvEnergy(rxtime, Pr_consume_);
 
-			// ----------- Log l'énergie restante -----------
+			// ----------- Log the remaining energy -----------
 			if (em()->energy() > 0)
 				((MobileNode *)node_)->log_energy(1);
 			else if (em()->energy() <= 0)
@@ -775,7 +775,7 @@ void WirelessPhyEvalVSN::setState(int newstate)
 		log("PHYState", msg);
 	}
 
-	// Si on passe de SEARCHING à un autre état, indiquer la MAC que le canal est busy
+	// Leaving SEARCHING for another state: tell the MAC the channel is busy
 	if (state == SEARCHINGEvalVSN && newstate != SEARCHINGEvalVSN)
 	{
 		if (powerMonitor->getPowerLevel() < CSThresh_)
@@ -783,7 +783,7 @@ void WirelessPhyEvalVSN::setState(int newstate)
 			sendCSBusyIndication();
 		}
 	}
-	// Si on passe d’un état actif vers SEARCHING, indiquer la MAC que le canal est idle
+	// Leaving an active state for SEARCHING: tell the MAC the channel is idle
 	else if (state != SEARCHINGEvalVSN && newstate == SEARCHINGEvalVSN)
 	{
 		if (powerMonitor->getPowerLevel() < CSThresh_)
@@ -944,7 +944,7 @@ void PowerMonitorEvalVSN::expire(Event *)
  */
 double PowerMonitorEvalVSN::measureRSSI(double Pr)
 {
-	// Mesure totale du plancher (bruit + interférences)
+	// Total noise floor (noise + interference)
 	double totalNoiseFloor = getPowerLevel();
 
 	if (Pr <= 0.0 || totalNoiseFloor <= 0.0)
@@ -971,12 +971,12 @@ double PowerMonitorEvalVSN::measureRSSI(double Pr)
  */
 double PowerMonitorEvalVSN::measureSNR(double Pr)
 {
-	// Calcul du niveau de bruit + interférences hors signal
+	// Noise plus interference, excluding the signal itself
 	double noisePlusInterf = getPowerLevel() - Pr;
 
 	if (Pr <= 0.0 || noisePlusInterf <= 0.0)
 	{
-		// pas de signal détectable ou erreur de mesure
+		// no detectable signal, or a measurement error
 		return -DBL_MAX;
 	}
 
@@ -1000,16 +1000,16 @@ double PowerMonitorEvalVSN::measureSNR(double Pr)
  */
 double PowerMonitorEvalVSN::measurePER(double sinr)
 {
-	// Récupération du seuil nécessaire pour la modulation en cours
+	// Threshold required by the modulation currently in use
 	double sinr_threshold = modulation_tableEvalVSN[wirelessPhyEvalVSN->BasicModulationScheme_].SINR_ratio;
 
 	if (sinr <= 0.0 || sinr_threshold <= 0.0)
 	{
-		// conditions extrêmes : PER=100%
+		// extreme conditions: PER = 100%
 		return 1.0;
 	}
 
-	// PER = 1 - exp( - SINR_mesuré / SINR_min )
+	// PER = 1 - exp( - SINR_measured / SINR_min )
 	return 1.0 - exp(-sinr / sinr_threshold);
 }
 
@@ -1025,7 +1025,7 @@ double PowerMonitorEvalVSN::measurePER(double sinr)
  */
 double PowerMonitorEvalVSN::measurePERfromPr(double Pr)
 {
-	// on calcule d’abord le SINR réel
+	// compute the actual SINR first
 	double sinr = SINR(Pr); // utilise getPowerLevel()
 	return measurePER(sinr);
 }
@@ -1047,15 +1047,15 @@ double PowerMonitorEvalVSN::measurePERfromPr(double Pr)
  */
 UINT_8 PowerMonitorEvalVSN::measureLQI(double Pr)
 {
-	// 1) Ratio d’énergie relative par rapport au seuil de réception
-	//    On multiplie par 128 pour cadrer sur 0..128
+	// 1) Energy ratio relative to the reception threshold
+	//    Multiplied by 128 to land on the 0..128 scale
 	double energyRatio = Pr / wirelessPhyEvalVSN->RXThresh_;
 	int ener = static_cast<int>(energyRatio * 128.0);
 
-	// 2) Ratio SINR normalisé
-	//    SINR linéaire = Pr / (noise+interf)
+	// 2) Normalised SINR ratio
+	//    linear SINR = Pr / (noise + interference)
 	double sinrLin = SINR(Pr);
-	// On considère qu’un SINR de 10 (10 dB) ou plus est excellent
+	// A SINR of 10 (10 dB) or more counts as excellent
 	const double SINR_LIN_MAX = 10.0;
 	double sinrNorm = sinrLin / SINR_LIN_MAX;
 	int snrVal = static_cast<int>(sinrNorm * 255.0);
@@ -1135,7 +1135,7 @@ int WirelessPhyEvalVSN::getBasicModulationScheme() const
 void WirelessPhyEvalVSN::setBasicModulationScheme(int scheme)
 {
 	if (scheme >= 0 && scheme < NUM_MODULATION_SCHEMES)
-	{ // Vérifie que le schéma est valide (0 à 3 pour les 4 schémas définis)
+	{ // Check the scheme is valid (0 to 3 for the four defined schemes)
 		BasicModulationScheme_ = scheme;
 
 		if (PHY_DBG)
@@ -1189,20 +1189,20 @@ void WirelessPhyEvalVSN::adjustPhyMetrics(Packet *p)
 	char frameType = ch->frameType_[0];
 	int priority = ch->prioNb_;
 
-	// 1) Récupération des métriques
+	// 1) Read the metrics
 	double rssi = ch->receivedSignalStrengthIndicator_;
 	double snr = ch->signalToNoiseRatio_;
 	double per = ch->packetErrorRate_;
 
-	// 2) Normalisation des métriques
+	// 2) Normalise the metrics
 	double normRSSI = clampDouble((rssi + 100.0) / 100.0, 0.0, 1.0);
 	double normSNR = clampDouble(snr / 50.0, 0.0, 1.0);
 	double normPER = clampDouble(1.0 - per, 0.0, 1.0);
 
-	// 3) Poids dynamiques selon frameType et priority
+	// 3) Dynamic weights, by frameType and priority
 	double w1, w2, w3;
-	// Priorites de 1 (critique) a getMaxPrioNb() ; le +1 evite que le dernier
-	// niveau annule la ponderation, comme dans aomdv_qpv.cc et priqueueEvalVSN.cc.
+	// Priorities run from 1 (critical) to getMaxPrioNb(); the +1 stops the last
+	// level cancelling the weighting, as in aomdv_qpv.cc and priqueueEvalVSN.cc.
 	double prioBoost = double(getMaxPrioNb() + 1 - priority) / double(getMaxPrioNb());
 
 	if (packetType == PT_VIDEO)
@@ -1213,7 +1213,7 @@ void WirelessPhyEvalVSN::adjustPhyMetrics(Packet *p)
 	}
 	else
 	{
-		// Non vidéo : priorité la plus haute, pondération forte sur robustesse
+		// Non-video: highest priority, weighted heavily towards robustness
 		w1 = 0.6 * (prioBoost);
 		w2 = 0.3 * (prioBoost);
 		w3 = 0.1 * (prioBoost);
@@ -1225,12 +1225,12 @@ void WirelessPhyEvalVSN::adjustPhyMetrics(Packet *p)
 									  w3 * normPER,
 								  0.0, 1.0);
 
-	// 5) Différer l’adaptation si le PHY n’est pas idle
+	// 5) Defer the adaptation if the PHY is not idle
 	int phyState = getState();
 
 	if (phyState != SEARCHINGEvalVSN)
 	{
-		// 6) Adaptation modulation et puissance avec dernier contexte
+		// 6) Adapt modulation and power using the last context
 		adjustModulationScheme(packetType, frameType, priority, rawScore);
 		adjustTxPower(packetType, frameType, priority, rawScore);
 
@@ -1280,30 +1280,30 @@ void WirelessPhyEvalVSN::adjustModulationScheme(packet_t packetType, char frameT
 {
 	const int N = NUM_MODULATION_SCHEMES;
 
-	// Détermine la plage autorisée selon type de trame et priorité
+	// Determine the allowed range from frame type and priority
 	Range r = allowedRange(packetType, frameType, priority, N, getMaxPrioNb());
 
-	// 1) Mapping linéaire score [0..1] → index [r.min..r.max]
+	// 1) Linear mapping of the score [0..1] to an index [r.min..r.max]
 	double clampedScore = clampDouble(score, 0.0, 1.0);
 	int target = r.min + int(clampedScore * (r.max - r.min) + 0.5);
 	target = clampInt(target, r.min, r.max);
 
-	// Initialisation du compteur d’hystérésis si nécessaire
+	// Initialise the hysteresis counter if needed
 	if (modHystCount_ < 0)
 	{
 		lastModScheme_ = getBasicModulationScheme();
 		modHystCount_ = 0;
 	}
 
-	// Hystérésis : confirmer 3 mesures consécutives
+	// Hysteresis: confirm over three consecutive measurements
 	if (target == lastModScheme_)
 	{
-		// même schéma que précédemment → on réinitialise le compteur
+		// same scheme as before: reset the counter
 		modHystCount_ = 0;
 	}
 	else if (++modHystCount_ >= HYST_COUNT)
 	{
-		// le nouveau schéma est stable → on l’applique
+		// the new scheme is stable: apply it
 		setBasicModulationScheme(target);
 		lastModScheme_ = target;
 		modHystCount_ = 0;
@@ -1349,31 +1349,31 @@ void WirelessPhyEvalVSN::adjustModulationScheme(packet_t packetType, char frameT
  */
 void WirelessPhyEvalVSN::adjustTxPower(packet_t packetType, char frameType, int priority, double score)
 {
-	// 1) Logique floue sur le score
+	// 1) Fuzzy logic over the score
 	double deltaFactor;
 
 	if (score > 0.8)
 	{
-		deltaFactor = -0.15; // Réduction plus importante si le score est très bon
+		deltaFactor = -0.15; // Larger reduction when the score is very good
 	}
 	else if (score > 0.6 && score <= 0.8)
 	{
-		deltaFactor = -0.1; // Réduction légère si le score est bon
+		deltaFactor = -0.1; // Slight reduction when the score is good
 	}
 	else if (score > 0.4 && score <= 0.6)
 	{
-		deltaFactor = 0.0; // Pas de changement si le score est moyen
+		deltaFactor = 0.0; // no change when the score is average
 	}
 	else if (score > 0.2 && score <= 0.4)
 	{
-		deltaFactor = +0.1; // Augmentation légère si le score est faible
+		deltaFactor = +0.1; // Slight increase when the score is low
 	}
 	else // score <= 0.2
 	{
-		deltaFactor = +0.15; // Augmentation plus importante si le score est très faible
+		deltaFactor = +0.15; // Larger increase when the score is very low
 	}
 
-	// 2) Boost selon type de trame et priorité
+	// 2) Boost according to frame type and priority
 	double frameBoost;
 	double prioBoost;
 
@@ -1383,21 +1383,21 @@ void WirelessPhyEvalVSN::adjustTxPower(packet_t packetType, char frameType, int 
 	}
 	else
 	{
-		// Non vidéo : priorité la plus haute, boost maximal
+		// Non-video: highest priority, maximum boost
 		frameBoost = 1.2;
 	}
 
 	prioBoost = double(getMaxPrioNb() + 1 - priority) / double(getMaxPrioNb());
 
-	// 3) Calcul du pas de variation
+	// 3) Step size
 	double currentPt = getPt();
 	double step = deltaFactor * currentPt * frameBoost * prioBoost;
 
-	// 4) Détermination des bornes sur Pt_
-	const double P_MIN = currentPt * 0.5; // 50% de la valeur actuelle minimum
-	const double P_MAX = currentPt * 2.0; // 200% de la valeur actuelle maximum
+	// 4) Bounds on Pt_
+	const double P_MIN = currentPt * 0.5; // floor at 50% of the current value
+	const double P_MAX = currentPt * 2.0; // ceiling at 200% of the current value
 
-	// 5) Calcul et application de la nouvelle puissance
+	// 5) Compute and apply the new power
 	double newPt = clampDouble(currentPt + step, P_MIN, P_MAX);
 	setPt(newPt);
 
@@ -1421,11 +1421,11 @@ void WirelessPhyEvalVSN::adjustTxPower(packet_t packetType, char frameType, int 
 }
 
 /**
- * Calcule dynamiquement la plage de modulation autorisée :
- * - Pour frameType 'M' (main frame), on favorise les schémas robustes ;
- * - Pour frameType 'D' (diff frame), on favorise les débits élevés ;
- * - L’influence de la priorité (1 = haute, HIGH_PRIO = basse) ajuste la largeur de la plage.
- * - Pour les paquets non-vidéo (packetType != PT_VIDEO), on force la modulation la plus robuste.
+ * Computes the allowed modulation range dynamically:
+ * - for frameType 'M' (main frame), robust schemes are favoured;
+ * - for frameType 'D' (diff frame), high bit rates are favoured;
+ * - priority (1 = high, HIGH_PRIO = low) adjusts the width of the range;
+ * - for non-video packets (packetType != PT_VIDEO), the most robust modulation is forced.
  */
 /**
  * @brief Determines the allowed modulation/coding scheme range for a given packet type, frame type, and priority.
@@ -1449,7 +1449,7 @@ Range WirelessPhyEvalVSN::allowedRange(packet_t packetType, char frameType, int 
 	const int MAX_SCHEME = numSchemes - 1;
 	Range r;
 
-	// Pour les paquets non-vidéo : priorité maximale, modulation la plus robuste
+	// Non-video packets: top priority, most robust modulation
 	if (packetType != PT_VIDEO)
 	{
 		r.min = MIN_SCHEME;
@@ -1458,15 +1458,15 @@ Range WirelessPhyEvalVSN::allowedRange(packet_t packetType, char frameType, int 
 		return r;
 	}
 
-	// Pour les paquets vidéo : logique existante selon frameType/prio
+	// Video packets: the existing logic, driven by frameType and priority
 
-	// On normalise la priorité en 0..1 : 0 = haute (prio=1), 1 = basse (prio=HIGH_PRIO)
-	// Normalisation de la priorité en [0..1], en évitant la division par zéro
+	// Normalise priority to 0..1: 0 = high (prio=1), 1 = low (prio=HIGH_PRIO)
+	// Normalise priority to [0..1], avoiding a division by zero
 	double pnorm;
 
 	if (HIGH_PRIO <= 1)
 	{
-		// Un seul niveau de priorité : on positionne pnorm à 0 (priorité « haute » par défaut)
+		// A single priority level: set pnorm to 0, that is "high" by default
 		pnorm = 0.0;
 	}
 	else
@@ -1481,30 +1481,30 @@ Range WirelessPhyEvalVSN::allowedRange(packet_t packetType, char frameType, int 
 
 	if (frameType == 'M')
 	{
-		// On reste dans la moitié basse (robuste) : [0 .. mid]
-		// + un décalage vers la gauche si priorité haute (pnorm≈0)
+		// Stay in the lower, robust half: [0 .. mid]
+		// plus a shift to the left when priority is high (pnorm around 0)
 		double mid = (MAX_SCHEME + MIN_SCHEME) * 0.5;
-		// plus pnorm grand → plus on élargit jusqu’à mid
+		// the larger pnorm, the wider the range, up to mid
 		r.min = MIN_SCHEME;
 		r.max = clampInt(int(mid * (1.0 - pnorm) + pnorm * mid), MIN_SCHEME, MAX_SCHEME);
 	}
 	else if (frameType == 'D')
 	{
-		// On reste dans la moitié haute (débit) : [mid .. MAX]
-		// + un décalage vers la droite si priorité haute (pnorm≈0)
+		// Stay in the upper, high-rate half: [mid .. MAX]
+		// plus a shift to the right when priority is high (pnorm around 0)
 		double mid = (MAX_SCHEME + MIN_SCHEME) * 0.5;
-		// plus pnorm grand → plus on élargit jusqu’à MAX_SCHEME
+		// the larger pnorm, the wider the range, up to MAX_SCHEME
 		r.min = clampInt(int(mid * pnorm + (1.0 - pnorm) * mid), MIN_SCHEME, MAX_SCHEME);
 		r.max = MAX_SCHEME;
 	}
 	else
 	{
-		// par défaut on autorise toute la plage
+		// by default the whole range is allowed
 		r.min = MIN_SCHEME;
 		r.max = MAX_SCHEME;
 	}
 
-	// Sécurité
+	// Safety clamp
 	if (r.min > r.max)
 	{
 		int tmp = r.min;
@@ -1515,7 +1515,7 @@ Range WirelessPhyEvalVSN::allowedRange(packet_t packetType, char frameType, int 
 	return r;
 }
 
-// ------- Helpers pour clamp -------
+// ------- Clamping helpers -------
 /**
  * @brief Clamps a double value within the specified range.
  *
@@ -1551,9 +1551,9 @@ int WirelessPhyEvalVSN::clampInt(int v, int lo, int hi)
 }
 
 /**
- * Fonction pour générer une raison de drop détaillée.
- * Elle inclut le type de paquet, le type de trame et la priorité.
- * La chaîne retournée doit être libérée par l'appelant si nécessaire.
+ * Builds a detailed drop reason.
+ * It carries the packet type, the frame type and the priority.
+ * The returned string must be freed by the caller where necessary.
  */
 /**
  * @brief Generates a detailed drop reason string for a given packet and logs the drop event if debugging is enabled.
@@ -1574,17 +1574,17 @@ char *WirelessPhyEvalVSN::dropReason(Packet *p, char *Reason)
 {
 	hdr_cmn *ch = HDR_CMN(p);
 
-	// Récupère les informations du paquet
+	// Read the packet information
 	packet_t packetType = ch->ptype();
 	char frameType = ch->frameType_[0] ? ch->frameType_[0] : 'C';
 	int priority = ch->prioNb_ ? ch->prioNb_ : 0;
 
-	// Compose la nouvelle raison détaillée
+	// Compose the detailed reason
 	char buf[1000];
 	snprintf(buf, sizeof(buf), "%s -Frt %c -Pri %d",
 			 Reason ? Reason : "---", frameType, priority);
 
-	// Alloue dynamiquement la chaîne (à libérer par l'appelant si besoin)
+	// Allocate the string dynamically (the caller frees it if needed)
 	char *detailedReason = strdup(buf);
 
 	if (PHY_DBG)

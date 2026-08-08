@@ -102,7 +102,7 @@
 static int route_request = 0;
 #endif
 
-/// Map : adresse du nexthop → pointeur vers l'IFQ associé
+/// Map: next-hop address -> pointer to the interface queue it belongs to
 map<nsaddr_t, priqueueEvalVSN *> nexthop_ifq_map_;
 
 /*
@@ -969,9 +969,9 @@ void AOMDV_QPV::recvRequest(Packet *p)
 
 	if (mac_)
 	{
-		// --- MAJ PRR à chaque réception de RREQ ---
+		// --- Update the PRR on every RREQ received ---
 		updatePRR_onRecv(p, ih->saddr());
-		// --- MAJ PRR à chaque réception de RREQ ---
+		// --- Update the PRR on every RREQ received ---
 	}
 
 	/*
@@ -1019,18 +1019,18 @@ void AOMDV_QPV::recvRequest(Packet *p)
 
 	if (mac_)
 	{
-		// --- Cross-layer: coût cumulé sur le reverse path ---
-		// Calcule la métrique composite pour le saut précédent
+		// --- Cross-layer: cumulative cost along the reverse path ---
+		// Composite metric for the previous hop
 		nsaddr_t prev_hop = ih->saddr();
 		LinkQuality q = getLinkQuality(p, prev_hop);
 		double cost = linkCost(p, q);
 
-		// Cumulez le coût sur le chemin
+		// Accumulate the cost along the path
 		if (rq->rq_hop_count == 0)
 			rq->rq_cost_cumule = cost;
 		else
 			rq->rq_cost_cumule += cost;
-		// --- Cross-layer: coût cumulé sur le reverse path ---
+		// --- Cross-layer: cumulative cost along the reverse path ---
 	}
 
 	/*
@@ -1052,10 +1052,10 @@ void AOMDV_QPV::recvRequest(Packet *p)
 
 		if (mac_)
 		{
-			// --- Cross-layer: stocke le coût cumulé dans le reverse path ---
+			// --- Cross-layer: store the cumulative cost in the reverse path ---
 			if (reverse_path)
 				reverse_path->path_cost = rq->rq_cost_cumule;
-			// --- Cross-layer: stocke le coût cumulé dans le reverse path ---
+			// --- Cross-layer: store the cumulative cost in the reverse path ---
 		}
 	}
 	/* If a new path with smaller hop count is received
@@ -1317,9 +1317,9 @@ void AOMDV_QPV::recvReply(Packet *p)
 
 	if (mac_)
 	{
-		// --- MAJ PRR à chaque réception de RREP ---
+		// --- Update the PRR on every RREP received ---
 		updatePRR_onRecv(p, ih->saddr());
-		// --- MAJ PRR à chaque réception de RREP ---
+		// --- Update the PRR on every RREP received ---
 	}
 
 	/* If I receive a RREP with myself as source - drop packet (should not occur).
@@ -1404,20 +1404,20 @@ void AOMDV_QPV::recvReply(Packet *p)
 
 	if (mac_)
 	{
-		// --- Cross-layer: coût cumulé sur le chemin ---
+		// --- Cross-layer: cumulative cost along the path ---
 		if (forward_path)
 		{
 			nsaddr_t prev_hop = rp->rp_src;
 			LinkQuality q = getLinkQuality(p, prev_hop);
 			double cost = linkCost(p, q);
 
-			// Cumulez le coût sur le chemin
+			// Accumulate the cost along the path
 			if (rp->rp_hop_count == 0)
 				forward_path->path_cost = cost;
 			else
 				forward_path->path_cost = cost + rp->rp_cost_cumule;
 
-			// Propagation du coût cumulé pour le prochain saut
+			// Propagate the cumulative cost to the next hop
 			rp->rp_cost_cumule = forward_path->path_cost;
 		}
 		// --- Fin cross-layer ---
@@ -1497,9 +1497,9 @@ void AOMDV_QPV::recvReply(Packet *p)
 
 	if (mac_)
 	{
-		// --- Cross-layer: propagation du coût cumulé ---
-		// rp->rp_cost_cumule déjà mis à jour ci-dessus
-		// MAJ PRR pour chaque envoi de RREP (reverse)
+		// --- Cross-layer: propagate the cumulative cost ---
+		// rp->rp_cost_cumule was already updated above
+		// Update the PRR on every RREP sent (reverse)
 		updatePRR_onSend(p, reverse_path->nexthop);
 		// --- Fin cross-layer ---
 	}
@@ -1557,9 +1557,9 @@ void AOMDV_QPV::recvReply(Packet *p)
 
 		if (mac_)
 		{
-			// --- Cross-layer: propagation du coût cumulé ---
-			// rp->rp_cost_cumule déjà mis à jour ci-dessus
-			// MAJ PRR pour chaque envoi de RREP (reverse)
+			// --- Cross-layer: propagate the cumulative cost ---
+			// rp->rp_cost_cumule was already updated above
+			// Update the PRR on every RREP sent (reverse)
 			updatePRR_onSend(p, reverse_path->nexthop);
 			// --- Fin cross-layer ---
 		}
@@ -1716,16 +1716,16 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 		{
 			assert(rt->rt_flags == RTF_UP);
 
-			// --- Cross-layer: Sélection du chemin en tenant compte de la congestion IFQ ---
-			// Cette section sélectionne le meilleur chemin en évitant les chemins congestionnés,
-			// sauf si tous les chemins sont congestionnés (dans ce cas, on prend le moins mauvais).
+			// --- Cross-layer: path selection accounting for interface-queue congestion ---
+			// This block picks the best path while avoiding congested ones,
+			// unless every path is congested, in which case the least bad one is taken.
 
 			AOMDV_QPV_Path *best = NULL;
 			double min_cost = 1e9;
 			int next_path = 0;
 			int not_congested_paths = 0;
 
-			// Première passe : compter les chemins non congestionnés
+			// First pass: count the uncongested paths
 			for (AOMDV_QPV_Path *tmp = rt->rt_path_list.lh_first; tmp; tmp = tmp->path_link.le_next)
 			{
 				priqueueEvalVSN *nh_ifq = get_ifq_for_nexthop(tmp->nexthop);
@@ -1738,7 +1738,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 					not_congested_paths++;
 			}
 
-			// Deuxième passe : sélection du meilleur chemin
+			// Second pass: select the best path
 			for (AOMDV_QPV_Path *path_iter = rt->rt_path_list.lh_first; path_iter; path_iter = path_iter->path_link.le_next)
 			{
 				if (path_iter->expire < CURRENT_TIME)
@@ -1746,7 +1746,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 
 				double total_cost = path_iter->path_cost;
 
-				// Récupérer l’IFQ associée à ce nexthop (cross-layer)
+				// The interface queue bound to this next hop (cross-layer)
 				priqueueEvalVSN *nh_ifq = get_ifq_for_nexthop(path_iter->nexthop);
 
 				PacketCountStats stats = nh_ifq->countPackets();
@@ -1754,7 +1754,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 				int congestionThreshold = nh_ifq ? nh_ifq->computeCongestionThreshold(p) : 0;
 				int qlen = nh_ifq ? nh_ifq->getQueueLength() : 0;
 
-				// N'ignorer le chemin congestionné que s'il existe au moins un chemin non congestionné
+				// Skip a congested path only if at least one uncongested path exists
 				if (not_congested_paths > 0)
 				{
 					if (congestedIFQ)
@@ -1763,7 +1763,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 						continue;
 				}
 
-				// Métrique composite : coût du chemin + pénalité de congestion
+				// Composite metric: path cost plus a congestion penalty
 				if (nh_ifq && qlen > 0)
 				{
 					double occupancy = double(qlen) / double(nh_ifq->getQlim());
@@ -1778,7 +1778,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 
 				next_path++;
 
-				// Debug log pour chaque chemin
+				// Debug log, one line per path
 				if (AOMDV_QPV_DBG)
 				{
 					char msg[1000];
@@ -1787,7 +1787,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 					log("forward_path_iter (cross-layer)", msg);
 				}
 
-				// Log de congestion détaillé si besoin
+				// Detailed congestion log, if enabled
 				if (logtarget && AOMDV_QPV_DBG)
 				{
 					sprintf(logtarget->pt_->buffer(),
@@ -1812,7 +1812,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 				ch->next_hop() = best->nexthop;
 				best->expire = CURRENT_TIME + ACTIVE_ROUTE_TIMEOUT;
 
-				// MAJ PRR pour chaque envoi de DATA ou routage
+				// Update the PRR on every data or routing packet sent
 				updatePRR_onSend(p, best->nexthop);
 
 				// Debug log for selected best path
@@ -1925,8 +1925,8 @@ void AOMDV_QPV::sendRequest(nsaddr_t dst)
 
 	if (mac_)
 	{
-		// Initialisation du coût cumulé (cross-layer)
-		rq->rq_cost_cumule = 0.0; // Premier saut, coût nul
+		// Initialise the cumulative cost (cross-layer)
+		rq->rq_cost_cumule = 0.0; // first hop, zero cost
 	}
 
 	/*
@@ -2046,8 +2046,8 @@ void AOMDV_QPV::sendRequest(nsaddr_t dst)
 
 	if (mac_)
 	{
-		// --- Cross-layer: coût cumulé (déjà initialisé à 0.0 ci-dessus) ---
-		// MAJ PRR pour chaque envoi de RREQ (broadcast)
+		// --- Cross-layer: cumulative cost (already initialised to 0.0 above) ---
+		// Update the PRR on every RREQ sent (broadcast)
 		updatePRR_onSend(p, IP_BROADCAST);
 		// --- Fin cross-layer ---
 	}
@@ -2100,14 +2100,14 @@ void AOMDV_QPV::sendReply(nsaddr_t ipdst, u_int32_t hop_count, nsaddr_t rpdst,
 
 	if (mac_)
 	{
-		// --- Cross-layer: coût cumulé ---
-		// Calcule la métrique composite pour nexthop (le voisin vers qui on envoie le RREP)
+		// --- Cross-layer: cumulative cost ---
+		// Composite metric for the next hop, the neighbour the RREP is sent to
 		LinkQuality q = getLinkQuality(p, nexthop);
 		double cost = linkCost(p, q);
 
-		// On suppose que le coût cumulé précédent est 0 pour la source du RREP, sinon à récupérer du chemin
-		// Ici, pour la première émission, on initialise à cost, sinon à cost + coût cumulé précédent
-		rp->rp_cost_cumule = cost; // Ajoutez ce champ dans hdr_aomdv_qpv_reply (aomdv_qpv_packet.h)
+		// The previous cumulative cost is 0 at the RREP source; otherwise it is read from the path
+		// On the first send it starts at cost, afterwards at cost + the previous cumulative cost
+		rp->rp_cost_cumule = cost; // this field lives in hdr_aomdv_qpv_reply (aomdv_qpv_packet.h)
 								   // --- Fin cross-layer ---
 	}
 
@@ -2131,7 +2131,7 @@ void AOMDV_QPV::sendReply(nsaddr_t ipdst, u_int32_t hop_count, nsaddr_t rpdst,
 
 	if (mac_)
 	{
-		// MAJ PRR pour chaque envoi de RREP (unicast)
+		// Update the PRR on every RREP sent (unicast)
 		updatePRR_onSend(p, nexthop);
 	}
 
@@ -2462,11 +2462,11 @@ DynamicWeights AOMDV_QPV::getDynamicWeights(packet_t packetType, char frameType,
 {
 	DynamicWeights dw;
 
-	// Pour NON-VIDEO : frameType = '0', priority = 0, pondération forte sur PRR
+	// NON-VIDEO: frameType = '0', priority = 0, weighted heavily towards PRR
 
 	if (packetType == PT_VIDEO)
 	{
-		// VIDEO : logique existante selon frameType/priorité
+		// VIDEO: the existing logic, driven by frameType and priority
 		if (frameType == 'M')
 		{
 			// main frame: highest reliability
@@ -2490,12 +2490,12 @@ DynamicWeights AOMDV_QPV::getDynamicWeights(packet_t packetType, char frameType,
 	}
 
 	// adjust PRR weight by priority (higher priority -> more weight)
-	// Les priorites vont de 1 (la plus critique) a getMaxPrioNb(), et non de 0 :
-	// avec (max - p) / max le dernier niveau obtenait exactement zero, ce qui
-	// annulait wPRR et le retirait de la metrique. Le +1 lui laisse un poids
-	// faible mais non nul -- 1,0 au niveau 1 et 0,077 au niveau 13 pour
-	// getMaxPrioNb() = 13 -- de sorte que la ponderation decroisse sans jamais
-	// degenerer.
+	// Priorities run from 1 (the most critical) to getMaxPrioNb(), not from 0:
+	// with (max - p) / max the last level came out at exactly zero, which
+	// cancelled wPRR and removed it from the metric. The +1 leaves it a small
+	// but non-zero weight -- 1.0 at level 1 and 0.077 at level 13 for
+	// getMaxPrioNb() = 13 -- so the weighting decreases without ever
+	// degenerating.
 	double prioFactor = double(mac_->phy_->getMaxPrioNb() + 1 - priority) / double(mac_->phy_->getMaxPrioNb());
 
 	dw.wPRR *= prioFactor;
@@ -2767,11 +2767,11 @@ bool AOMDV_QPV::notifyCongestionIFQ(priqueueEvalVSN *ifq)
 		if (logtarget && AOMDV_QPV_DBG)
 		{
 			sprintf(logtarget->pt_->buffer(),
-					"AOMDV_QPV (cross-layer): Congestion IFQ détectée, total=%d, video=%d, non_video=%d, video_M=%d, video_D=%d",
+					"AOMDV_QPV (cross-layer): interface-queue congestion detected, total=%d, video=%d, non_video=%d, video_M=%d, video_D=%d",
 					stats.total, stats.video, stats.non_video, stats.video_M, stats.video_D);
 			logtarget->pt_->dump();
 
-			// Log des priorités
+			// Per-priority log
 			for (map<int, int>::iterator it = stats.prio_count.begin(); it != stats.prio_count.end(); ++it)
 			{
 				char prio_msg[1000];
@@ -2785,7 +2785,7 @@ bool AOMDV_QPV::notifyCongestionIFQ(priqueueEvalVSN *ifq)
 	return congestedIFQ;
 }
 
-// Enregistre l'IFQ associée à un nexthop
+// Registers the interface queue bound to a next hop
 /**
  * @brief Registers the interface queue (IFQ) for a specified next hop.
  *
@@ -2802,7 +2802,7 @@ void AOMDV_QPV::register_ifq_for_nexthop(nsaddr_t nexthop, priqueueEvalVSN *ifq)
 	nexthop_ifq_map_[nexthop] = ifq;
 }
 
-// Retourne le pointeur IFQ pour un nexthop
+// Returns the interface-queue pointer for a next hop
 /**
  * Retrieves the interface queue (IFQ) associated with a given next hop address.
  *
