@@ -635,7 +635,7 @@ int priqueueEvalVSN::computeCongestionThreshold(Packet *p)
         queue_factor = 1.0 - min(0.5, double(getQueueLength()) / double(getQlim()));
     }
 
-    // Calcul du congestionThreshold
+    // congestionThreshold
     int congestionThreshold = int(base * type_factor * frame_factor * prio_factor * queue_factor);
 
     // Toujours au moins 1
