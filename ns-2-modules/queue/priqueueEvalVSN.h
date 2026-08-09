@@ -28,11 +28,11 @@ public:
     void setAOMDV_QPV(AOMDV_QPV *agent) { aomdv_qpv_agent_ = agent; }
     AOMDV_QPV *getAOMDV_QPV() const { return aomdv_qpv_agent_; }
 
-    /// Expose la longueur courante de la file
+    /// The queue's current length
     int getQueueLength() const { return q_ ? q_->length() : 0; }
     /// (Optionnel) Retourne l'occupation en octets
     int getQueueBytes() const { return q_ ? q_->byteLength() : 0; }
-    /// Expose la limite en paquets de la file
+    /// The queue's limit, in packets
     int getQlim() const { return qlim_; }
 
 protected:

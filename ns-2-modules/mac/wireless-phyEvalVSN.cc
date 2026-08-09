@@ -1219,7 +1219,7 @@ void WirelessPhyEvalVSN::adjustPhyMetrics(Packet *p)
 		w3 = 0.1 * (prioBoost);
 	}
 
-	// 4) Calcul du score brut [0..1]
+	// 4) Raw score, in [0..1]
 	double rawScore = clampDouble(w1 * normRSSI +
 									  w2 * normSNR +
 									  w3 * normPER,

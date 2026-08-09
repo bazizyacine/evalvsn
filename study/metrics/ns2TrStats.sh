@@ -52,7 +52,7 @@ BEGIN {
   delete recvUID
 
   ############################################
-  # Pour Tab1 + Tab2/Tab3 :
+  # For Tab1 and Tab2/Tab3:
   #   - uniqueUIDs[u]: flag every UID counted as a unique loss
   #   - uniqueUIDList : liste CSV d’UIDs uniques perdus
   ############################################
@@ -302,7 +302,7 @@ END {
 
   ########################################
   # 2) Tab2: only the unique lost UIDs
-  #    - on ne garde plus la colonne Count, seulement Drop Reason et Liste (UIDs)
+  #    - the Count column is dropped; only Drop Reason and the UID list remain
   ########################################
   delete tab2UniqueUIDs     # tab2UniqueUIDs[label] = CSV of unique UIDs for that label
   delete tab2UniqueCount    # tab2UniqueCount[label] = how many unique UIDs for that label

@@ -124,7 +124,7 @@ void aomdv_qpv_rqueue::enque(Packet *p)
     if (!lowestPrioPkt)
       lowestPrioPkt = head_;
 
-    // Retirer lowestPrioPkt de la file
+    // Remove lowestPrioPkt from the queue
     if (lowestPrioPkt == head_)
     {
       lowestPrioPkt = remove_head();

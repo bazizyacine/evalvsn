@@ -654,7 +654,7 @@ sub calculate_Compression_Ratio {
     $header =~ s/^\s*#//;
     my @columns = split /\s+/, $header;
 
-    # Cherche l'index de la colonne compRatio
+    # Find the index of the compRatio column
     my $idx_compRatio = -1;
     for my $i (0..$#columns) {
         $idx_compRatio = $i if $columns[$i] eq 'compRatio';
