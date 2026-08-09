@@ -92,7 +92,7 @@ BEGIN {
 
 {
   ###################################
-  # Reconstruction du tableau kv2 (paires -flag valeur)
+  # Rebuild the kv2 array (-flag value pairs)
   ###################################
   delete kv2
   for (j = 2; j <= NF; j++) {
@@ -137,7 +137,7 @@ BEGIN {
     L = kv2["Nl"]
     R = kv2["Nw"]
 
-    # Construction du label de drop (identique Tab2/Tab3)
+    # Build the drop label (same for Tab2 and Tab3)
     label = ""
     if (R == "END")                                       label = "DROP_END_OF_SIMULATION"
     else if (L == "PHY" && R == "INT")                    label = "DROP_PHY_INT"
