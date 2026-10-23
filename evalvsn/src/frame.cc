@@ -19,12 +19,6 @@ vector<prioritiesInfo> frameEncoder(inputParameters IP, Mat_<double> encodedFram
                 blockZigZag = zigzagEncoder(quantificationEncoder(IP, dctEncoder(IP, block)));
                 vecPI = priorityEncoder(IP, blockZigZag, vecPI, PI);
             }
-            else if (!(IP.encoder.compare("SC")))
-            {
-                PI.dataPriority = IP.priorityNb;
-                PI.level = zigzagEncoder(block);
-                vecPI.push_back(PI);
-            }
         }
     }
 

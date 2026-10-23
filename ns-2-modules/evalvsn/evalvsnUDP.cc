@@ -41,7 +41,19 @@ int evalvsnUDP::command(int argc, const char *const *argv)
             SenderTraceBuffer = new char[strlen(argv[2]) + 1];
             strcpy(SenderTraceBuffer, argv[2]);
             SenderTraceFile = fopen(SenderTraceBuffer, "w");
-            fprintf(SenderTraceFile, "#sTime\tseqNb\tpSize\tframeNb\tframeType\tprioNb\toffset\n");
+
+            // A path that cannot be opened used to become a silent NULL and
+            // a segmentation fault at the first send: refuse it loudly.
+            if (SenderTraceFile == 0)
+            {
+                fprintf(stderr, "cannot open trace file %s\n", SenderTraceBuffer);
+                abort();
+            }
+            // The banner st-packetGenerate.sh writes, so the trace this agent
+            // mirrors and the trace it was fed are the same format to every
+            // reader.
+            fprintf(SenderTraceFile, "#!evsn-trace version=1 fields=8 payload=hex\n");
+            fprintf(SenderTraceFile, "#sTime\tseqNb\tpSize\tframeNb\tframeType\tprioNb\toffset\tpayload\n");
 
             return (TCL_OK);
         }
@@ -91,7 +103,14 @@ void evalvsnUDP::sendmsg(int nbytes, AppData *data, const char *flags)
 
     ch->size_ = nbytes;
 
-    fprintf(SenderTraceFile, "%f\t%i\t%i\t%i\t%s\t%i\t%i\n", Scheduler::instance().clock(), ch->seqNb_, ch->pSize_, ch->frameNb_, ch->frameType_, ch->prioNb_, ch->offset__);
+    fprintf(SenderTraceFile, "%f\t%i\t%i\t%i\t%s\t%i\t%i", Scheduler::instance().clock(), ch->seqNb_, ch->pSize_, ch->frameNb_, ch->frameType_, ch->prioNb_, ch->offset__);
+
+    // Eighth column, always (one format, the author ruled): the payload
+    // this packet carries, or "-" when it carries none.
+    if (data != 0 && data->type() == PACKET_DATA)
+        fprintf(SenderTraceFile, "\t%s\n", (char *)((PacketData *)data)->data());
+    else
+        fprintf(SenderTraceFile, "\t-\n");
 
     p->setdata(data);
 

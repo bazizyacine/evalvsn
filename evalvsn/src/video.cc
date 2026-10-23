@@ -52,6 +52,11 @@ int videoEncoder(inputParameters IP, string videoFile, string outputDirectory)
 
     mkDir(stPath + '/' + "capturedImages");
 
+    if (!(IP.encoder.compare("JPEG")))
+    {
+        mkDir(stPath + "/pham");
+    }
+
     captureStep = ceil(IP.imagesNb / (IP.videoDuration * IP.FPS));
 
     frameResolutionHeight = stoi(IP.imageResolution.substr(0, IP.imageResolution.find_last_of('x')));
@@ -106,6 +111,23 @@ int videoEncoder(inputParameters IP, string videoFile, string outputDirectory)
 
         if (mse > IP.threshold || FI.frameNb == 1)
         {
+            if (!(IP.encoder.compare("JPEG")))
+            {
+                // The Pham witness: every encoded frame is a still, one
+                // priority level, packets written by the ported encoder.
+                int frameBytes = 0;
+
+                PI.frameType = FI.frameType = "M";
+                vecPI.clear();
+                // Two statements: frameBytes is filled by the first call
+                // and read by the second, and argument evaluation order
+                // would not guarantee that in one.
+                vector<string> packets = phamEncodeFrame(IP, grayImage, stPath + "/pham", FI.frameNb, frameBytes);
+                phamTraceEncoder(IP, packets, PI.sendTime, FI.frameNb, FI.frameType, frameBytes, priorityName, frameName);
+                PI.sendTime += 1.0 / IP.FPS;
+                continue;
+            }
+
             if (!(IP.encoder.compare("MMPEG")))
             {
                 if (FI.frameNb == 1)
@@ -130,12 +152,6 @@ int videoEncoder(inputParameters IP, string videoFile, string outputDirectory)
                     DFrame = currentFrame - MFrame;
                     vecPI = frameEncoder(IP, DFrame, PI);
                 }
-            }
-            else if (!(IP.encoder.compare("SC")))
-            {
-                PI.frameType = FI.frameType = "SC";
-                encodedFrame = currentFrame.clone();
-                vecPI = frameEncoder(IP, encodedFrame, PI);
             }
         }
         else if (mse <= IP.threshold && FI.frameNb != 1)
@@ -163,6 +179,8 @@ int videoDecoder(inputParameters IP, string videoFile, string outputDirectory)
     vector<prioritiesInfo> levelsInfo, decodedFrames(ceil(IP.imagesNb / ceil(IP.imagesNb / (IP.videoDuration * IP.FPS))));
     vector<packetsInfo> vecPK;
     set<int> seenSeqNb;
+    // Frames of which at least one packet reached the sink.
+    set<int> receivedFrames;
     prioritiesInfo PI;
     packetsInfo PK;
     ifstream priorityTrace, inPacketTrace;
@@ -226,13 +244,15 @@ int videoDecoder(inputParameters IP, string videoFile, string outputDirectory)
                 continue;
             }
 
-            lineStream << line;
+            lineStream.str(line);
+            lineStream.clear();
 
             lineStream >> PK.sTime >> PK.seqNb >> PK.pSize >> PK.frameNb >> PK.frameType >> PK.prioNb >> PK.offset;
 
             if (seenSeqNb.find(PK.seqNb) == seenSeqNb.end())
             {
                 seenSeqNb.insert(PK.seqNb);
+                receivedFrames.insert(PK.frameNb);
                 outPacketTrace << line << '\n';
             }
 
@@ -271,7 +291,15 @@ int videoDecoder(inputParameters IP, string videoFile, string outputDirectory)
         vecPK = lostPackets(IP, stPacketName, rtPacketNameOut);
     }
 
-    levelsInfo = traceDecoder(IP, vecPK, priorityName);
+    if (!(IP.encoder.compare("JPEG")))
+    {
+        return phamVideoDecoder(IP, stPath, rtPath, priorityName, stPacketName, vecPK,
+                                (int)ceil(IP.imagesNb / ceil(IP.imagesNb / (IP.videoDuration * IP.FPS))),
+                                frameResolutionHeight, frameResolutionWidth);
+    }
+
+    levelsInfo = IP.rcvFile.empty() ? traceDecoder(IP, priorityName, false)
+                                    : traceDecoder(IP, rtPacketNameOut, true);
 
     for (int l = 0; l <= ((int)levelsInfo.size()) - 1; l++)
     {
@@ -293,11 +321,25 @@ int videoDecoder(inputParameters IP, string videoFile, string outputDirectory)
         }
     }
 
+    // The first frame, always of type M, decodes from what survived even
+    // when nothing did: every coefficient at zero, a uniform grey (the
+    // decoder before d53 read the sender's stream and always had it).
+    if (decodedFrames[0].frameNb != 1)
+    {
+        decodedFrames[0].frameNb = 1;
+        decodedFrames[0].frameType = "M";
+    }
     for (int i = 0; i <= ceil(IP.imagesNb / ceil(IP.imagesNb / (IP.videoDuration * IP.FPS))) - 1; i++)
     {
         PI.frameNb = i + 1;
 
-        if (decodedFrames[i].frameNb == PI.frameNb)
+        // A frame none of whose packets reached the sink is not decoded: the
+        // previous image stays displayed, as a video player freezes on the
+        // last image it received (and as frames of type N already do). The
+        // first frame has no predecessor and decodes from what survived.
+        bool wholeFrameLost = !(IP.rcvFile.empty()) && PI.frameNb > 1 && receivedFrames.find(PI.frameNb) == receivedFrames.end();
+
+        if (decodedFrames[i].frameNb == PI.frameNb && !wholeFrameLost)
         {
             if (!(IP.encoder.compare("MMPEG")))
             {
@@ -309,13 +351,6 @@ int videoDecoder(inputParameters IP, string videoFile, string outputDirectory)
                 else if (!(decodedFrames[i].frameType.compare("D")))
                 {
                     decodedFrames[i].level = frameDecoder(IP, decodedFrames[i].level) + MFrame;
-                }
-            }
-            else if (!(IP.encoder.compare("SC")))
-            {
-                if (!(decodedFrames[i].frameType.compare("SC")))
-                {
-                    decodedFrames[i].level = decodedFrames[i].level;
                 }
             }
 

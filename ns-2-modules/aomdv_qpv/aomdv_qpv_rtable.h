@@ -128,6 +128,10 @@ public:
                 error = false;
                 // CHANGE
                 path_cost = 0.0; // Added
+                // Cost of the path beyond its first hop, the part the
+                // per-class recomputation of the first link keeps; -1 when
+                // the first hop is the destination itself.
+                downstream_cost = -1.0;
         }
         void printPath()
         {
@@ -154,6 +158,7 @@ protected:
         bool error;
         // CHANGE
         double path_cost; // Added: cumulative cost of the path
+        double downstream_cost;
 };
 
 LIST_HEAD(aomdv_qpv_paths, AOMDV_QPV_Path);
@@ -185,7 +190,6 @@ class aomdv_qpv_rt_entry
 {
         friend class aomdv_qpv_rtable;
         friend class AOMDV_QPV;
-        friend class LocalRepairTimer;
 
 public:
         aomdv_qpv_rt_entry();
@@ -221,6 +225,7 @@ public:
 
         double rt_req_timeout; // when I can send another req
         u_int8_t rt_req_cnt;   // number of route requests
+        u_int8_t rt_req_sent;  // RREQs sent since the route was last up: 0 = first flood of the round
 
         // AOMDV_QPV code
         u_int8_t rt_flags;
@@ -233,7 +238,6 @@ protected:
         u_int32_t rt_seqno;
         /* u_int8_t 	rt_interface; */
         // AOMDV_QPV code
-        u_int16_t rt_hops;            // hop count
         u_int16_t rt_advertised_hops; // advertised hop count
         int rt_last_hop_count;        // last valid hop count
                                       // AOMDV_QPV code
@@ -248,15 +252,12 @@ protected:
 
 #define RTF_DOWN 0
 #define RTF_UP 1
-#define RTF_IN_REPAIR 2
 
         /*
          *  Must receive 4 errors within 3 seconds in order to mark
          *  the route down.
         u_int8_t        rt_errors;      // error count
         double          rt_error_time;
-#define MAX_RT_ERROR            4       // errors
-#define MAX_RT_ERROR_TIME       3       // seconds
          */
 
 #define MAX_HISTORY 3

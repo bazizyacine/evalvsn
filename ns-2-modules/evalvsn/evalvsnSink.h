@@ -1,6 +1,7 @@
 #include "agent.h"
 #include "trafgen.h"
 #include "packet.h"
+#include <set>
 
 class evalvsnSink : public Agent
 {
@@ -17,4 +18,6 @@ protected:
     char *ReceiverTraceBuffer;
     FILE *ReceiverTraceFile;
     int TotalPacketsReceived;
+    int DuplicatesDiscarded;
+    std::set<int> seenSeqNb;
 };

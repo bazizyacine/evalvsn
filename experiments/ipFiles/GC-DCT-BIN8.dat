@@ -1,0 +1,2 @@
+#|simId|Encoder|FPS|Threshold|gopCoef|qualityCoef|priorityNb|DCTzoneSize|rleLevel|binLevel|
+DCT-BIN8 MMPEG 1 0 0.03 0.01 7 BIN8 RLE1 EG

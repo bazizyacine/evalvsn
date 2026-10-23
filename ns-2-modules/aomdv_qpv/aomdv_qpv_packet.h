@@ -90,7 +90,6 @@ The AODV code developed by the CMU/MONARCH group was optimized and tuned by Sami
 #define AOMDV_QPVTYPE_RREQ 0x02
 #define AOMDV_QPVTYPE_RREP 0x04
 #define AOMDV_QPVTYPE_RERR 0x08
-#define AOMDV_QPVTYPE_RREP_ACK 0x10
 
 /*
  * AOMDV_QPV Routing Protocol Header Macros
@@ -99,7 +98,6 @@ The AODV code developed by the CMU/MONARCH group was optimized and tuned by Sami
 #define HDR_AOMDV_QPV_REQUEST(p) ((struct hdr_aomdv_qpv_request *)hdr_aomdv_qpv::access(p))
 #define HDR_AOMDV_QPV_REPLY(p) ((struct hdr_aomdv_qpv_reply *)hdr_aomdv_qpv::access(p))
 #define HDR_AOMDV_QPV_ERROR(p) ((struct hdr_aomdv_qpv_error *)hdr_aomdv_qpv::access(p))
-#define HDR_AOMDV_QPV_RREP_ACK(p) ((struct hdr_aomdv_qpv_rrep_ack *)hdr_aomdv_qpv::access(p))
 
 /*
  * General AOMDV_QPV Header - shared by all formats
@@ -183,6 +181,26 @@ struct hdr_aomdv_qpv_reply
 
         double rp_cost_cumule; // Added: cumulative cost of the path
 
+        // HELLO only: the sender's interface queue, so that a neighbour's
+        // routing learns its occupancy by signalling rather than by
+        // reading the queue in memory (a real node cannot).
+        u_int8_t rp_qlen;  // packets waiting
+        u_int8_t rp_qlim;  // capacity
+        u_int8_t rp_qcong; // 1 if the queue overflowed since its last report
+
+        // HELLO only: for each neighbour whose unicast frames the sender
+        // received since its last HELLO, how many it received and their
+        // mean received power and SINR. The count gives that neighbour its
+        // delivery ratio towards the sender (pi of the link cost), the two
+        // means its transmit power control in closed loop. Each entry is a
+        // 16-bit short address, a 16-bit count and two signed bytes.
+#define AOMDV_QPV_MAX_TXFB 16
+        u_int8_t rp_fb_n;
+        nsaddr_t rp_fb_addr[AOMDV_QPV_MAX_TXFB];
+        u_int16_t rp_fb_cnt[AOMDV_QPV_MAX_TXFB];
+        int8_t rp_fb_rssi[AOMDV_QPV_MAX_TXFB]; // dBm
+        int8_t rp_fb_sinr[AOMDV_QPV_MAX_TXFB]; // dB
+
         inline int size()
         {
                 int sz = 0;
@@ -198,6 +216,13 @@ struct hdr_aomdv_qpv_reply
                 */
                 sz = 6 * sizeof(u_int32_t);
                 // AOMDV_QPV code
+                if (rp_type == AOMDV_QPVTYPE_HELLO)
+                {
+                        sz += 3 * sizeof(u_int8_t); // rp_qlen, rp_qlim, rp_qcong
+                        if (rp_fb_n > 0)            // count + entries
+                                sz += sizeof(u_int8_t) +
+                                      rp_fb_n * (2 * sizeof(u_int16_t) + 2 * sizeof(int8_t));
+                }
                 if (rp_type == AOMDV_QPVTYPE_RREP)
                 {
                         sz += sizeof(u_int32_t); // rp_bcast_id
@@ -232,12 +257,6 @@ struct hdr_aomdv_qpv_error
         }
 };
 
-struct hdr_aomdv_qpv_rrep_ack
-{
-        u_int8_t rpack_type;
-        u_int8_t reserved;
-};
-
 // for size calculation of header-space reservation
 union hdr_all_aomdv_qpv
 {
@@ -245,7 +264,6 @@ union hdr_all_aomdv_qpv
         hdr_aomdv_qpv_request rreq;
         hdr_aomdv_qpv_reply rrep;
         hdr_aomdv_qpv_error rerr;
-        hdr_aomdv_qpv_rrep_ack rrep_ack;
 };
 
 #endif /* __aomdv_qpv_packet_h__ */

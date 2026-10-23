@@ -135,7 +135,7 @@ vector<prioritiesInfo> priorityEncoder(inputParameters IP, Mat_<double> blockZig
     return vecPI;
 }
 
-vector<prioritiesInfo> priorityDecoder(inputParameters IP, vector<prioritiesInfo> levelsInfo, prioritiesInfo PI)
+vector<prioritiesInfo> priorityDecoder(inputParameters IP, vector<prioritiesInfo> &levelsInfo, prioritiesInfo PI)
 {
     int levelStart, pixelsNb, r;
 
@@ -332,7 +332,15 @@ vector<prioritiesInfo> priorityDecoder(inputParameters IP, vector<prioritiesInfo
 
         PI.level(Range::all(), Range(i, i + pixelsNb)).copyTo(level(Range::all(), Range(levelStart, levelStart + pixelsNb)));
 
-        levelsInfo.push_back({PI.sendTime, PI.frameNb, PI.frameType, PI.dataPriority, PI.dataSize, PI.data, PI.blockNb, level, PI.levelSize, PI.levelOffset});
+        // One entry per block, carrying what the frame assembly reads: the
+        // frame, its type, the level and the block's coefficients. The bit
+        // string and the offset tables of the whole level are NOT copied
+        // into each of the level's 396 entries: with 13 levels and 12
+        // frames that was some 60 000 copies of strings of tens of
+        // kilobytes, 8 GB of memory on the EG sets and, on the ST sets
+        // whose strings are twice as long, hours of reallocation and an
+        // out-of-memory (13 September 2026, tier A, set GC-BIN-ST).
+        levelsInfo.push_back({PI.sendTime, PI.frameNb, PI.frameType, PI.dataPriority, PI.dataSize, string(), PI.blockNb, level, vector<int>(), vector<int>()});
     }
 
     return levelsInfo;

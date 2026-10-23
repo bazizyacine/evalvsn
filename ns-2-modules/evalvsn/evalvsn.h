@@ -18,6 +18,11 @@ struct packetsInfo
     char frameType[10];
     int prioNb;
     int offset;
+    // The hexadecimal payload of the eighth trace column, or null when the
+    // trace is in the seven-column format that predates it. Owned by the
+    // evalvsnFile that parsed it; records passed around by get_next() share
+    // the same storage.
+    char *payload;
 };
 
 class evalvsnFile : public NsObject

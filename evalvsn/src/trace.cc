@@ -1,13 +1,11 @@
 #include "evalvsn.h"
 
+// A simId names a directory: no path separator or shell-hostile character,
+// not "." or "..", not ending in a dot or a space - and one character is
+// enough (the former form demanded two, the test bench's first finding).
 bool isValidSimId(const string &simId)
 {
-    return regex_match(simId, regex(R"(^(?!\.{1,2}$)[^\\/:*?"<>|][^\\/:*?"<>|]*[^\\/:*?"<>|\. ]$)"));
-}
-
-bool isValidResolution(const string &res)
-{
-    return regex_match(res, regex("^[0-9]+x[0-9]+$"));
+    return regex_match(simId, regex(R"(^(?!\.{1,2}$)[^\\/:*?"<>|]*[^\\/:*?"<>|\. ]$)"));
 }
 
 bool isValidInt(const string &s)
@@ -31,9 +29,12 @@ bool isValidZoneSize(const string &zs)
     return z >= 2 && z <= 8;
 }
 
+// RLEk applies the run-length coding from level k on; RLE1 codes every
+// level and RLE14, one past the thirteenth, none of them - the end point of
+// the RLE axis of the comparative study (14 September 2026).
 bool isValidRleLevel(const string &rle)
 {
-    return regex_match(rle, regex("^RLE([1-9]|1[0-3])$"));
+    return regex_match(rle, regex("^RLE([1-9]|1[0-4])$"));
 }
 
 bool isValidBinLevel(const string &bl)
@@ -47,22 +48,32 @@ bool isValidPriorityNb(const string &pn)
     return p >= 1 && p <= 13;
 }
 
-bool isValidFile(const string &f)
-{
-    return f.empty() || regex_match(f, regex(R"(^(?!\.{1,2}$)[^\\/:*?"<>|][^\\/:*?"<>|]*[^\\/:*?"<>|\. ]$)"));
-}
-
 bool getIP(inputParameters &IP, const string &line, string &errParam)
 {
     stringstream lineStream(line);
 
-    string imagesNbStr, videoDurationStr, FPSStr, thresholdStr, gopCoefStr, qualityCoefStr, priorityNbStr, zoneSizeStr;
+    string FPSStr, thresholdStr, gopCoefStr, qualityCoefStr, priorityNbStr, zoneSizeStr, claStr;
 
     lineStream >> IP.simId >> IP.encoder;
 
     if (!(IP.encoder.compare("MMPEG")))
     {
-        lineStream >> IP.imageResolution >> imagesNbStr >> videoDurationStr >> FPSStr >> thresholdStr >> gopCoefStr >> qualityCoefStr >> priorityNbStr >> IP.DCT >> zoneSizeStr >> IP.rleLevel >> IP.binLevel >> IP.rcvFile;
+        lineStream >> FPSStr >> thresholdStr >> gopCoefStr >> qualityCoefStr >> priorityNbStr >> claStr >> IP.rleLevel >> IP.binLevel;
+
+        // DCT and zoneSize travel as one field - CLA8, the notation the
+        // README already used (R32): the alphabetic prefix names the
+        // transform, the digits give the zone size. rcvFile is no longer a
+        // column either: decoding is asked with -decode on the command line.
+        size_t claDigit = claStr.find_first_of("0123456789");
+
+        if (claDigit == string::npos || claDigit == 0)
+        {
+            errParam = "DCT+zoneSize";
+            return false;
+        }
+
+        IP.DCT = claStr.substr(0, claDigit);
+        zoneSizeStr = claStr.substr(claDigit);
 
         if (!isValidSimId(IP.simId))
         {
@@ -72,21 +83,6 @@ bool getIP(inputParameters &IP, const string &line, string &errParam)
         if (IP.encoder != "MMPEG")
         {
             errParam = "Encoder";
-            return false;
-        }
-        if (!isValidResolution(IP.imageResolution))
-        {
-            errParam = "imageResolution";
-            return false;
-        }
-        if (!isValidInt(imagesNbStr))
-        {
-            errParam = "imagesNb";
-            return false;
-        }
-        if (!isValidInt(videoDurationStr))
-        {
-            errParam = "videoDuration";
             return false;
         }
         if (!isValidDouble(FPSStr))
@@ -124,6 +120,18 @@ bool getIP(inputParameters &IP, const string &line, string &errParam)
             errParam = "zoneSize";
             return false;
         }
+        // The zonal transforms keep the triangle of the first zoneSize
+        // diagonals of the block, one level per diagonal from the second on:
+        // zoneSize - 1 levels at most (7 for LLM8 and BIN8), where CLA, the
+        // full 8x8 DCT, carries 13. More levels than that were silently
+        // capped; the encoder refuses them since the test bench of 14
+        // September 2026 (the author's choice: the transforms are compared
+        // at seven levels).
+        if (IP.DCT.compare("CLA") != 0 && stoi(priorityNbStr) > stoi(zoneSizeStr) - 1)
+        {
+            errParam = "priorityNb (at most zoneSize - 1 levels for " + IP.DCT + ")";
+            return false;
+        }
         if (!isValidRleLevel(IP.rleLevel))
         {
             errParam = "rleLevel";
@@ -134,14 +142,7 @@ bool getIP(inputParameters &IP, const string &line, string &errParam)
             errParam = "binLevel";
             return false;
         }
-        if (!isValidFile(IP.rcvFile))
-        {
-            errParam = "rcvFile";
-            return false;
-        }
 
-        IP.imagesNb = stoi(imagesNbStr);
-        IP.videoDuration = stoi(videoDurationStr);
         IP.FPS = stod(FPSStr);
         IP.threshold = stoi(thresholdStr);
         IP.gopCoef = stod(gopCoefStr);
@@ -149,33 +150,20 @@ bool getIP(inputParameters &IP, const string &line, string &errParam)
         IP.priorityNb = stoi(priorityNbStr);
         IP.zoneSize = stoi(zoneSizeStr);
     }
-    else if (!(IP.encoder.compare("SC")))
+    else if (!(IP.encoder.compare("JPEG")))
     {
-        lineStream >> IP.imageResolution >> imagesNbStr >> videoDurationStr >> FPSStr >> thresholdStr >> priorityNbStr >> IP.binLevel >> IP.rcvFile;
+        // The Pham witness: simId JPEG FPS Threshold QF MSS. QF is the
+        // ucam-II quality factor (the reference deposit runs at 20), MSS the
+        // packet size the encoder packetises to, in bytes, which the
+        // network packetiser must not have to split: keep it at most the
+        // set's payload minus two.
+        string qfStr, mssStr;
+
+        lineStream >> FPSStr >> thresholdStr >> qfStr >> mssStr;
 
         if (!isValidSimId(IP.simId))
         {
             errParam = "simId";
-            return false;
-        }
-        if (IP.encoder != "SC")
-        {
-            errParam = "Encoder";
-            return false;
-        }
-        if (!isValidResolution(IP.imageResolution))
-        {
-            errParam = "imageResolution";
-            return false;
-        }
-        if (!isValidInt(imagesNbStr))
-        {
-            errParam = "imagesNb";
-            return false;
-        }
-        if (!isValidInt(videoDurationStr))
-        {
-            errParam = "videoDuration";
             return false;
         }
         if (!isValidDouble(FPSStr))
@@ -188,27 +176,30 @@ bool getIP(inputParameters &IP, const string &line, string &errParam)
             errParam = "Threshold";
             return false;
         }
-        if (!isValidPriorityNb(priorityNbStr))
+        if (!isValidInt(qfStr) || stoi(qfStr) < 1 || stoi(qfStr) > 100)
         {
-            errParam = "priorityNb";
+            errParam = "QF";
             return false;
         }
-        if (!isValidBinLevel(IP.binLevel))
+        if (!isValidInt(mssStr) || stoi(mssStr) < 16)
         {
-            errParam = "binLevel";
-            return false;
-        }
-        if (!isValidFile(IP.rcvFile))
-        {
-            errParam = "rcvFile";
+            errParam = "MSS";
             return false;
         }
 
-        IP.imagesNb = stoi(imagesNbStr);
-        IP.videoDuration = stoi(videoDurationStr);
         IP.FPS = stod(FPSStr);
         IP.threshold = stoi(thresholdStr);
-        IP.priorityNb = stoi(priorityNbStr);
+        IP.qualityFactor = stoi(qfStr);
+        IP.mss = stoi(mssStr);
+        // One priority level, every frame a still: the accounting of the
+        // evaluation reads these as the MMPEG grammar does.
+        IP.priorityNb = 1;
+        IP.gopCoef = 0;
+        IP.qualityCoef = 0;
+        IP.DCT = "BIN";
+        IP.zoneSize = 8;
+        IP.rleLevel = "RLE1";
+        IP.binLevel = "EG";
     }
     else
     {
@@ -268,6 +259,7 @@ void traceEncoder(inputParameters IP, vector<prioritiesInfo> vecPI, vector<frame
         }
 
         PI.level = levels;
+        bool rle = false;
 
         levelZeros = levelZerosEvaluate(PI.level);
 
@@ -280,25 +272,30 @@ void traceEncoder(inputParameters IP, vector<prioritiesInfo> vecPI, vector<frame
                 if (PI.dataPriority >= rleLevel)
                 {
                     PI = rleEncoder(PI);
+                    rle = true;
                 }
             }
 
+            Mat_<double> elems = PI.level.clone();
+
+            // The code-word tables are the level's own: PI serves every
+            // level of the frame in turn.
+            PI.levelSize.clear();
+            PI.levelOffset.clear();
+            PI.data.clear();
             PI = binaryEncoder(IP, PI);
 
-            if (!(IP.binLevel.compare("EG")))
+            // One line per packet (d53): each packet of the level, cut on
+            // the code words, its coefficient index in its first two bytes.
+            // st-packetGenerate.sh then sends each line as one packet.
+            for (const string &unit : packetEncoder(IP, PI, elems, rle))
             {
-                PI = digitEncoder(PI);
-            }
-
-            PI = hexEncoder(PI);
-
-            PI.dataSize = ceil(((int)PI.data.length()) / 2);
-
-            FI.frameSize += PI.dataSize;
-
-            if (PI.dataPriority)
-            {
-                priorityTrace << PI.sendTime << '\t' << PI.frameNb << '\t' << PI.frameType << '\t' << PI.dataPriority << '\t' << PI.dataSize << '\t' << PI.data << '\n';
+                PI.dataSize = ((int)unit.length()) / 2;
+                FI.frameSize += PI.dataSize;
+                if (PI.dataPriority)
+                {
+                    priorityTrace << PI.sendTime << '\t' << PI.frameNb << '\t' << PI.frameType << '\t' << PI.dataPriority << '\t' << PI.dataSize << '\t' << unit << '\n';
+                }
             }
 
             PI.dataPriority = PI.dataSize = 0;
@@ -319,74 +316,54 @@ void traceEncoder(inputParameters IP, vector<prioritiesInfo> vecPI, vector<frame
     frameTrace.close();
 }
 
-vector<prioritiesInfo> traceDecoder(inputParameters IP, vector<packetsInfo> vecPK, string priorityName)
+vector<prioritiesInfo> traceDecoder(inputParameters IP, string unitsName, bool received)
 {
-    vector<prioritiesInfo> vecPI, levelsInfo;
-    prioritiesInfo PI;
-    ifstream priorityTrace;
+    // The packets of each frame and level: every packet of st-priority.dat
+    // for the reference decoding, the payloads that reached the sink (the
+    // deduplicated reception trace) for the decoding after the network. The
+    // decoder reads nothing else of the sender (d53, finding X-27).
+    map<pair<int, int>, vector<string>> units;
+    map<pair<int, int>, prioritiesInfo> heads;
+    ifstream trace(unitsName, ifstream::in);
     stringstream lineStream;
     string line;
-    int rleLevel;
-
-    priorityTrace.open(priorityName, ifstream::in);
-
-    getline(priorityTrace, line, '\n');
-
-    while (getline(priorityTrace, line, '\n'))
+    while (getline(trace, line, '\n'))
     {
-        lineStream << line;
-
-        lineStream >> PI.sendTime >> PI.frameNb >> PI.frameType >> PI.dataPriority >> PI.dataSize >> PI.data;
-
-        vecPI.push_back(PI);
-
+        if (line.empty() || line[0] == '#')
+            continue;
+        prioritiesInfo PI;
+        string data;
+        lineStream.str(line);
         lineStream.clear();
+        if (received)
+        {
+            packetsInfo PK;
+            lineStream >> PK.sTime >> PK.seqNb >> PK.pSize >> PK.frameNb >> PK.frameType >> PK.prioNb >> PK.offset >> data;
+            PI.sendTime = PK.sTime;
+            PI.frameNb = PK.frameNb;
+            PI.frameType = PK.frameType;
+            PI.dataPriority = PK.prioNb;
+        }
+        else
+        {
+            lineStream >> PI.sendTime >> PI.frameNb >> PI.frameType >> PI.dataPriority >> PI.dataSize >> data;
+        }
+        if (lineStream.fail() || data.empty() || data == "-" || PI.dataPriority < 1)
+            continue;
+        pair<int, int> key(PI.frameNb, PI.dataPriority);
+        if (heads.find(key) == heads.end())
+            heads[key] = PI;
+        units[key].push_back(data);
     }
+    trace.close();
 
-    priorityTrace.close();
-
-    for (int i = 0; i <= ((int)vecPI.size()) - 1; i++)
+    vector<prioritiesInfo> levelsInfo;
+    for (auto &h : heads)
     {
-        vecPI[i] = hexDecoder(vecPI[i]);
-
-        if (!(IP.binLevel.compare("EG")))
-        {
-            vecPI[i] = digitDecoder(vecPI[i]);
-        }
-
-        vecPI[i] = binaryDecoder(IP, vecPI[i]);
-
-        if (!(IP.rcvFile.empty()))
-        {
-            vecPI[i] = lostLevels(IP, vecPI[i], vecPK);
-        }
-
-        if (!(IP.encoder.compare("MMPEG")))
-        {
-            rleLevel = stoi(IP.rleLevel.substr(3, ((int)IP.rleLevel.length()) - 3));
-
-            if (vecPI[i].dataPriority >= rleLevel)
-            {
-                vecPI[i] = rleDecoder(vecPI[i]);
-            }
-
-            levelsInfo = priorityDecoder(IP, levelsInfo, vecPI[i]);
-        }
-        else if (!(IP.encoder.compare("SC")))
-        {
-            PI.blockNb = 0;
-
-            for (int j = 0; j < vecPI[i].level.cols - 1; j += 64)
-            {
-                PI.blockNb++;
-
-                PI.level = vecPI[i].level(Range::all(), Range(j, j + 64));
-
-                levelsInfo.push_back({vecPI[i].sendTime, vecPI[i].frameNb, vecPI[i].frameType, vecPI[i].dataPriority, vecPI[i].dataSize, vecPI[i].data, PI.blockNb, PI.level, vecPI[i].levelSize, vecPI[i].levelOffset});
-            }
-        }
+        prioritiesInfo PI = h.second;
+        PI.level = packetDecoder(IP, PI.dataPriority, units[h.first]);
+        levelsInfo = priorityDecoder(IP, levelsInfo, PI);
     }
-
     return levelsInfo;
 }
 
@@ -405,7 +382,8 @@ vector<packetsInfo> lostPackets(inputParameters IP, string stPacketName, string 
     {
         if (line[0] != '#' && line[0] != ' ' && !(line.empty()))
         {
-            lineStream << line;
+            lineStream.str(line);
+            lineStream.clear();
 
             lineStream >> PK.sTime >> PK.seqNb >> PK.pSize >> PK.frameNb >> PK.frameType >> PK.prioNb >> PK.offset;
 
@@ -421,9 +399,12 @@ vector<packetsInfo> lostPackets(inputParameters IP, string stPacketName, string 
 
     while (getline(packetTrace, line, '\n'))
     {
-        if (line[0] != '#' && line[0] != ' ' && !(line.empty()) && (count(line.begin(), line.end(), '\t') + 1) == 7)
+        // Exactly eight fields: one trace format, the author ruled, the
+        // payload always last.
+        if (line[0] != '#' && line[0] != ' ' && !(line.empty()) && (count(line.begin(), line.end(), '\t') + 1) == 8)
         {
-            lineStream << line;
+            lineStream.str(line);
+            lineStream.clear();
 
             lineStream >> PK.sTime >> PK.seqNb >> PK.pSize >> PK.frameNb >> PK.frameType >> PK.prioNb >> PK.offset;
 
@@ -457,50 +438,4 @@ vector<packetsInfo> lostPackets(inputParameters IP, string stPacketName, string 
     }
 
     return vecPK;
-}
-
-prioritiesInfo lostLevels(inputParameters IP, prioritiesInfo PI, vector<packetsInfo> vecPK)
-{
-    int rleLevel;
-
-    for (int i = 0; i <= ((int)vecPK.size()) - 1; i++)
-    {
-        if (PI.frameNb == vecPK[i].frameNb && PI.dataPriority == vecPK[i].prioNb)
-        {
-            for (int j = 0; j <= ((int)PI.levelSize.size()) - 1; j++)
-            {
-                if (!(IP.encoder.compare("MMPEG")))
-                {
-                    rleLevel = stoi(IP.rleLevel.substr(3, ((int)IP.rleLevel.length()) - 3));
-
-                    if (PI.dataPriority >= rleLevel)
-                    {
-                        if (j % 2 != 0)
-                        {
-                            if ((PI.levelOffset[j] + PI.levelSize[j]) <= (8 * (vecPK[i].offset + vecPK[i].pSize)))
-                            {
-                                PI.level.at<double>(j) = 0;
-                            }
-                        }
-                    }
-                    else if (PI.dataPriority < rleLevel)
-                    {
-                        if ((PI.levelOffset[j] + PI.levelSize[j]) <= (8 * (vecPK[i].offset + vecPK[i].pSize)))
-                        {
-                            PI.level.at<double>(j) = 0;
-                        }
-                    }
-                }
-                else if (!(IP.encoder.compare("SC")))
-                {
-                    if ((PI.levelOffset[j] + PI.levelSize[j]) <= (8 * (vecPK[i].offset + vecPK[i].pSize)))
-                    {
-                        PI.level.at<double>(j) = 0;
-                    }
-                }
-            }
-        }
-    }
-
-    return PI;
 }

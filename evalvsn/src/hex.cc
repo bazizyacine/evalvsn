@@ -29,34 +29,3 @@ prioritiesInfo hexDecoder(prioritiesInfo PI)
     
     return PI;
 }
-
-prioritiesInfo digitEncoder(prioritiesInfo PI)
-{
-    string digits;
-    double r;
-    
-    r = ((int) PI.data.length()) % 4;
-    
-    if (r == 0)
-    {
-        PI.data = dec2bin(r,4) + PI.data;
-    }
-    else if (r != 0)
-    {
-        PI.data = dec2bin(4 - r,4) + digits.assign(4 - r,'0') + PI.data;
-    }
-    
-    return PI;
-}
-
-prioritiesInfo digitDecoder(prioritiesInfo PI)
-{
-    string bin;
-    double begin;
-    
-    begin = bin2dec(PI.data.substr(0,4),4);
-    
-    PI.data = PI.data.substr(begin + 4,((int) PI.data.length()) - begin - 4);
-    
-    return PI;
-}

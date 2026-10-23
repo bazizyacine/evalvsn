@@ -4,7 +4,7 @@
 *.a
 bin/
 build/
+__pycache__/
 
-# Internal review reports, written here by audit.sh. Not part of what the
-# article's Data Availability statement promises, and not for publication.
+# Internal review reports, written by the working repository's audit.
 AUDIT-*.md

@@ -27,6 +27,13 @@ struct inputParameters
     string rleLevel;
     string binLevel;
     string rcvFile;
+    // Encoder=JPEG, the Pham witness (tranche 3b-2): the quality factor of
+    // the ucam-II encoder and the packet size it packetises to.
+    int qualityFactor = 0;
+    int mss = 0;
+    // The packet payload in bytes, header included (-mpl, 74 by default):
+    // the encoder cuts each priority level into packets of this size.
+    int mpl = 74;
 };
 
 struct prioritiesInfo
@@ -76,7 +83,6 @@ struct metricsInfo
 };
 
 bool isValidSimId(const string &simId);
-bool isValidResolution(const string &res);
 bool isValidInt(const string &s);
 bool isValidDouble(const string &s);
 bool isValidDCT(const string &dct);
@@ -84,7 +90,6 @@ bool isValidZoneSize(const string &zs);
 bool isValidRleLevel(const string &rle);
 bool isValidBinLevel(const string &bl);
 bool isValidPriorityNb(const string &pn);
-bool isValidFile(const string &f);
 bool getIP(inputParameters &IP, const string &line, string &errParam);
 
 void mkDir(string pathName);
@@ -108,23 +113,22 @@ double negativeEncoder(double dec);
 string unaryEncoder(double ne);
 double getGroupID(double ne);
 string dec2bin(double dec, int bits);
-prioritiesInfo digitEncoder(prioritiesInfo PI);
 prioritiesInfo hexEncoder(prioritiesInfo PI);
 void traceEncoder(inputParameters IP, vector<prioritiesInfo> vecPI, vector<framesInfo> vecFI, string priorityName, string frameName);
 
 vector<packetsInfo> lostPackets(inputParameters IP, string stPacketName, string rtPacketName);
-vector<prioritiesInfo> traceDecoder(inputParameters IP, vector<packetsInfo> vecPK, string priorityName);
+vector<prioritiesInfo> traceDecoder(inputParameters IP, string unitsName, bool received);
+vector<string> packetEncoder(inputParameters IP, prioritiesInfo PI, Mat_<double> elems, bool rle);
+Mat_<double> packetDecoder(inputParameters IP, int dataPriority, const vector<string> &units);
 prioritiesInfo hexDecoder(prioritiesInfo PI);
-prioritiesInfo digitDecoder(prioritiesInfo PI);
 prioritiesInfo binaryDecoder(inputParameters IP, prioritiesInfo PI);
 prioritiesInfo staticDecoder(inputParameters IP, prioritiesInfo PI);
 prioritiesInfo expGolombDecoder(prioritiesInfo PI);
 double unaryDecoder(string ue);
 double negativeDecoder(double ne);
 double bin2dec(string bin, int bits);
-prioritiesInfo lostLevels(inputParameters IP, prioritiesInfo PI, vector<packetsInfo> vecPK);
 prioritiesInfo rleDecoder(prioritiesInfo PI);
-vector<prioritiesInfo> priorityDecoder(inputParameters IP, vector<prioritiesInfo> levelsInfo, prioritiesInfo PI);
+vector<prioritiesInfo> priorityDecoder(inputParameters IP, vector<prioritiesInfo> &levelsInfo, prioritiesInfo PI);  // by reference: the vector grows to 60 000 entries, copying it per level was quadratic
 Mat_<double> zigzagDecoder(Mat_<double> blockZigZag, int vmax, int hmax);
 Mat_<double> quantificationDecoder(inputParameters IP, Mat_<double> blockQTF);
 Mat_<double> dctDecoder(inputParameters IP, Mat_<double> blockDCT);
@@ -143,3 +147,11 @@ int frameZerosEvaluate(Mat_<double> frame);
 int levelZerosEvaluate(Mat_<double> level);
 
 void png2avi(inputParameters IP, string videoFile, string outputDirectory);
+
+// The Pham witness, pham.cc: the ported ucam-II JPEG encoder and the
+// untouched reference decoder, driven as external programs.
+string phamDir();
+void writeBmp8(const string &path, const Mat &gray);
+vector<string> phamEncodeFrame(inputParameters IP, const Mat &gray, const string &workDir, int frameNb, int &frameBytes);
+int phamTraceEncoder(inputParameters IP, const vector<string> &packets, double sendTime, int frameNb, const string &frameType, int frameBytes, const string &priorityName, const string &frameName);
+int phamVideoDecoder(inputParameters IP, const string &stPath, const string &rtPath, const string &priorityName, const string &stPacketName, const vector<packetsInfo> &vecPK, int frames, int height, int width);

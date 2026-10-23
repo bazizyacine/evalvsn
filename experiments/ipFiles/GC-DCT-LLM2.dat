@@ -1,0 +1,2 @@
+#|simId|Encoder|FPS|Threshold|gopCoef|qualityCoef|priorityNb|DCTzoneSize|rleLevel|binLevel|
+DCT-LLM2 MMPEG 1 0 0.03 0.01 1 LLM2 RLE1 EG

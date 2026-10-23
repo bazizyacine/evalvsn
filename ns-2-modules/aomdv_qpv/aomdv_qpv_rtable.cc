@@ -88,6 +88,7 @@ aomdv_qpv_rt_entry::aomdv_qpv_rt_entry()
 
   rt_req_timeout = 0.0;
   rt_req_cnt = 0;
+  rt_req_sent = 0;
 
   rt_dst = 0;
   rt_seqno = 0;
@@ -176,9 +177,6 @@ aomdv_qpv_rt_entry::path_insert(nsaddr_t nexthop, u_int16_t hopcount, double exp
   AOMDV_QPV_Path *path = new AOMDV_QPV_Path(nexthop, hopcount, expire_time, lasthop);
 
   assert(path);
-#ifdef DEBUG
-  fprintf(stderr, "%s: (%d\t%d)\n", __FUNCTION__, path->nexthop, path->hopcount);
-#endif // DEBUG
 
   /*
    * Insert path at the end of the list
