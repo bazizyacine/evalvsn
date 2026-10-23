@@ -1,0 +1,2 @@
+#|simId|Encoder|FPS|Threshold|gopCoef|qualityCoef|priorityNb|DCTzoneSize|rleLevel|binLevel|
+0.03-4 MMPEG 1 0 0.03 0.01 4 CLA8 RLE1 EG

@@ -11,6 +11,6 @@ if(UNIX)
 endif()
 
 find_package (OpenCV REQUIRED)
-add_executable (evalvsn ./src/evalvsn.cc ./src/video.cc ./src/frame.cc ./src/dct.cc ./src/quantification.cc ./src/zigzag.cc ./src/priority.cc ./src/rle.cc ./src/static.cc ./src/golomb.cc ./src/bin.cc ./src/hex.cc ./src/trace.cc ./src/evaluate.cc)
+add_executable (evalvsn ./src/evalvsn.cc ./src/video.cc ./src/frame.cc ./src/dct.cc ./src/quantification.cc ./src/zigzag.cc ./src/priority.cc ./src/rle.cc ./src/static.cc ./src/golomb.cc ./src/bin.cc ./src/hex.cc ./src/trace.cc ./src/packet.cc ./src/evaluate.cc ./src/pham.cc)
 set_target_properties(evalvsn PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 target_link_libraries (evalvsn ${OpenCV_LIBS})

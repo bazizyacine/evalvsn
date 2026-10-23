@@ -36,10 +36,6 @@ prioritiesInfo staticEncoder(inputParameters IP, prioritiesInfo PI)
             }
         }
     }
-    else if (!(IP.encoder.compare("SC")))
-    {
-        pixelBits = 8;
-    }
 
     if (!(IP.encoder.compare("MMPEG")))
     {
@@ -110,19 +106,6 @@ prioritiesInfo staticEncoder(inputParameters IP, prioritiesInfo PI)
             }
         }
     }
-    else if (!(IP.encoder.compare("SC")))
-    {
-        levelSize = pixelBits;
-
-        for (int i = 0; i <= PI.level.cols - 1; i++)
-        {
-            PI.data += dec2bin(PI.level.at<double>(i), pixelBits);
-
-            PI.levelSize.push_back(levelSize);
-            PI.levelOffset.push_back(levelOffset);
-            levelOffset += levelSize;
-        }
-    }
 
     return PI;
 }
@@ -161,10 +144,6 @@ prioritiesInfo staticDecoder(inputParameters IP, prioritiesInfo PI)
                 pixelBits = 16;
             }
         }
-    }
-    else if (!(IP.encoder.compare("SC")))
-    {
-        pixelBits = 8;
     }
 
     if (!(IP.encoder.compare("MMPEG")))
@@ -215,19 +194,6 @@ prioritiesInfo staticDecoder(inputParameters IP, prioritiesInfo PI)
                 PI.levelOffset.push_back(levelOffset);
                 levelOffset += levelSize;
             }
-        }
-    }
-    else if (!(IP.encoder.compare("SC")))
-    {
-        levelSize = pixelBits;
-
-        for (int i = 0; i < ((int)PI.data.length()); i += pixelBits)
-        {
-            PI.level.push_back(bin2dec(PI.data.substr(i, pixelBits), pixelBits));
-
-            PI.levelSize.push_back(levelSize);
-            PI.levelOffset.push_back(levelOffset);
-            levelOffset += levelSize;
         }
     }
 

@@ -13,10 +13,6 @@ prioritiesInfo binaryEncoder(inputParameters IP, prioritiesInfo PI)
             PI = expGolombEncoder(PI);
         }
     }
-    else if (!(IP.encoder.compare("SC")))
-    {
-        PI = staticEncoder(IP, PI);
-    }
 
     return PI;
 }

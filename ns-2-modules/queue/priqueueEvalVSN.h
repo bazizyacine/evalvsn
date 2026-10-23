@@ -2,7 +2,7 @@
 #include "queue.h"
 #include "config.h"
 #include <map>
-#include <mac/mac-802_11EvalVSN.h>
+#include <mac/link-metrics.h>
 
 struct PacketCountStats
 {
@@ -17,7 +17,6 @@ struct PacketCountStats
 };
 
 class AOMDV_QPV;
-class Mac802_11EvalVSN;
 
 class priqueueEvalVSN : public Queue
 {
@@ -58,6 +57,9 @@ protected:
 
     bool notifyCongestionThreshold(Packet *p, PacketCountStats &stats, int congestionThreshold);
     int computeCongestionThreshold(Packet *p);
+    // The same threshold for a queue known only by what it advertised in a
+    // HELLO (occupancy and capacity), as the routing of a neighbour sees it.
+    int computeCongestionThresholdFor(Packet *p, int qlen, int qlim);
     PacketCountStats countPackets();
 
 private:

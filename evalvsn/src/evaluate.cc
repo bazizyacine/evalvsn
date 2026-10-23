@@ -14,13 +14,9 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
     string metricsFormat, videoName, stPath, frameName, frameFormat, packetName, rtPath, metricsName, imagePath, imageName, line;
     int frameResolutionHeight, frameResolutionWidth, capturedFrameSize;
 
-    if (!(IP.encoder.compare("MMPEG")))
+    if (!(IP.encoder.compare("MMPEG")) || !(IP.encoder.compare("JPEG")))
     {
         metricsFormat = "#psnr\trefPSNR\tssim\trefSSIM\tpktLoss\tpktLossM\tpktLossD\tpktlossM1\tpktlossM2\tpktlossM3\tpktlossM4\tpktlossM5\tpktlossM6\tpktlossM7\tpktlossM8\tpktlossM9\tpktlossM10\tpktlossM11\tpktlossM12\tpktlossM13\tpktlossD1\tpktlossD2\tpktlossD3\tpktlossD4\tpktlossD5\tpktlossD6\tpktlossD7\tpktlossD8\tpktlossD9\tpktlossD10\tpktlossD11\tpktlossD12\tpktlossD13";
-    }
-    else if (!(IP.encoder.compare("SC")))
-    {
-        metricsFormat = "#psnr\trefPSNR\tssim\trefSSIM\tpktLoss";
     }
 
     videoName = videoFile.substr(videoFile.find_last_of('/') + 1, videoFile.find_last_of('.') - videoFile.find_last_of('/') - 1);
@@ -49,7 +45,11 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
 
         while (getline(inTrace, line, '\n'))
         {
-            lineStream << line;
+            // str() then clear(), not operator<<: appending leaves whatever the
+            // previous extraction did not consume - the payload column - in the
+            // buffer, and from the second line on every parse fails silently.
+            lineStream.str(line);
+            lineStream.clear();
 
             lineStream >> FI.frameNb >> FI.frameType >> FI.frameSize >> FI.refPSNR >> FI.refSSIM >> FI.compRatio;
 
@@ -88,7 +88,7 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
 
             outTrace << vecFI[i].frameNb << '\t' << vecFI[i].frameType << '\t' << vecFI[i].frameSize << '\t' << vecFI[i].refPSNR << '\t' << vecFI[i].refSSIM << '\t';
 
-            if (!(vecFI[i].frameType.compare("M")) || !(vecFI[i].frameType.compare("D")) || !(vecFI[i].frameType.compare("SC")))
+            if (!(vecFI[i].frameType.compare("M")) || !(vecFI[i].frameType.compare("D")))
             {
                 outTrace << vecFI[i].compRatio << '\n';
             }
@@ -112,11 +112,19 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
             return EXIT_FAILURE;
         }
 
-        getline(inTrace, line, '\n');
-
+        // Comment lines are skipped by their '#', not by dropping the first
+        // line: the banner made the header the second comment, and a reader
+        // that skips exactly one line parses the header as a record - whose
+        // zero frameNb then indexes one before the vector and asks the PSNR
+        // loop for frame_0. The same fix trace.cc and the ns-2 reader got
+        // when the banner appeared; this reader had been missed.
         while (getline(inTrace, line, '\n'))
         {
-            lineStream << line;
+            if (line.empty() || line[0] == '#' || line[0] == ' ')
+                continue;
+
+            lineStream.str(line);
+            lineStream.clear();
 
             lineStream >> PK.sTime >> PK.seqNb >> PK.pSize >> PK.frameNb >> PK.frameType >> PK.prioNb >> PK.offset;
 
@@ -124,7 +132,7 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
 
             stVecMI[PK.frameNb - 1].pktLoss++;
 
-            if (!(IP.encoder.compare("MMPEG")))
+            if (!(IP.encoder.compare("MMPEG")) || !(IP.encoder.compare("JPEG")))
             {
                 if (!(PK.frameType.compare("M")))
                 {
@@ -157,9 +165,12 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
 
         while (getline(inTrace, line, '\n'))
         {
-            if (line[0] != '#' && line[0] != ' ' && !(line.empty()) && (count(line.begin(), line.end(), '\t') + 1) == 7)
+            // Exactly eight fields: one trace format, the author ruled,
+            // the payload always last and "-" carrying an empty one.
+            if (line[0] != '#' && line[0] != ' ' && !(line.empty()) && (count(line.begin(), line.end(), '\t') + 1) == 8)
             {
-                lineStream << line;
+                lineStream.str(line);
+                lineStream.clear();
 
                 lineStream >> PK.sTime >> PK.seqNb >> PK.pSize >> PK.frameNb >> PK.frameType >> PK.prioNb >> PK.offset;
 
@@ -167,7 +178,7 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
 
                 rtVecMI[PK.frameNb - 1].pktLoss++;
 
-                if (!(IP.encoder.compare("MMPEG")))
+                if (!(IP.encoder.compare("MMPEG")) || !(IP.encoder.compare("JPEG")))
                 {
                     if (!(PK.frameType.compare("M")))
                     {
@@ -191,19 +202,23 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
 
         outTrace.open(frameName, ofstream::out);
 
-        if (!(IP.encoder.compare("MMPEG")))
+        if (!(IP.encoder.compare("MMPEG")) || !(IP.encoder.compare("JPEG")))
         {
             frameFormat = "#frameNb\tpsnr\tssim\tpktLoss\tpktloss1\tpktloss2\tpktloss3\tpktloss4\tpktloss5\tpktloss6\tpktloss7\tpktloss8\tpktloss9\tpktloss10\tpktloss11\tpktloss12\tpktloss13";
-        }
-        else if (!(IP.encoder.compare("SC")))
-        {
-            frameFormat = "#frameNb\tpsnr\tssim\tpktLoss";
         }
 
         outTrace << frameFormat << '\n';
 
         for (int i = 0; i <= ((int)stVecMI.size()) - 1; i++)
         {
+            // The frame number is the position, not what the packet trace
+            // wrote: a frame the encoder skipped (type N, Threshold > 0)
+            // sent no packet, so its number stayed 0 and the loop read
+            // frame_0.png, an empty image the SSIM's blur rejected. The
+            // decoder repeats the previous frame for it, and that repeat
+            // is what the PSNR and SSIM measure (14 September 2026).
+            stVecMI[i].frameNb = i + 1;
+
             outTrace << stVecMI[i].frameNb << '\t';
 
             imagePath = stPath + '/' + "capturedImages";
@@ -248,8 +263,13 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
                 rtMI.pktLoss += rtVecMI[i].pktLoss;
                 rtVecMI[i].pktLoss = ((stVecMI[i].pktLoss - rtVecMI[i].pktLoss) / stVecMI[i].pktLoss) * 100;
             }
+            else
+            {
+                // a skipped frame: no packet, so no loss to report
+                outTrace << "na" << '\t';
+            }
 
-            if (!(IP.encoder.compare("MMPEG")))
+            if (!(IP.encoder.compare("MMPEG")) || !(IP.encoder.compare("JPEG")))
             {
                 if (stVecMI[i].pktLossM)
                 {
@@ -329,7 +349,7 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
             outTrace << "na" << '\t';
         }
 
-        if (!(IP.encoder.compare("MMPEG")))
+        if (!(IP.encoder.compare("MMPEG")) || !(IP.encoder.compare("JPEG")))
         {
             if (stMI.pktLossM)
             {
@@ -398,7 +418,11 @@ double psnrEvaluate(Mat_<double> capturedFrame, Mat_<double> decodedFrame)
     }
     else if (mse == 0)
     {
-        psnr = 60;
+        // An exact frame scores the PSNR of the smallest error a frame can
+        // carry, one grey level on one pixel: above every lossy frame, so the
+        // measure stays monotone (the former 60 dB sat under the 68 dB of a
+        // near-lossless frame, finding X-33).
+        psnr = 10.0 * log10((255.0 * 255.0) * capturedFrame.total());
     }
 
     return psnr;

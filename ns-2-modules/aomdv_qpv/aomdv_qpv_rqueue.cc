@@ -77,7 +77,7 @@ The AODV code developed by the CMU/MONARCH group was optimized and tuned by Sami
 */
 
 #include <assert.h>
-#include <mac/mac-802_11EvalVSN.h>
+#include <mac/link-metrics.h>
 #include <aomdv_qpv/aomdv_qpv.h>
 
 #define CURRENT_TIME Scheduler::instance().clock()
@@ -152,11 +152,14 @@ void aomdv_qpv_rqueue::enque(Packet *p)
     // Drop with the appropriate reason
     if (HDR_CMN(lowestPrioPkt)->ts_ > CURRENT_TIME)
     {
-      drop(lowestPrioPkt, agent_->mac_->phy_->dropReason(lowestPrioPkt, DROP_RTR_QFULL));
+      // Through the agent: the rqueue is a bare Connector whose drop target
+      // nobody wires, so its own drop() was a silent Packet::free - five
+      // thousand evictions invisible to every statistic.
+      agent_->drop(lowestPrioPkt, agent_->mac_->dropReason(lowestPrioPkt, DROP_RTR_QFULL));
     }
     else
     {
-      drop(lowestPrioPkt, agent_->mac_->phy_->dropReason(lowestPrioPkt, DROP_RTR_QTIMEOUT));
+      agent_->drop(lowestPrioPkt, agent_->mac_->dropReason(lowestPrioPkt, DROP_RTR_QTIMEOUT));
     }
   }
 
@@ -345,7 +348,7 @@ void aomdv_qpv_rqueue::purge()
   {
     // assert(p == remove_head());
     p = remove_head();
-    drop(p, agent_->mac_->phy_->dropReason(p, DROP_RTR_QTIMEOUT));
+    agent_->drop(p, agent_->mac_->dropReason(p, DROP_RTR_QTIMEOUT));
   }
 }
 */

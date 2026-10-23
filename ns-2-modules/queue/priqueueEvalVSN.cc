@@ -8,6 +8,7 @@ using namespace std;
 #define DROP_IFQ_QFULL_NEW "NEW"
 #define DROP_IFQ_QFULL_SHRK "SHRK"
 #define DROP_IFQ_MANUAL_DROP "MANU"
+#define DROP_IFQ_EARLY_DISCARD "EDIS" // discarded by the early discard by priority (d27)
 
 static class priqueueEvalVSNClass : public TclClass
 {
@@ -137,6 +138,14 @@ void priqueueEvalVSN::reset()
  */
 void priqueueEvalVSN::enque(Packet *p)
 {
+    // Early discard by priority (d27): under congestion the agent discards the
+    // video packets of least value before they take the channel.
+    if (aomdv_qpv_agent_ && !aomdv_qpv_agent_->discardAdmit(p))
+    {
+        drop(p, aomdv_qpv_agent_->mac_->dropReason(p, DROP_IFQ_EARLY_DISCARD));
+        return;
+    }
+
     int qlimBytes = qlim_ * mean_pktsize_;
 
     if (summarystats)
@@ -195,12 +204,12 @@ void priqueueEvalVSN::enque(Packet *p)
         if (replace)
         {
             q_->remove(lowest);
-            drop(lowest, aomdv_qpv_agent_->mac_->phy_->dropReason(lowest, DROP_IFQ_QFULL_REPL));
+            drop(lowest, aomdv_qpv_agent_->mac_->dropReason(lowest, DROP_IFQ_QFULL_REPL));
             insertSorted(p);
         }
         else
         {
-            drop(p, aomdv_qpv_agent_->mac_->phy_->dropReason(p, DROP_IFQ_QFULL_NEW));
+            drop(p, aomdv_qpv_agent_->mac_->dropReason(p, DROP_IFQ_QFULL_NEW));
         }
     }
 }
@@ -366,7 +375,7 @@ void priqueueEvalVSN::shrink_queue()
         if (lowest)
         {
             q_->remove(lowest);
-            drop(lowest, aomdv_qpv_agent_->mac_->phy_->dropReason(lowest, DROP_IFQ_QFULL_SHRK));
+            drop(lowest, aomdv_qpv_agent_->mac_->dropReason(lowest, DROP_IFQ_QFULL_SHRK));
         }
         else
         {
@@ -492,7 +501,7 @@ void priqueueEvalVSN::dropLowestPriority()
     if (lowest)
     {
         q_->remove(lowest);
-        drop(lowest, aomdv_qpv_agent_->mac_->phy_->dropReason(lowest, DROP_IFQ_MANUAL_DROP));
+        drop(lowest, aomdv_qpv_agent_->mac_->dropReason(lowest, DROP_IFQ_MANUAL_DROP));
     }
 }
 
@@ -590,6 +599,11 @@ bool priqueueEvalVSN::notifyCongestionThreshold(Packet *p, PacketCountStats &sta
  */
 int priqueueEvalVSN::computeCongestionThreshold(Packet *p)
 {
+    return computeCongestionThresholdFor(p, getQueueLength(), getQlim());
+}
+
+int priqueueEvalVSN::computeCongestionThresholdFor(Packet *p, int qlen, int qlim)
+{
     struct hdr_cmn *ch = HDR_CMN(p);
     packet_t packetType = ch->ptype();
     char frameType = ch->frameType_[0];
@@ -624,15 +638,19 @@ int priqueueEvalVSN::computeCongestionThreshold(Packet *p)
     // pulled down to the minimum by the max(1) below: it was declared congested
     // from the first unit of occupancy. The +1 lets it decrease without
     // degenerating.
-    double prio_factor = double(aomdv_qpv_agent_->mac_->phy_->getMaxPrioNb() + 1 - priority) / double(aomdv_qpv_agent_->mac_->phy_->getMaxPrioNb());
+    // kappa of the level; 1 outside the codec's levels (control, scalar
+    // readings), as chapter 4 defines it.
+    int maxPrio = aomdv_qpv_agent_->mac_->getMaxPrioNb();
+    double prio_factor = (priority >= 1 && priority <= maxPrio)
+        ? double(maxPrio + 1 - priority) / double(maxPrio) : 1.0;
 
     // Queue-length factor: the longer the queue, the lower the congestionThreshold
     double queue_factor = 1.0;
 
-    if (qlim_ > 0)
+    if (qlim > 0)
     {
-        // For instance: congestionThreshold falls linearly once the queue exceeds q_->length() packets, up to qlim_
-        queue_factor = 1.0 - min(0.5, double(getQueueLength()) / double(getQlim()));
+        // congestionThreshold falls linearly with the occupancy, down to half at a half-full queue
+        queue_factor = 1.0 - min(0.5, double(qlen) / double(qlim));
     }
 
     // congestionThreshold
