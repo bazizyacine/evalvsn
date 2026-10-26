@@ -53,6 +53,12 @@ def cells(rows, metric):
     return out
 
 
+def first(fire, k):
+    """The first column as the MDPI template writes it: the value once,
+    vertically centered on the rows it spans."""
+    return '\\multirow[m]{%d}{*}{%s}' % (len(SPLITS), fire) if k == 0 else ''
+
+
 def mean(d):
     return sum(d.values()) / len(d)
 
@@ -82,26 +88,23 @@ def write(lang, rows):
     os.makedirs(OUT, exist_ok=True)
 
     with open(os.path.join(OUT, lang + '_comparatif-psnr.tex'), 'w') as f:
-        f.write(HEAD + '\\begin{tabularx}{\\textwidth}{llCCCC}\n\\toprule\n')
+        f.write(HEAD + '\\begin{tabularx}{\\linewidth}{CCCCCC}\n\\toprule\n')
         f.write('\\textbf{%s} & \\textbf{GOP} & ' % W['fire'] + ' & '.join('\\textbf{%s}' % lab for _, lab in STACKS) + ' \\\\\n')
         for fire in FIRES:
             f.write('\\midrule\n')
             for k, (sp, lab) in enumerate(SPLITS):
                 vals = [psnr.get((fire, sp, st)) for st, _ in STACKS]
-                best = max(mean(v) for v in vals if v) if any(vals) else None
                 txt = []
                 for v in vals:
                     if not v:
                         txt.append('--')
                     else:
-                        s = fr(mean(v))
-                        s = '\\textbf{%s}' % s if mean(v) == best else s
-                        txt.append('%s $\\pm$ %s' % (s, fr(half_ci(v))))
-                f.write('%s & %s & %s \\\\\n' % (fire if k == 0 else '', lab, ' & '.join(txt)))
+                        txt.append('%s $\\pm$ %s' % (fr(mean(v)), fr(half_ci(v))))
+                f.write('%s & %s & %s \\\\\n' % (first(fire, k), lab, ' & '.join(txt)))
         f.write('\\bottomrule\n\\end{tabularx}\n')
 
     with open(os.path.join(OUT, lang + '_comparatif-pertes.tex'), 'w') as f:
-        f.write(HEAD + '\\begin{tabularx}{\\textwidth}{llCCCC}\n\\toprule\n')
+        f.write(HEAD + '\\begin{tabularx}{\\linewidth}{CCCCCC}\n\\toprule\n')
         f.write('\\textbf{%s} & \\textbf{GOP} & ' % W['fire'] + ' & '.join('\\textbf{%s}' % lab for _, lab in STACKS) + ' \\\\\n')
         for fire in FIRES:
             f.write('\\midrule\n')
@@ -110,11 +113,11 @@ def write(lang, rows):
                 for st, _ in STACKS:
                     a, b = loss.get((fire, sp, st)), m1.get((fire, sp, st))
                     txt.append('%s / %s' % (fr(mean(a)), fr(mean(b))) if a and b else '--')
-                f.write('%s & %s & %s \\\\\n' % (fire if k == 0 else '', lab, ' & '.join(txt)))
+                f.write('%s & %s & %s \\\\\n' % (first(fire, k), lab, ' & '.join(txt)))
         f.write('\\bottomrule\n\\end{tabularx}\n')
 
     with open(os.path.join(OUT, lang + '_comparatif-tests.tex'), 'w') as f:
-        f.write(HEAD + '\\begin{tabularx}{\\textwidth}{llCcCcCc}\n\\toprule\n')
+        f.write(HEAD + '\\begin{tabularx}{\\linewidth}{CCCCCCCC}\n\\toprule\n')
         f.write('& & ' + ' & '.join('\\multicolumn{2}{c}{\\textbf{%s}}' % lab for _, _, lab in PAIRS) + ' \\\\\n')
         f.write('\\textbf{%s} & \\textbf{GOP} & ' % W['fire'] + ' & '.join(['$\\Delta$ (dB) & $p$'] * len(PAIRS)) + ' \\\\\n')
         adj = {}
@@ -131,7 +134,7 @@ def write(lang, rows):
                 for a, b, _ in PAIRS:
                     r = adj.get((a, b, (fire, sp)))
                     txt += [('+' if r[0] >= 0 else '') + fr(r[0], 2), pfr(r[1])] if r else ['--', '--']
-                f.write('%s & %s & %s \\\\\n' % (fire if k == 0 else '', lab, ' & '.join(txt)))
+                f.write('%s & %s & %s \\\\\n' % (first(fire, k), lab, ' & '.join(txt)))
         f.write('\\bottomrule\n\\end{tabularx}\n')
 
     complete = all((fi, sp, st) in psnr for fi in FIRES for sp, _ in SPLITS for st, _ in STACKS)
@@ -141,12 +144,12 @@ def write(lang, rows):
         analyse_comparative.STACKS = ('rules', 'agents', 'hybrid')
         res, dfe = anova([r for r in rows if r['stack'] != 'aomdv'], 'psnr')
         with open(os.path.join(OUT, lang + '_comparatif-anova.tex'), 'w') as f:
-            f.write(HEAD + '\\begin{tabularx}{\\textwidth}{LCCCC}\n\\toprule\n')
+            f.write(HEAD + '\\begin{tabularx}{\\linewidth}{CCCCC}\n\\toprule\n')
             f.write('\\textbf{%s} & \\textbf{%s} & ' % (W['factor'], W['df']) + '\\textbf{$F$} & \\textbf{$p$} & \\textbf{$\\eta^2_p$} \\\\\n\\midrule\n')
             for term, ss, df, F, p, eta in res:
                 name = ' $\\times$ '.join(W['terms'][t.strip()] for t in term.split(' x '))
-                f.write('%s & %d & %s & %s & %s \\\\\n' % (name, df, fr(F, 1), pfr(p), fr(eta, 2)))
-            f.write('\\midrule\n%s & %d & & & \\\\\n\\bottomrule\n\\end{tabularx}\n' % (W['resid'], dfe))
+                f.write('%s & %d & %s & %s & %s \\\\\n\\midrule\n' % (name, df, fr(F, 1), pfr(p), fr(eta, 2)))
+            f.write('%s & %d & & & \\\\\n\\bottomrule\n\\end{tabularx}\n' % (W['resid'], dfe))
     print('tables written to', os.path.relpath(OUT), '' if complete else '(ANOVA waits for the complete design)')
 
 
