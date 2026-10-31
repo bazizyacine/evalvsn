@@ -2,8 +2,9 @@
 """Statistics of the comparative study (study 09) from src/data/comparative.tsv:
 the cell means, the paired t-tests between stacks in each cell (fire x split;
 the four stacks of a fire share their seeds, so each test pairs the same
-simulations), Holm-corrected within each comparison over the nine cells, and
-the three-way ANOVA stack x fire x split on a metric (effect coding,
+simulations), Holm-corrected within each comparison over the nine cells, the
+same differences pooled over the 180 pairs (mean, 95 % confidence interval,
+share of positive pairs), and the three-way ANOVA stack x fire x split on a metric (effect coding,
 sequential sums of squares; the design is balanced).
 
 Usage: analyse_comparative.py [metric]   (default psnr; also loss, m1loss...)
@@ -43,6 +44,15 @@ def paired(a, b):
     sd = math.sqrt(sum((y - m) ** 2 for y in d) / (len(d) - 1)) if len(d) > 1 else 0.0
     p = stats.t_sf2(m / (sd / math.sqrt(len(d))), len(d) - 1) if sd else 1.0
     return m, p, len(d)
+
+
+def pooled(d):
+    n = len(d)
+    m = sum(d) / n
+    sd = math.sqrt(sum((y - m) ** 2 for y in d) / (n - 1))
+    h = stats.t_quantile(0.975, n - 1) * sd / math.sqrt(n)
+    p = stats.t_sf2(m / (sd / math.sqrt(n)), n - 1) if sd else 1.0
+    return m, m - h, m + h, p, sum(y > 0 for y in d) / n, n
 
 
 def anova(rows, metric):
@@ -96,6 +106,11 @@ def main():
         print('  %s - %s' % (a, b))
         for (key, m, p, n), (_, _, _, pa) in zip(tests, adj):
             print('    %s %s  %+7.2f  p = %.4f  p_Holm = %.4f  (n = %d)' % (key[0], key[1], m, p, pa, n))
+        d = [cell[(f, s, a)][k] - cell[(f, s, b)][k] for (f, s), _, _, _ in tests
+             for k in sorted(set(cell[(f, s, a)]) & set(cell[(f, s, b)]))]
+        m, lo, hi, p, pos, n = pooled(d)
+        print('    pooled   %+7.2f  95%% CI [%+.2f, %+.2f]  p = %.3g  positive %.1f%%  (n = %d)'
+              % (m, lo, hi, p, 100 * pos, n))
     complete = all((f, s, st) in cell for f in fires for s in splits for st in STACKS)
     if complete and len(fires) > 1 and len(splits) > 1:
         res, dfe = anova(rows, metric)
