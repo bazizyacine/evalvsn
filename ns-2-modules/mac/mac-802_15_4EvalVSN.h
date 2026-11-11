@@ -59,6 +59,7 @@ protected:
 class Mac802_15_4EvalVSN : public Mac802_15_4, public LinkMetricsStore
 {
 public:
+	bool rlTraceLine(int line, char *b, double now, int node);
 	// The base takes the MAC PIB the wpan implementation keeps as a global;
 	// the Tcl class passes the same one the original Mac/802_15_4 uses.
 	Mac802_15_4EvalVSN(MAC_PIB *mp);
@@ -150,6 +151,11 @@ protected:
 	int rl_access_;
 	double rlm_alpha_;
 	double rlm_epsilon_;
+	double rlm_eps_start_; // with RL_EPS_END_ above it, the exploration rate falls
+	double rlm_eps_end_;   // linearly from RL_MAC_EPSILON_ to 0 between these two instants
+	double rlmEps();
+	long rlm_cnt_[3][3][9]; // how often each action was selected, per state
+	long rlp_cnt_[6];       // and each power step, over the neighbours
 	double rlmQ_[3][3][9];
 	bool rlmPending_;         // a frame configured by the agent is in the MAC
 	bool rlmFailed_;          // its failure callback fired

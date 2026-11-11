@@ -76,8 +76,8 @@ if [[ -n "${ARG[knobs]:-}" && "${ARG[knobs]}" != "0" ]]; then
     key="${kv%%=*}"; value="${kv#*=}"
     case "$key" in
       ifqlen)   IFQLEN="$value" ;;
-      rule_power|hello_interval|rreq_timeout|class_cost|hello_queue|rl_access|rl_path|rl_congestion|rl_break|rl_discovery|rl_power|rule_discard|rl_discard|firewind|firedir|firealpha|firezone|firefail|firefailwin) KNOB_ARGS+=("-$key" "$value") ;;
-      *) die "unknown knob: $key (ifqlen, rule_power, hello_interval, rreq_timeout, class_cost, hello_queue, rl_access, rl_path, rl_congestion, rl_break, rl_discovery, rl_power, rule_discard, rl_discard, firewind, firedir, firealpha, firezone, firefail, firefailwin)" ;;
+      rule_power|hello_interval|rreq_timeout|class_cost|hello_queue|rl_access|rl_path|rl_congestion|rl_break|rl_discovery|rl_power|rule_discard|rl_discard|rl_alpha|rl_epsilon|rl_mac_alpha|rl_mac_epsilon|rl_eps_start|rl_eps_end|rl_break_eps|rl_trace|aomdv_derived|aomdv_tuned|jitter|camnode|sinknode|firefaildist|firewind|firedir|firealpha|firezone|firefail|firefailwin) KNOB_ARGS+=("-$key" "$value") ;;
+      *) die "unknown knob: $key (ifqlen, rule_power, hello_interval, rreq_timeout, class_cost, hello_queue, rl_access, rl_path, rl_congestion, rl_break, rl_discovery, rl_power, rule_discard, rl_discard, rl_alpha, rl_epsilon, rl_mac_alpha, rl_mac_epsilon, rl_eps_start, rl_eps_end, rl_break_eps, rl_trace, aomdv_derived, aomdv_tuned, jitter, camnode, sinknode, firefaildist, firewind, firedir, firealpha, firezone, firefail, firefailwin)" ;;
     esac
   done
 fi

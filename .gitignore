@@ -6,5 +6,11 @@ bin/
 build/
 __pycache__/
 
+# What the chain writes: the raw sets, and the tables and figures the tools
+# regenerate from article/src/data/
+experiments/sets/
+article/src/tables/
+article/src/figures/
+
 # Internal review reports, written by the working repository's audit.
 AUDIT-*.md

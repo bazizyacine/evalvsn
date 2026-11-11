@@ -302,7 +302,7 @@ if {![info exists val(rule_power)]} {
 if {![info exists val(hello_interval)]} {
     set val(hello_interval) ""                          ;# study knob: overrides the QPV HELLO_INTERVAL_ of radio-params.tcl
 }
-foreach knob {class_cost hello_queue rl_access rl_path rl_congestion rl_break rl_discovery rl_power rule_discard rl_discard} {
+foreach knob {class_cost hello_queue rl_access rl_path rl_congestion rl_break rl_discovery rl_power rule_discard rl_discard rl_alpha rl_epsilon rl_mac_alpha rl_mac_epsilon rl_eps_start rl_eps_end rl_break_eps rl_trace aomdv_derived aomdv_tuned jitter camnode sinknode firefaildist} {
     if {![info exists val($knob)]} { set val($knob) "" } ;# bench knobs: 0 turns off a chapter-4 mechanism of AOMDV_QPV, 1 turns on an agent or the early discard
 }
 if {![info exists val(rreq_timeout)]} {
@@ -350,6 +350,12 @@ if {$val(rp) == "AOMDV"} {
     set val(ifq)        Queue/DropTail/PriQueue       ;# Interface queue type
     set val(netif)      Phy/WirelessPhy/802_15_4      ;# Network interface type
     set val(mac)        Mac/802_15_4                  ;# MAC type
+    # A control of study 10, never the reference: AOMDV on the derived PHY
+    # and MAC, whose TX watchdog the release's MAC lacks.
+    if {$val(aomdv_derived) == 1} {
+        set val(netif)  Phy/WirelessPhy/802_15_4EvalVSN
+        set val(mac)    Mac/802_15_4EvalVSN
+    }
 } elseif {$val(rp) == "AOMDV_QPV"} {
     set val(ifq)        Queue/priqueueEvalVSN         ;# Interface queue type
     set val(netif)      Phy/WirelessPhy/802_15_4EvalVSN ;# Network interface type
@@ -518,6 +524,14 @@ if {$val(rp) == "AOMDV_QPV"} {
     }
 }
 
+# The tuned AOMDV control of study 10 (E1): the route queue of the cross-layer
+# stacks, one interface queue long, instead of the release's 64 packets.
+if {$val(rp) == "AOMDV" && $val(aomdv_tuned) == 1} {
+    for {set i 0} {$i < $val(nn)} {incr i} {
+        [$node_($i) set ragent_] set-rtq-max-len $val(ifqlen)
+    }
+}
+
 # Provide initial (X,Y,Z = 0) co-ordinates for mobilenodes
 if {$val(topo) == "Grid"} {
     for {set i 0} {$i < $gridspace} {incr i} { 
@@ -527,6 +541,15 @@ if {$val(topo) == "Grid"} {
                 $node_($ln) set X_ [expr $i * $val(dist)]
                 $node_($ln) set Y_ [expr $j * $val(dist)]
                 $node_($ln) set Z_ 0.0
+                # Study 10: an irregular deployment, the same for every run.
+                if {$val(jitter) != "" && $val(jitter) > 0} {
+                    if {![info exists jitRng]} {
+                        set jitRng [new RNG]
+                        $jitRng seed 20261106
+                    }
+                    $node_($ln) set X_ [expr {abs($i * $val(dist) + [$jitRng uniform [expr {-$val(jitter)}] $val(jitter)])}]
+                    $node_($ln) set Y_ [expr {abs($j * $val(dist) + [$jitRng uniform [expr {-$val(jitter)}] $val(jitter)])}]
+                }
             }
         }
     }
@@ -581,7 +604,7 @@ if {$val(fire)} {
     set fireLog [open fire-nodes.dat w]
     set fNetif [$node_(0) set netif_(0)]
     puts $fireLog "# Pt_ [$fNetif set Pt_] L_ [$fNetif set L_] freq_ [$fNetif set freq_] CSThresh_ [$fNetif set CSThresh_] RXThresh_ [$fNetif set RXThresh_] Gt_ [Antenna/OmniAntenna set Gt_] Gr_ [Antenna/OmniAntenna set Gr_]"
-    puts $fireLog "# prop $val(prop) plexp $val(plexp) pstd $val(pstd) dist0 1.0 firealpha $val(firealpha) firezone $val(firezone) firet0 $val(firet0) camera 0 sink $ln simt $val(simt)"
+    puts $fireLog "# prop $val(prop) plexp $val(plexp) pstd $val(pstd) dist0 1.0 firealpha $val(firealpha) firezone $val(firezone) firet0 $val(firet0) camera [expr {$val(camnode) != "" ? $val(camnode) : 0}] sink [expr {$val(sinknode) != "" ? $val(sinknode) : $ln}] simt $val(simt)"
     puts $fireLog "# id x y front death"
     for {set i 0} {$i < $val(nn)} {incr i} {
         # NAM's color change needs an initial color on record: nodes start
@@ -607,6 +630,8 @@ if {$val(fire)} {
             set u1 [$fireRng uniform 0 1]
             set u2 [$fireRng uniform 0 1]
             if {$u1 < $val(firefail)} {
+                # firefaildist 1: closer to the front, as the heating grows.
+                if {$val(firefaildist) == 1} { set u2 [expr {$u2 * $u2}] }
                 set tdie [expr {$ti - $val(firefailwin)*$u2}]
                 if {$tdie < $val(firet0)} { set tdie $val(firet0) }
             }
@@ -632,11 +657,14 @@ if {$val(fire)} {
 }
 
 # Define traffic model
-# 0 connecting to last node
+# 0 connecting to last node, unless -camnode and -sinknode say otherwise
+set camN 0
+if {$val(camnode) != ""} { set camN $val(camnode) }
+if {$val(sinknode) != ""} { set ln $val(sinknode) }
 set udp [new Agent/evalvsnUDP]
 $udp set packetSize_ 0
-$ns_ attach-agent $node_(0) $udp
-$node_(0) label "VBR"
+$ns_ attach-agent $node_($camN) $udp
+$node_($camN) label "VBR"
 set sink [new Agent/evalvsnSink]
 $sink set packetSize_ 0
 $ns_ attach-agent $node_($ln) $sink
@@ -672,7 +700,7 @@ if {$val(standby) != "0"} {
         exit 1
     }
     set sbUdp [new Agent/UDP]
-    $ns_ attach-agent $node_(0) $sbUdp
+    $ns_ attach-agent $node_($camN) $sbUdp
     set sbSink [new Agent/Null]
     $ns_ attach-agent $node_($ln) $sbSink
     $ns_ connect $sbUdp $sbSink

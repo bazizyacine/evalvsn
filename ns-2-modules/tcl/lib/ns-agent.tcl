@@ -197,6 +197,11 @@ Agent/AOMDV set sport_   0
 Agent/AOMDV set dport_   0
 Agent/AOMDV set aomdv_prim_alt_path_len_diff_ 1
 Agent/AOMDV set aomdv_max_paths_ 3
+# Routing timers, the release's values (study 10: the tuned AOMDV series of E1
+# gives AOMDV the cross-layer stacks' values through radio-params.tcl)
+Agent/AOMDV set HELLO_INTERVAL_ 1.0
+Agent/AOMDV set MAX_RREQ_TIMEOUT_ 1.0
+Agent/AOMDV set ACTIVE_ROUTE_TIMEOUT_ 10.0
 
 # AOMDV_QPV patch
 Agent/AOMDV_QPV set sport_   0

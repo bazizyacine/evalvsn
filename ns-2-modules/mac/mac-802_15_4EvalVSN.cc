@@ -75,6 +75,12 @@ Mac802_15_4EvalVSN::Mac802_15_4EvalVSN(MAC_PIB *mp) : Mac802_15_4(mp), max_prio_
 	bind("RL_ACCESS_", &rl_access_);
 	bind("RL_MAC_ALPHA_", &rlm_alpha_);
 	bind("RL_MAC_EPSILON_", &rlm_epsilon_);
+	rlm_eps_start_ = 0.0;
+	bind("RL_EPS_START_", &rlm_eps_start_);
+	rlm_eps_end_ = 0.0;
+	bind("RL_EPS_END_", &rlm_eps_end_);
+	memset(rlm_cnt_, 0, sizeof(rlm_cnt_));
+	memset(rlp_cnt_, 0, sizeof(rlp_cnt_));
 	bind("RL_POWER_", &rl_power_);
 	bind("RL_POWER_KAPPA_", &rlp_kappa_);
 	wd_last_frfunc_[0] = '\0';
@@ -150,8 +156,9 @@ void Mac802_15_4EvalVSN::recv(Packet *p, Handler *h)
 				for (int k = 1; k < 9; k++)
 					if (rlmQ_[c][b][k] > rlmQ_[c][b][a])
 						a = k;
-				if (c > 0 && Random::uniform() < rlm_epsilon_)
+				if (c > 0 && Random::uniform() < rlmEps())
 					a = (int)(Random::uniform() * 9) % 9;
+				rlm_cnt_[c][b][a]++;
 				mpib.macMinBE = BE[a / 3];
 				mpib.macMaxCSMABackoffs = NB[a % 3];
 			}
@@ -183,8 +190,9 @@ void Mac802_15_4EvalVSN::recv(Packet *p, Handler *h)
 					for (int k = 1; k < allowed; k++)
 						if (q[k] > q[s])
 							s = k;
-					if (c > 0 && allowed > 1 && Random::uniform() < rlm_epsilon_)
+					if (c > 0 && allowed > 1 && Random::uniform() < rlmEps())
 						s = (int)(Random::uniform() * allowed) % allowed;
+					rlp_cnt_[s]++;
 					ephy->setExternalStep(da, kRlpSteps[s]);
 				}
 			}
@@ -212,6 +220,42 @@ void Mac802_15_4EvalVSN::recv(Packet *p, Handler *h)
 void MacRlmDone::handle(Event *)
 {
 	mac_->rlmFrameDone();
+}
+
+// The exploration rate now, as AOMDV_QPV::rlEps().
+double Mac802_15_4EvalVSN::rlmEps()
+{
+	if (rlm_eps_end_ <= rlm_eps_start_)
+		return rlm_epsilon_;
+	double t = Scheduler::instance().clock();
+	if (t <= rlm_eps_start_)
+		return rlm_epsilon_;
+	if (t >= rlm_eps_end_)
+		return 0.0;
+	return rlm_epsilon_ * (rlm_eps_end_ - t) / (rlm_eps_end_ - rlm_eps_start_);
+}
+
+// One line of the agents' counters for the routing trace: 0 to 2 the channel
+// access per class, 3 the power steps. False when that agent is off.
+bool Mac802_15_4EvalVSN::rlTraceLine(int line, char *b, double now, int node)
+{
+	int n;
+	if (line < 3)
+	{
+		if (!rl_access_)
+			return false;
+		n = sprintf(b, "Q %.3f _%d_ A%d", now, node, line);
+		for (int k = 0; k < 3; k++)
+			for (int a = 0; a < 9; a++)
+				n += sprintf(b + n, " %ld:%.3f", rlm_cnt_[line][k][a], rlmQ_[line][k][a]);
+		return true;
+	}
+	if (!rl_power_)
+		return false;
+	n = sprintf(b, "Q %.3f _%d_ T", now, node);
+	for (int s = 0; s < kRlpStepsNb; s++)
+		n += sprintf(b + n, " %ld", rlp_cnt_[s]);
+	return true;
 }
 
 // The frame failed: noted for the reward, then the routing's own callback,

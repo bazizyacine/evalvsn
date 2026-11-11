@@ -428,7 +428,22 @@ public:
         int class_cost_;    // first link priced for the class of the packet, else the discovered cost
         int hello_queue_;   // next hop's queue learnt from its HELLOs, else read in memory
         double rl_alpha_;   // learning rate of the routing agents
-        double rl_epsilon_; // their exploration rate, non-critical packets only
+        double rl_epsilon_; // their exploration rate; path and congestion skip critical packets
+        double rl_eps_start_; // with RL_EPS_END_ above it, the exploration rate falls
+        double rl_eps_end_;   // linearly from RL_EPSILON_ to 0 between these two instants
+        double rl_break_eps_; // RL_BREAK_EPSILON_: the link-break agent's own exploration rate; below 0 it follows rlEps()
+        double rlEps();
+        int rl_trace_;      // 1: each node writes its agents' counters to the trace every 20 s
+        double rl_trace_next_;
+        void rlTraceDump();
+        long rlp_cnt_[3][5];   // how often each action was selected, per state
+        long rlc_cnt_[3][4];
+        long rlb_cnt_[2][4];
+        long rld_cnt_[2][3];
+        long rle_cnt_[5];
+        long rlb_decl_cnt_[4]; // declarations per failure count
+        long rlb_false_cnt_;   // declared neighbours proved alive within 15 s
+        long rlb_silent_cnt_;  // declared neighbours silent for 15 s
 
         /*
          * The learning agents that replace the chapter-4 rules (decision

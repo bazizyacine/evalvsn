@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# encode_only.sh - stage E1 of the comparative study: compression alone.
+# encode_only.sh - the encoding stage alone: compression without the network.
 #
 # Runs EvalVSN's encoding pass and its lossless decoding on one video for
 # one or more encoder files, without ns-2, and prints per point what the

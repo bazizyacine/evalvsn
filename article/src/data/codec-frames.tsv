@@ -1,0 +1,91 @@
+# compiled by analyse_codec.py from the encodings of experiments/sets and evalvsn/videos/fire_qcif.avi
+quantity	key	value	source
+check	reproduction	36 of 36 frames, bytes and packets identical to the traces	the three encodings (set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13, set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13, set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13)
+bytes	3-9 M frames	3	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-frame.dat
+bytes	3-9 M mean bytes	31460	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-frame.dat
+bytes	3-9 M mean packets	434.3	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-priority.dat
+bytes	3-9 D frames	9	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-frame.dat
+bytes	3-9 D mean bytes	35780	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-frame.dat
+bytes	3-9 D mean packets	492.8	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-priority.dat
+bytes	3-9 packets	5738	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-priority.dat
+bytes	3-9 bytes per packet	72.57	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-priority.dat
+bytes	6-6 M frames	6	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-frame.dat
+bytes	6-6 M mean bytes	31771	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-frame.dat
+bytes	6-6 M mean packets	438.2	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-priority.dat
+bytes	6-6 D frames	6	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-frame.dat
+bytes	6-6 D mean bytes	35288	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-frame.dat
+bytes	6-6 D mean packets	485.8	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-priority.dat
+bytes	6-6 packets	5544	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-priority.dat
+bytes	6-6 bytes per packet	72.58	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-priority.dat
+bytes	9-3 M frames	9	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-frame.dat
+bytes	9-3 M mean bytes	31487	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-frame.dat
+bytes	9-3 M mean packets	433.4	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-priority.dat
+bytes	9-3 D frames	3	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-frame.dat
+bytes	9-3 D mean bytes	35205	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-frame.dat
+bytes	9-3 D mean packets	483.7	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-priority.dat
+bytes	9-3 packets	5352	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-priority.dat
+bytes	9-3 bytes per packet	72.68	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-priority.dat
+bytes	raw image	25344	one byte per pixel of the QCIF image
+paired	comparisons	18	the three encodings (set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13, set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13, set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), st-frame.dat
+paired	D over M	7.9 to 22.6 %	the three encodings (set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13, set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13, set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), st-frame.dat
+corr	DC	0.88	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11
+energy	DC	0.24	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11, residual over image (image - 128)
+corr	AC 1-9	0.38	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11
+energy	AC 1-9	1.27	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11, residual over image (image - 128)
+corr	AC 10-63	0.00	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11
+energy	AC 10-63	2.01	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11, residual over image (image - 128)
+energy	AC per pair	1.12 to 1.81	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11
+energy	AC pairs above 1	15 of 15	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11
+energy	AC positions above the image per pair	58 to 63 of 63	15 pairs (D frame, M reference) of the three GOPs: 2-1 3-1 4-1 4-3 6-5 7-5 7-6 8-5 8-7 9-5 9-8 10-5 10-9 11-10 12-11
+nonzero	M AC	68.8 to 85.0 %	18 M frames of the three GOPs, qualityCoef 0.01
+bits	M values per coefficient	6.22 to 7.23	18 M frames of the three GOPs, qualityCoef 0.01
+bits	M runs per coefficient	2.68 to 2.87	18 M frames of the three GOPs, qualityCoef 0.01
+nonzero	D AC	83.6 to 90.1 %	18 D frames of the three GOPs, qualityCoef 0.01
+bits	D values per coefficient	7.71 to 8.15	18 D frames of the three GOPs, qualityCoef 0.01
+bits	D runs per coefficient	2.87 to 2.92	18 D frames of the three GOPs, qualityCoef 0.01
+bits	quantisation step	0.10 to 1.21	JPEG luminance table times qualityCoef 0.01 (quantification.cc:5, 11)
+quality	0.005 M mean bytes	37117	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.005
+quality	0.005 D mean bytes	41064	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.005
+quality	0.005 D over M	1.106	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.005
+quality	0.01 M mean bytes	31487	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.01
+quality	0.01 D mean bytes	35205	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.01
+quality	0.01 D over M	1.118	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.01
+quality	0.02 M mean bytes	25829	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.02
+quality	0.02 D mean bytes	29544	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.02
+quality	0.02 D over M	1.144	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.02
+quality	0.05 M mean bytes	19301	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.05
+quality	0.05 D mean bytes	22217	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.05
+quality	0.05 D over M	1.151	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.05
+quality	0.1 M mean bytes	15406	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.1
+quality	0.1 D mean bytes	17519	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.1
+quality	0.1 D over M	1.137	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.1
+quality	0.2 M mean bytes	11295	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.2
+quality	0.2 D mean bytes	12879	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.2
+quality	0.2 D over M	1.140	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.2
+quality	0.5 M mean bytes	6914	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.5
+quality	0.5 D mean bytes	7878	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.5
+quality	0.5 D over M	1.139	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 0.5
+quality	1 M mean bytes	4601	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 1
+quality	1 D mean bytes	5155	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 1
+quality	1 D over M	1.120	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 1
+quality	2 M mean bytes	2911	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 2
+quality	2 D mean bytes	3224	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 2
+quality	2 D over M	1.107	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 2
+quality	4 M mean bytes	1715	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 4
+quality	4 D mean bytes	1813	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 4
+quality	4 D over M	1.057	GOP 9-3 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13), qualityCoef 4
+quality	D over M, sweep	1.057 to 1.151	GOP 9-3, qualityCoef 0.005 to 4
+check	encoder sweep	10 of 10 qualities, type and bytes of the 12 frames identical to evalvsn/bin/evalvsn	evalvsn -mpl 74 on evalvsn/videos/fire_qcif.avi
+source	images	301	evalvsn/videos/fire_qcif.avi, 301 images at 25 images/s; video.cc:60
+source	step	26 images	evalvsn/videos/fire_qcif.avi, 301 images at 25 images/s; video.cc:60; each coded image equals source image 1 + 26 (k - 1) (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	interval	1.04 s	evalvsn/videos/fire_qcif.avi, 301 images at 25 images/s; video.cc:60
+source	AC 10-63 corr, lag 1	0.68	source images 27 and 28 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 energy, lag 1	0.62	source images 27 and 28 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 corr, lag 2	0.47	source images 27 and 29 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 energy, lag 2	1.04	source images 27 and 29 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 corr, lag 5	0.08	source images 27 and 32 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 energy, lag 5	1.79	source images 27 and 32 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 corr, lag 13	0.00	source images 27 and 40 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 energy, lag 13	1.90	source images 27 and 40 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 corr, lag 26	0.01	source images 27 and 53 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)
+source	AC 10-63 energy, lag 26	1.83	source images 27 and 53 (set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/allImages)

@@ -52,17 +52,24 @@ $val(netif) set L_          1.0         ;# no additional system loss
 # The CSMA/CA constants of Mac/802_15_4 are the standard's, compiled in
 # wpan/p802_15_4const.h and left untouched: the MAC needs no line here.
 
+# The routing timers of the cross-layer stacks, read by AOMDV_QPV below and by
+# the tuned AOMDV control of study 10 (E1, decision d69), so that each value
+# is written once. Per-second hellos are the dimensioning of a fast radio: a
+# hundred nodes of them eat a 250 kbit/s channel in collisions before any
+# video is sent, where real sensor stacks beacon in tens of seconds. Five is
+# conservative on that scale (R49). A 1 s cap on the RREQ backoff makes a
+# hundred nodes rebroadcast a rediscovery every second - the measured
+# ~63,000-drop storm; 10 s is RFC 3561's own value. Routes outlive the
+# capture period (30 s at the base point, 9 s under the fires of study 09),
+# or every frame would pay the discovery backoff again.
+set helloInterval_      5.0
+set maxRreqTimeout_     10.0
+set activeRouteTimeout_ 35.0
+
 if {$val(rp) == "AOMDV_QPV"} {
-    # Per-second hellos are the dimensioning of a fast radio: a hundred
-    # nodes of them eat a 250 kbit/s channel in collisions before any video
-    # is sent, where real sensor stacks beacon in tens of seconds. Five is
-    # conservative on that scale (R49, measured below).
-    Agent/AOMDV_QPV set HELLO_INTERVAL_  5.0
+    Agent/AOMDV_QPV set HELLO_INTERVAL_  $helloInterval_
     if {$val(hello_interval) != ""}     { Agent/AOMDV_QPV set HELLO_INTERVAL_ $val(hello_interval) } ;# study knob
-    # A 1 s cap on the RREQ backoff makes a hundred nodes rebroadcast a
-    # rediscovery every second - the measured ~63,000-drop storm.
-    # RFC 3561's own value.
-    Agent/AOMDV_QPV set MAX_RREQ_TIMEOUT_ 10.0
+    Agent/AOMDV_QPV set MAX_RREQ_TIMEOUT_ $maxRreqTimeout_
     if {$val(rreq_timeout) != ""}       { Agent/AOMDV_QPV set MAX_RREQ_TIMEOUT_ $val(rreq_timeout) } ;# study knob
     # Ablation knobs of the mechanisms aligned on chapter 4: the per-class
     # link cost and the HELLO queue field (default on).
@@ -78,17 +85,43 @@ if {$val(rp) == "AOMDV_QPV"} {
     if {$val(rl_break) != ""}           { Agent/AOMDV_QPV set RL_BREAK_ $val(rl_break) }
     if {$val(rl_discovery) != ""}       { Agent/AOMDV_QPV set RL_DISCOVERY_ $val(rl_discovery) }
     if {$val(rl_power) != ""}           { Mac/802_15_4EvalVSN set RL_POWER_ $val(rl_power) }
+    # The exploration schedule and the agents' trace (study 10).
+    if {$val(rl_eps_start) != ""}       { Agent/AOMDV_QPV set RL_EPS_START_ $val(rl_eps_start); Mac/802_15_4EvalVSN set RL_EPS_START_ $val(rl_eps_start) }
+    if {$val(rl_eps_end) != ""}         { Agent/AOMDV_QPV set RL_EPS_END_ $val(rl_eps_end); Mac/802_15_4EvalVSN set RL_EPS_END_ $val(rl_eps_end) }
+    if {$val(rl_break_eps) != ""}       { Agent/AOMDV_QPV set RL_BREAK_EPSILON_ $val(rl_break_eps) }
+    if {$val(rl_trace) != ""}           { Agent/AOMDV_QPV set RL_TRACE_ $val(rl_trace) }
+    # The agents' learning and exploration rates; all four at 0 freeze every
+    # agent on its initial choice (the frozen-policy control of study 10).
+    if {$val(rl_alpha) != ""}           { Agent/AOMDV_QPV set RL_ALPHA_ $val(rl_alpha) }
+    if {$val(rl_epsilon) != ""}         { Agent/AOMDV_QPV set RL_EPSILON_ $val(rl_epsilon) }
+    if {$val(rl_mac_alpha) != ""}       { Mac/802_15_4EvalVSN set RL_MAC_ALPHA_ $val(rl_mac_alpha) }
+    if {$val(rl_mac_epsilon) != ""}     { Mac/802_15_4EvalVSN set RL_MAC_EPSILON_ $val(rl_mac_epsilon) }
     # Early discard by priority (d27): the rule (rule_discard) or its learning agent (rl_discard).
     if {$val(rule_discard) != ""}       { Agent/AOMDV_QPV set DISCARD_RULE_ $val(rule_discard) }
     if {$val(rl_discard) != ""}         { Agent/AOMDV_QPV set RL_DISCARD_ $val(rl_discard) }
-    # Routes outlive the capture period (30 s at the base point, 9 s
-    # under the fires of study 09), or every frame would pay the discovery
-    # backoff again.
-    Agent/AOMDV_QPV set ACTIVE_ROUTE_TIMEOUT_ 35.0
+    Agent/AOMDV_QPV set ACTIVE_ROUTE_TIMEOUT_ $activeRouteTimeout_
     $val(netif) set noise_floor_         7.94328e-15 ;# -111 dBm: thermal noise kTB over the 2 MHz channel
     $val(netif) set PowerMonitorThresh_  2.64776e-15 ;# noise_floor_ / 3, the monitor's ratio
     $val(netif) set SINRThresh_          10.0        ;# 10 dB: the -101 dBm sensitivity over the -111 dBm floor
     $val(netif) set MAX_PRIO_NB          $maxPrioNb_ ;# the PHY's own copy for its score (R58)
     $val(netif) set TxPowerAdapt_        $val(rule_power) ;# closed-loop power per neighbour on the chip's TX_PWR steps; -rule_power, default 1 (4 Oct 2026)
     $val(mac)   set MAX_PRIO_NB          $maxPrioNb_ ;# the cross-layer MAC holds the count (R58)
+}
+# The tuned AOMDV control of study 10 (E1, decision d69), never the reference:
+# the cross-layer stacks' routing timers (the route queue's length is set per
+# agent in evalvsn.tcl). The study knobs hello_interval and rreq_timeout
+# stay QPV-only.
+if {$val(rp) == "AOMDV" && $val(aomdv_tuned) == 1} {
+    Agent/AOMDV set HELLO_INTERVAL_       $helloInterval_
+    Agent/AOMDV set MAX_RREQ_TIMEOUT_     $maxRreqTimeout_
+    Agent/AOMDV set ACTIVE_ROUTE_TIMEOUT_ $activeRouteTimeout_
+}
+# The AOMDV control of study 10: the derived PHY's constants, no power loop.
+if {$val(rp) == "AOMDV" && $val(aomdv_derived) == 1} {
+    $val(netif) set noise_floor_         7.94328e-15
+    $val(netif) set PowerMonitorThresh_  2.64776e-15
+    $val(netif) set SINRThresh_          10.0
+    $val(netif) set MAX_PRIO_NB          $maxPrioNb_
+    $val(netif) set TxPowerAdapt_        0
+    $val(mac)   set MAX_PRIO_NB          $maxPrioNb_
 }

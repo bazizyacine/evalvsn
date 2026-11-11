@@ -3,9 +3,12 @@
 the cell means, the paired t-tests between stacks in each cell (fire x split;
 the four stacks of a fire share their seeds, so each test pairs the same
 simulations), Holm-corrected within each comparison over the nine cells, the
-same differences pooled over the 180 pairs (mean, 95 % confidence interval,
-share of positive pairs), and the three-way ANOVA stack x fire x split on a metric (effect coding,
-sequential sums of squares; the design is balanced).
+same differences per seed (each of the 60 seeds averaged over its three splits:
+mean, 95 % confidence interval; the share of positive pairs is over the 180
+pairs), and the repeated-measures ANOVA of a metric: stack and split vary within
+a seed, fire between seeds, and each term is tested against its own error
+stratum (the design is balanced). anova() keeps the ANOVA that treats the
+simulations as independent, for comparison.
 
 Usage: analyse_comparative.py [metric]   (default psnr; also loss, m1loss...)
 """
@@ -50,9 +53,51 @@ def pooled(d):
     n = len(d)
     m = sum(d) / n
     sd = math.sqrt(sum((y - m) ** 2 for y in d) / (n - 1))
-    h = stats.t_quantile(0.975, n - 1) * sd / math.sqrt(n)
+    h = stats.t_quantile(0.95, n - 1) * sd / math.sqrt(n)
     p = stats.t_sf2(m / (sd / math.sqrt(n)), n - 1) if sd else 1.0
     return m, m - h, m + h, p, sum(y > 0 for y in d) / n, n
+
+
+def anova_rm(rows, metric):
+    """Split-plot ANOVA: subjects are the seeds (fire, realisation), fire is
+    between subjects, stack and split are within. Returns (term, df, error df,
+    F, p, partial eta2) for each term; partial eta2 = SS / (SS + SS of its
+    error stratum)."""
+    data = [(r['fire'], r['real'], r['stack'], r['split'], float(r[metric])) for r in rows]
+    y = np.array([d[4] for d in data])
+    gm = y.mean()
+
+    def ss(*cols):
+        groups = {}
+        for d in data:
+            groups.setdefault(tuple(d[c] for c in cols), []).append(d[4])
+        return sum(len(v) * (sum(v) / len(v) - gm) ** 2 for v in groups.values())
+
+    F_, R_, S_, G_ = 0, 1, 2, 3
+    a = len({d[F_] for d in data})
+    b = len({d[S_] for d in data})
+    c = len({d[G_] for d in data})
+    n = len({(d[F_], d[R_]) for d in data})
+    fire, stack, split = ss(F_), ss(S_), ss(G_)
+    subj = ss(F_, R_)
+    fs = ss(F_, S_) - fire - stack
+    fg = ss(F_, G_) - fire - split
+    sg = ss(S_, G_) - stack - split
+    fsg = ss(F_, S_, G_) - fire - stack - split - fs - fg - sg
+    e0, d0 = subj - fire, n - a
+    e1, d1 = ss(F_, R_, S_) - subj - stack - fs, d0 * (b - 1)
+    e2, d2 = ss(F_, R_, G_) - subj - split - fg, d0 * (c - 1)
+    e3 = float(((y - gm) ** 2).sum()) - subj - stack - split - fs - fg - sg - fsg - e1 - e2
+    d3 = d0 * (b - 1) * (c - 1)
+    terms = (('stack', stack, b - 1, e1, d1), ('fire', fire, a - 1, e0, d0), ('split', split, c - 1, e2, d2),
+             ('stack x fire', fs, (a - 1) * (b - 1), e1, d1), ('stack x split', sg, (b - 1) * (c - 1), e3, d3),
+             ('fire x split', fg, (a - 1) * (c - 1), e2, d2),
+             ('stack x fire x split', fsg, (a - 1) * (b - 1) * (c - 1), e3, d3))
+    out = []
+    for name, s, df, e, de in terms:
+        f = (s / df) / (e / de)
+        out.append((name, df, de, f, stats.f_sf(f, df, de), s / (s + e)))
+    return out
 
 
 def anova(rows, metric):
@@ -106,17 +151,23 @@ def main():
         print('  %s - %s' % (a, b))
         for (key, m, p, n), (_, _, _, pa) in zip(tests, adj):
             print('    %s %s  %+7.2f  p = %.4f  p_Holm = %.4f  (n = %d)' % (key[0], key[1], m, p, pa, n))
-        d = [cell[(f, s, a)][k] - cell[(f, s, b)][k] for (f, s), _, _, _ in tests
-             for k in sorted(set(cell[(f, s, a)]) & set(cell[(f, s, b)]))]
-        m, lo, hi, p, pos, n = pooled(d)
-        print('    pooled   %+7.2f  95%% CI [%+.2f, %+.2f]  p = %.3g  positive %.1f%%  (n = %d)'
-              % (m, lo, hi, p, 100 * pos, n))
+        seeds = {}
+        for (f, s), _, _, _ in tests:
+            for k in sorted(set(cell[(f, s, a)]) & set(cell[(f, s, b)])):
+                seeds.setdefault((f, k), []).append(cell[(f, s, a)][k] - cell[(f, s, b)][k])
+        pairs = [x for v in seeds.values() for x in v]
+        m, lo, hi, p, _, n = pooled([sum(v) / len(v) for v in seeds.values()])
+        print('    per seed %+7.2f  95%% CI [%+.2f, %+.2f]  p = %.3g  (n = %d seeds); positive in %.1f%% of the %d pairs'
+              % (m, lo, hi, p, n, 100 * sum(x > 0 for x in pairs) / len(pairs), len(pairs)))
     complete = all((f, s, st) in cell for f in fires for s in splits for st in STACKS)
     if complete and len(fires) > 1 and len(splits) > 1:
         res, dfe = anova(rows, metric)
-        print('\nANOVA %s (residual df %d)' % (metric, dfe))
+        print('\nANOVA %s, simulations taken as independent (residual df %d)' % (metric, dfe))
         for t, ss, df, F, p, eta in res:
             print('  %-22s df %2d  F %9.2f  p %.4g  partial eta2 %.3f' % (t, df, F, p, eta))
+        print('\nrepeated-measures ANOVA %s, the three cross-layer stacks' % metric)
+        for t, df, de, F, p, eta in anova_rm([r for r in rows if r['stack'] != 'aomdv'], metric):
+            print('  %-22s df %2d, %3d  F %9.2f  p %.4g  partial eta2 %.3f' % (t, df, de, F, p, eta))
     else:
         print('\nANOVA waits for the complete design')
 

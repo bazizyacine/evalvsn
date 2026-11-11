@@ -1,0 +1,130 @@
+# compiled by methode_mesures.py from experiments/sets and src/data/comparative.tsv
+kind	key	value	source
+load	p7 F1 simt	145	set_AOMDV_QPV_GC-PN-0p03-13_p7-n100-d40-fire-rules-s10
+load	p7 F1 hors-service	4.3	set_AOMDV_QPV_GC-PN-0p03-13_p7-n100-d40-fire-rules-s10, 20 runs
+load	p7 F2 simt	145	set_AOMDV_QPV_GC-PN-0p03-13_p7-n100-d40-fire2-rules-s10
+load	p7 F2 hors-service	3.4	set_AOMDV_QPV_GC-PN-0p03-13_p7-n100-d40-fire2-rules-s10, 20 runs
+load	p7 F3 simt	145	set_AOMDV_QPV_GC-PN-0p03-13_p7-n100-d40-fire3-rules-s10
+load	p7 F3 hors-service	3.8	set_AOMDV_QPV_GC-PN-0p03-13_p7-n100-d40-fire3-rules-s10, 20 runs
+load	p9 F1 simt	168	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules
+load	p9 F1 hors-service	6.0	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules, 20 runs
+load	p9 F2 simt	168	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire2-rules
+load	p9 F2 hors-service	4.5	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire2-rules, 20 runs
+load	p9 F3 simt	168	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire3-rules
+load	p9 F3 hors-service	5.6	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire3-rules, 20 runs
+load	p12 F1 simt	204	set_AOMDV_QPV_GC-PN-0p03-13_p12-n100-d40-fire-rules-s10
+load	p12 F1 hors-service	10.4	set_AOMDV_QPV_GC-PN-0p03-13_p12-n100-d40-fire-rules-s10, 20 runs
+load	p12 F2 simt	204	set_AOMDV_QPV_GC-PN-0p03-13_p12-n100-d40-fire2-rules-s10
+load	p12 F2 hors-service	7.4	set_AOMDV_QPV_GC-PN-0p03-13_p12-n100-d40-fire2-rules-s10, 20 runs
+load	p12 F3 simt	204	set_AOMDV_QPV_GC-PN-0p03-13_p12-n100-d40-fire3-rules-s10
+load	p12 F3 hors-service	8.4	set_AOMDV_QPV_GC-PN-0p03-13_p12-n100-d40-fire3-rules-s10, 20 runs
+load	p18 F1 simt	274	set_AOMDV_QPV_GC-PN-0p03-13_p18-n100-d40-fire-rules-s10
+load	p18 F1 hors-service	13.0	set_AOMDV_QPV_GC-PN-0p03-13_p18-n100-d40-fire-rules-s10, 20 runs
+load	p18 F2 simt	274	set_AOMDV_QPV_GC-PN-0p03-13_p18-n100-d40-fire2-rules-s10
+load	p18 F2 hors-service	11.0	set_AOMDV_QPV_GC-PN-0p03-13_p18-n100-d40-fire2-rules-s10, 20 runs
+load	p18 F3 simt	274	set_AOMDV_QPV_GC-PN-0p03-13_p18-n100-d40-fire3-rules-s10
+load	p18 F3 hors-service	9.5	set_AOMDV_QPV_GC-PN-0p03-13_p18-n100-d40-fire3-rules-s10, 20 runs
+load	p30 F1 simt	415	set_AOMDV_QPV_GC-PN-0p03-13_p30-n100-d40-fire-rules-s10
+load	p30 F1 hors-service	17.0	set_AOMDV_QPV_GC-PN-0p03-13_p30-n100-d40-fire-rules-s10, 20 runs
+load	p30 F2 simt	415	set_AOMDV_QPV_GC-PN-0p03-13_p30-n100-d40-fire2-rules-s10
+load	p30 F2 hors-service	15.7	set_AOMDV_QPV_GC-PN-0p03-13_p30-n100-d40-fire2-rules-s10, 20 runs
+load	p30 F3 simt	415	set_AOMDV_QPV_GC-PN-0p03-13_p30-n100-d40-fire3-rules-s10
+load	p30 F3 hors-service	13.6	set_AOMDV_QPV_GC-PN-0p03-13_p30-n100-d40-fire3-rules-s10, 20 runs
+volume	6M6D p9 F1 simt	169	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules
+volume	6M6D p9 F1 hors-service	6.0	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules, 20 runs
+volume	6M6D p9 F2 simt	169	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire2-rules
+volume	6M6D p9 F2 hors-service	4.5	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire2-rules, 20 runs
+volume	6M6D p9 F3 simt	169	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire3-rules
+volume	6M6D p9 F3 hors-service	5.6	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire3-rules, 20 runs
+volume	6M6D p9r32 F1 simt	173	set_AOMDV_QPV_GC-PN-0p02525-13_p9r32-n100-d40-fire-rules-s10
+volume	6M6D p9r32 F1 hors-service	6.2	set_AOMDV_QPV_GC-PN-0p02525-13_p9r32-n100-d40-fire-rules-s10, 20 runs
+volume	6M6D p9r32 F2 simt	173	set_AOMDV_QPV_GC-PN-0p02525-13_p9r32-n100-d40-fire2-rules-s10
+volume	6M6D p9r32 F2 hors-service	6.0	set_AOMDV_QPV_GC-PN-0p02525-13_p9r32-n100-d40-fire2-rules-s10, 20 runs
+volume	6M6D p9r32 F3 simt	173	set_AOMDV_QPV_GC-PN-0p02525-13_p9r32-n100-d40-fire3-rules-s10
+volume	6M6D p9r32 F3 hors-service	5.8	set_AOMDV_QPV_GC-PN-0p02525-13_p9r32-n100-d40-fire3-rules-s10, 20 runs
+volume	3M9D p9 F1 simt	169	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules
+volume	3M9D p9 F1 hors-service	6.0	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules, 20 runs
+volume	3M9D p9 F2 simt	169	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire2-rules
+volume	3M9D p9 F2 hors-service	4.5	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire2-rules, 20 runs
+volume	3M9D p9 F3 simt	169	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire3-rules
+volume	3M9D p9 F3 hors-service	5.6	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire3-rules, 20 runs
+volume	3M9D p9r65 F1 simt	177	set_AOMDV_QPV_GC-PN-0p01597-13_p9r65-n100-d40-fire-rules-s10
+volume	3M9D p9r65 F1 hors-service	6.5	set_AOMDV_QPV_GC-PN-0p01597-13_p9r65-n100-d40-fire-rules-s10, 20 runs
+volume	3M9D p9r65 F2 simt	177	set_AOMDV_QPV_GC-PN-0p01597-13_p9r65-n100-d40-fire2-rules-s10
+volume	3M9D p9r65 F2 hors-service	6.2	set_AOMDV_QPV_GC-PN-0p01597-13_p9r65-n100-d40-fire2-rules-s10, 20 runs
+volume	3M9D p9r65 F3 simt	177	set_AOMDV_QPV_GC-PN-0p01597-13_p9r65-n100-d40-fire3-rules-s10
+volume	3M9D p9r65 F3 hors-service	5.9	set_AOMDV_QPV_GC-PN-0p01597-13_p9r65-n100-d40-fire3-rules-s10, 20 runs
+worst	F1 3-9	connected to 169 s	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/r01/fire_qcif-0.01597-13/fire-nodes.dat
+worst	F1 6-6	connected to 169 s	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/r01/fire_qcif-0.02525-13/fire-nodes.dat
+worst	F1 9-3	connected to 168 s	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/r01/fire_qcif-0.03-13/fire-nodes.dat
+worst	F2 3-9	connected to 169 s	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire2-rules/r01/fire_qcif-0.01597-13/fire-nodes.dat
+worst	F2 6-6	connected to 169 s	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire2-rules/r01/fire_qcif-0.02525-13/fire-nodes.dat
+worst	F2 9-3	connected to 168 s	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire2-rules/r01/fire_qcif-0.03-13/fire-nodes.dat
+worst	F3 3-9	connected to 169 s	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire3-rules/r01/fire_qcif-0.01597-13/fire-nodes.dat
+worst	F3 6-6	connected to 169 s	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire3-rules/r01/fire_qcif-0.02525-13/fire-nodes.dat
+worst	F3 9-3	connected to 168 s	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire3-rules/r01/fire_qcif-0.03-13/fire-nodes.dat
+corr	720 m1loss	-0.89	comparative.tsv
+corr	720 m1to3loss	-0.81	comparative.tsv
+corr	720 mloss	-0.77	comparative.tsv
+corr	720 dloss	-0.61	comparative.tsv
+corr	720 loss	-0.76	comparative.tsv
+corr	540 cross-layer m1loss	-0.88	comparative.tsv
+corr	540 cross-layer m1to3loss	-0.67	comparative.tsv
+corr	540 cross-layer mloss	-0.58	comparative.tsv
+corr	540 cross-layer dloss	-0.29	comparative.tsv
+corr	540 cross-layer loss	-0.63	comparative.tsv
+calib	rules 3-9 F1 loss	60.91	comparative.tsv
+calib	rules 3-9 F2 loss	62.74	comparative.tsv
+calib	rules 3-9 F3 loss	63.09	comparative.tsv
+calib	aomdv 3-9 m1loss	68.9	comparative.tsv
+calib	aomdv 3-9 mloss	72.5	comparative.tsv
+calib	aomdv 3-9 dloss	76.2	comparative.tsv
+calib	rules 6-6 F1 loss	58.23	comparative.tsv
+calib	rules 6-6 F2 loss	59.75	comparative.tsv
+calib	rules 6-6 F3 loss	59.71	comparative.tsv
+calib	aomdv 6-6 m1loss	67.5	comparative.tsv
+calib	aomdv 6-6 mloss	74.6	comparative.tsv
+calib	aomdv 6-6 dloss	77.5	comparative.tsv
+calib	rules 9-3 F1 loss	57.26	comparative.tsv
+calib	rules 9-3 F2 loss	54.14	comparative.tsv
+calib	rules 9-3 F3 loss	57.27	comparative.tsv
+calib	aomdv 9-3 m1loss	66.6	comparative.tsv
+calib	aomdv 9-3 mloss	73.9	comparative.tsv
+calib	aomdv 9-3 dloss	85.8	comparative.tsv
+frames	3-9 M	3 frames, 31460 bytes	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-frame.dat
+frames	3-9 D	9 frames, 35780 bytes	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-frame.dat
+frames	3-9 refPSNR	59.6 to 67.8 dB	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-frame.dat
+frames	6-6 M	6 frames, 31771 bytes	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-frame.dat
+frames	6-6 D	6 frames, 35288 bytes	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-frame.dat
+frames	6-6 refPSNR	59.6 to 67.8 dB	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-frame.dat
+frames	9-3 M	9 frames, 31487 bytes	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-frame.dat
+frames	9-3 D	3 frames, 35205 bytes	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-frame.dat
+frames	9-3 refPSNR	59.6 to 68.3 dB	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-frame.dat
+packets	3-9	5738 packets	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.01597-13/st-priority.dat
+packets	6-6	5544 packets	set_AOMDV_QPV_GC-PN-0p02525-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.02525-13/st-priority.dat
+packets	9-3	5352 packets	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules/encoding/fire_qcif-0.03-13/st-priority.dat
+calendar	E0	60 seeds over 720 runs, at most 1 schedule(s) per seed	set_*_p9-n100-d40-{fire,fire2,fire3}-{pq,rules,hybrid,agents}, fire-nodes.dat
+videos	forest	5704 packets, 9 M and 3 D frames	set_AOMDV_QPV_GC-PN-0p01597-13_p9-n100-d40-fire-rules-forest-s10/encoding/forest_qcif-0.01597-13/st-priority.dat
+videos	smoke	3925 packets, 9 M and 3 D frames	set_AOMDV_QPV_GC-PN-0p15671-13_p9-n100-d40-fire-rules-smoke-s10/encoding/smoke_qcif-0.15671-13/st-priority.dat
+variants	j8 F1 hors-service	11.4	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire-rules-j8-s10, 20 runs
+variants	j8 F2 hors-service	9.1	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire2-rules-j8-s10, 20 runs
+variants	j8 F3 hors-service	9.0	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire3-rules-j8-s10, 20 runs
+variants	v15 F1 hors-service	13.0	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules-v15-s10, 20 runs
+variants	v15 F2 hors-service	10.3	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire2-rules-v15-s10, 20 runs
+variants	v15 F3 hors-service	9.4	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire3-rules-v15-s10, 20 runs
+topo	40 m deployments	1 over 2860 runs	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules
+topo	40 m grid links	180 of 180	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules
+topo	40 m diagonal links	0 of 162	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules
+topo	40 m two-step links	0	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules
+topo	40 m fewest hops	18	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules
+topo	40 m largest displacement	0.00 m on x, 0.00 m on y	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-rules
+topo	30 m deployments	1 over 240 runs	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire-rules-j8-s10
+topo	30 m grid links	180 of 180	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire-rules-j8-s10
+topo	30 m diagonal links	139 of 162	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire-rules-j8-s10
+topo	30 m two-step links	5	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire-rules-j8-s10
+topo	30 m fewest hops	10	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire-rules-j8-s10
+topo	30 m largest displacement	7.84 m on x, 7.96 m on y	set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d30-fire-rules-j8-s10
+topo	margin 30.0 m link	+6.7 dB	oracle link budget
+topo	margin 40.0 m link	+2.7 dB	oracle link budget
+topo	margin 42.4 m link	+1.9 dB	oracle link budget
+topo	30 m against 40 m	4.0 dB stronger	oracle link budget

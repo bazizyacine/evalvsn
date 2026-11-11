@@ -146,13 +146,24 @@ done < "$CONF"
 # the failures before combustion; rl_path, rl_congestion, rl_break, rl_discovery, rl_power (0
 # or 1: the learning agents of decision d22 that replace the chapter-4 rules),
 # rule_discard and rl_discard (0 or 1: the early discard by priority of d27, rule or agent).
+# rl_alpha, rl_epsilon, rl_mac_alpha, rl_mac_epsilon: the learning and exploration rates of the
+# routing and MAC agents; all four at 0 freeze every agent on its initial choice (study 10).
+# rl_eps_start, rl_eps_end: exploration falls linearly to 0 between the two instants. rl_break_eps:
+# the link-break agent's own exploration rate, the others unchanged. rl_trace: 1
+# writes the agents' counters to the routing trace. aomdv_derived: 1 runs classic AOMDV on the
+# EvalVSN PHY and MAC, TX watchdog included (a control, never the reference). aomdv_tuned: 1
+# gives classic AOMDV the cross-layer stacks' routing timers and route queue (the tuned AOMDV series of E1). jitter: each node
+# moves by up to J metres on each axis, the same topology for every run. camnode, sinknode: the
+# nodes that film and receive. firefaildist: 1 draws the failure instants closer to the front.
+# simtime: a floor on the simulated time, in whole seconds, applied by set.sh and never
+# passed to ns-2 (the quality coefficient 0.1 at the 168 s of its counterparts, 11 Nov 2026).
 # Trailing, so every earlier declaration reads unchanged.
 for n in "${DECLARED[@]}"; do
   [[ "${KNOBS[$n]}" == "0" ]] && continue
   IFS=',' read -r -a pairs <<< "${KNOBS[$n]}"
   for kv in "${pairs[@]}"; do
-    [[ "$kv" =~ ^(ifqlen|rule_power|hello_interval|rreq_timeout|class_cost|hello_queue|rl_access|rl_path|rl_congestion|rl_break|rl_discovery|rl_power|rule_discard|rl_discard|firewind|firedir|firealpha|firezone|firefail|firefailwin)=[0-9.:]+$ ]] \
-      || die "$n: invalid knobs spec \"${KNOBS[$n]}\" in $CONF (expected 0 or ifqlen=N,rule_power=0|1,hello_interval=S,rreq_timeout=S,class_cost=0|1,hello_queue=0|1,rl_access=0|1,rl_path=0|1,rl_congestion=0|1,rl_break=0|1,rl_discovery=0|1,rl_power=0|1,rule_discard=0|1,rl_discard=0|1,firewind=U,firedir=D,firealpha=A,firezone=S,firefail=P,firefailwin=S)"
+    [[ "$kv" =~ ^(ifqlen|rule_power|hello_interval|rreq_timeout|class_cost|hello_queue|rl_access|rl_path|rl_congestion|rl_break|rl_discovery|rl_power|rule_discard|rl_discard|rl_alpha|rl_epsilon|rl_mac_alpha|rl_mac_epsilon|rl_eps_start|rl_eps_end|rl_break_eps|rl_trace|aomdv_derived|aomdv_tuned|jitter|camnode|sinknode|firefaildist|firewind|firedir|firealpha|firezone|firefail|firefailwin|simtime)=[0-9.:]+$ ]] \
+      || die "$n: invalid knobs spec \"${KNOBS[$n]}\" in $CONF (expected 0 or ifqlen=N,rule_power=0|1,hello_interval=S,rreq_timeout=S,class_cost=0|1,hello_queue=0|1,rl_access=0|1,rl_path=0|1,rl_congestion=0|1,rl_break=0|1,rl_discovery=0|1,rl_power=0|1,rule_discard=0|1,rl_discard=0|1,rl_alpha=A,rl_epsilon=E,rl_mac_alpha=A,rl_mac_epsilon=E,rl_eps_start=T,rl_eps_end=T,rl_break_eps=E,rl_trace=0|1,aomdv_derived=0|1,aomdv_tuned=0|1,jitter=J,camnode=N,sinknode=N,firefaildist=0|1,firewind=U,firedir=D,firealpha=A,firezone=S,firefail=P,firefailwin=S,simtime=S)"
   done
 done
 
@@ -200,7 +211,11 @@ require_files ../../evalvsn/bin/evalvsn set.sh ../metrics/setGraphs.pl st-packet
 [[ -x ../../evalvsn/bin/evalvsn ]] || die "../../evalvsn/bin/evalvsn is not executable."
 # The Pham witness (Encoder=JPEG) runs two programs next to the tool; they
 # build in a second and a set that needs them must not fail an hour in.
-if [[ ! -x ../../evalvsn/pham/pham_encode || ! -x ../../evalvsn/pham/decode_to_bmp ]]; then
+needs_pham=0
+for n in "${SETS[@]}"; do
+  grep -v '^#' "$IP_DIR/${XL[$n]}.dat" 2>/dev/null | grep -qw JPEG && needs_pham=1
+done
+if [[ $needs_pham -eq 1 && ( ! -x ../../evalvsn/pham/pham_encode || ! -x ../../evalvsn/pham/decode_to_bmp ) ]]; then
   make -s -C ../../evalvsn/pham >/dev/null 2>&1 || die "could not build the Pham programs in evalvsn/pham/ (make)."
 fi
 

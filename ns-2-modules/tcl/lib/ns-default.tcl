@@ -1594,7 +1594,7 @@ Agent/MDART set etxMetric_ true
 
 # ---------------------------------------------------------------------------
 # EvalVSN and AOMDV_QPV: the default values of the modules this tree adds
-# (ns-2/MODIFICATIONS.md). Every knob of a mechanism defaults to 0 and the
+# (ns-2-modules/README.md). Every knob of a mechanism defaults to 0 and the
 # campaigns replay bit for bit with all of them at 0.
 # ---------------------------------------------------------------------------
 
@@ -1608,6 +1608,8 @@ Mac/802_15_4EvalVSN set MAX_PRIO_NB 13                              ;# priority 
 Mac/802_15_4EvalVSN set RL_ACCESS_ 0                                ;# 1: the channel-access agent, CSMA backoff exponent and backoff count per class and link (9 Oct 2026)
 Mac/802_15_4EvalVSN set RL_MAC_ALPHA_ 0.2                           ;# learning MAC: learning rate
 Mac/802_15_4EvalVSN set RL_MAC_EPSILON_ 0.1                         ;# learning MAC: exploration rate, non-critical packets only
+Mac/802_15_4EvalVSN set RL_EPS_START_ 0.0                           ;# with RL_EPS_END_ above it, exploration falls linearly to 0 between the two
+Mac/802_15_4EvalVSN set RL_EPS_END_ 0.0
 Mac/802_15_4EvalVSN set RL_POWER_ 0                                 ;# 1: the learning transmit power replaces the PHY's closed loop (d22, 10 Oct 2026)
 Mac/802_15_4EvalVSN set RL_POWER_KAPPA_ 0.2                         ;# learning power: weight of the power spent in the reward
 Phy/WirelessPhy/802_15_4EvalVSN set noise_floor_ 7.94328e-15        ;# -111 dBm: thermal noise kTB over the 2 MHz O-QPSK channel
@@ -1627,8 +1629,12 @@ Agent/AOMDV_QPV set RL_BREAK_ 0                                     ;# 1: the li
 Agent/AOMDV_QPV set RL_DISCOVERY_ 0                                 ;# 1: the discovery agent replaces the fixed 50 ms RREQ rebroadcast jitter
 Agent/AOMDV_QPV set DISCARD_RULE_ 0                                 ;# 1: early discard by priority, the rule: D frames and high levels discarded first under congestion (d27, 10 Oct 2026)
 Agent/AOMDV_QPV set RL_DISCARD_ 0                                   ;# 1: early discard by priority, the learning agent: the congestion threshold learnt
-Agent/AOMDV_QPV set RL_ALPHA_ 0.3                                   ;# Q-learning rate
-Agent/AOMDV_QPV set RL_EPSILON_ 0.1                                 ;# exploration rate, non-critical packets only
+Agent/AOMDV_QPV set RL_ALPHA_ 0.3                                   ;# learning rate of the routing agents (contextual bandits)
+Agent/AOMDV_QPV set RL_EPSILON_ 0.1                                 ;# exploration rate; the path and congestion agents never explore on a critical packet
+Agent/AOMDV_QPV set RL_EPS_START_ 0.0                               ;# with RL_EPS_END_ above it, exploration falls linearly to 0 between the two
+Agent/AOMDV_QPV set RL_EPS_END_ 0.0
+Agent/AOMDV_QPV set RL_BREAK_EPSILON_ -1.0                          ;# the link-break agent's own exploration rate; below 0 it follows the others
+Agent/AOMDV_QPV set RL_TRACE_ 0                                     ;# 1: the agents' counters in the routing trace every 20 s
 Agent/AOMDV_QPV set ACTIVE_ROUTE_TIMEOUT_ 10.0                      ;# seconds; historical - radio-params.tcl scales it to the capture calendar
 
 # The fire: the heated zone ahead of the front (mac/fire-propagationEvalVSN).

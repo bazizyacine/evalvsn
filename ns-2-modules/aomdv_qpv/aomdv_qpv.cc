@@ -80,6 +80,7 @@
 
 #include <queue/priqueueEvalVSN.h>
 #include <mac/link-metrics.h>
+#include <mac/mac-802_15_4EvalVSN.h>
 #include <aomdv_qpv/aomdv_qpv.h>
 #include <wpan/p802_15_4trace.h>
 #include <aomdv_qpv/aomdv_qpv_packet.h>
@@ -302,6 +303,22 @@ AOMDV_QPV::AOMDV_QPV(nsaddr_t id) : Agent(PT_AOMDV_QPV),
 	bind("RL_ALPHA_", &rl_alpha_);
 	rl_epsilon_ = 0.1;
 	bind("RL_EPSILON_", &rl_epsilon_);
+	rl_eps_start_ = 0.0;
+	bind("RL_EPS_START_", &rl_eps_start_);
+	rl_eps_end_ = 0.0;
+	bind("RL_EPS_END_", &rl_eps_end_);
+	rl_break_eps_ = -1.0;
+	bind("RL_BREAK_EPSILON_", &rl_break_eps_);
+	rl_trace_ = 0;
+	bind("RL_TRACE_", &rl_trace_);
+	rl_trace_next_ = 0.0;
+	memset(rlp_cnt_, 0, sizeof(rlp_cnt_));
+	memset(rlc_cnt_, 0, sizeof(rlc_cnt_));
+	memset(rlb_cnt_, 0, sizeof(rlb_cnt_));
+	memset(rld_cnt_, 0, sizeof(rld_cnt_));
+	memset(rle_cnt_, 0, sizeof(rle_cnt_));
+	memset(rlb_decl_cnt_, 0, sizeof(rlb_decl_cnt_));
+	rlb_false_cnt_ = rlb_silent_cnt_ = 0;
 	rl_path_ = 0;
 	bind("RL_PATH_", &rl_path_);
 	rl_congestion_ = 0;
@@ -544,6 +561,7 @@ void AOMDV_QPV::rt_ll_failed(Packet *p)
 					d.kidx = rlb_run_k_[failed];
 					d.st = rlb_run_s_[failed];
 					rlb_decl_[failed] = d;
+					rlb_decl_cnt_[d.kidx]++;
 					rlb_run_k_.erase(failed);
 					rlb_run_s_.erase(failed);
 				}
@@ -863,8 +881,11 @@ void AOMDV_QPV::recv(Packet *p, Handler *)
 				if (d != rlb_decl_.end())
 				{
 					if (CURRENT_TIME - d->second.t <= 15.0)
+					{
+						rlb_false_cnt_++;
 						for (int k = 0; k <= d->second.kidx; k++)
 							rlwScore(d->second.st, k, -2.0);
+					}
 					rlb_decl_.erase(d);
 				}
 			}
@@ -1930,8 +1951,9 @@ void AOMDV_QPV::sendRequest(nsaddr_t dst)
 		for (int k = 1; k < 3; k++)
 			if (rld_q_[bucket][k] > rld_q_[bucket][a])
 				a = k;
-		if (Random::uniform() < rl_epsilon_)
+		if (Random::uniform() < rlEps())
 			a = (int)(Random::uniform() * 3) % 3;
+		rld_cnt_[bucket][a]++;
 		RldPending np;
 		np.a = a;
 		np.bucket = bucket;
@@ -2104,6 +2126,11 @@ void AOMDV_QPV::sendHello()
 		rlwVerdicts();
 	if (rl_discard_)
 		rlsEpoch();
+	if (rl_trace_ && CURRENT_TIME >= rl_trace_next_)
+	{
+		rlTraceDump();
+		rl_trace_next_ = CURRENT_TIME + 20.0;
+	}
 	if (rl_path_ || rl_congestion_)
 	{
 		// Decisions whose frame never reached the MAC (dropped in a queue)
@@ -2922,8 +2949,12 @@ AOMDV_QPV_Path *AOMDV_QPV::selectPath(aomdv_qpv_rt_entry *rt, Packet *p, int &th
 	static const double TH[4] = {0.25, 0.5, 0.75, 1.01};
 	int cls = rlClass(p);
 	bool notCritical = cls > 0;
-	theta = rl_congestion_ ? rlcTheta(cls, notCritical && Random::uniform() < rl_epsilon_) : -1;
-	prof = rl_path_ ? rlpProfile(cls, notCritical && Random::uniform() < rl_epsilon_) : -1;
+	theta = rl_congestion_ ? rlcTheta(cls, notCritical && Random::uniform() < rlEps()) : -1;
+	prof = rl_path_ ? rlpProfile(cls, notCritical && Random::uniform() < rlEps()) : -1;
+	if (theta >= 0)
+		rlc_cnt_[cls][theta]++;
+	if (prof >= 0)
+		rlp_cnt_[cls][prof]++;
 	rlp_cur_ = prof;
 	priqueueEvalVSN *own_ifq = get_ifq_for_nexthop(index);
 	std::vector<AOMDV_QPV_Path *> cand;
@@ -3029,8 +3060,11 @@ int AOMDV_QPV::rlwPick(int st)
 	for (int k = 1; k < 4; k++)
 		if (rlb_q_[st][k] > rlb_q_[st][a])
 			a = k;
-	if (Random::uniform() < rl_epsilon_)
+	// The draw is taken whatever the rate: at -1 the run replays the default; a set
+	// rate keeps the seed and the failure schedule, and the draws diverge after.
+	if (Random::uniform() < (rl_break_eps_ >= 0.0 ? rl_break_eps_ : rlEps()))
 		a = (int)(Random::uniform() * 4) % 4;
+	rlb_cnt_[st][a]++;
 	return a;
 }
 
@@ -3048,6 +3082,7 @@ void AOMDV_QPV::rlwVerdicts()
 	{
 		if (CURRENT_TIME - d->second.t > 15.0)
 		{
+			rlb_silent_cnt_++;
 			for (int k = 0; k < 4; k++)
 				rlwScore(d->second.st, k, 1.0 - 0.2 * (RLW_K[k] - 1));
 			rlb_decl_.erase(d++);
@@ -3130,7 +3165,79 @@ void AOMDV_QPV::rlsEpoch()
 	for (int k = 1; k < 5; k++)
 		if (rle_q_[k] > rle_q_[a])
 			a = k;
-	if (Random::uniform() < rl_epsilon_)
+	if (Random::uniform() < rlEps())
 		a = (int)(Random::uniform() * 5) % 5;
 	rle_a_ = a;
+	rle_cnt_[a]++;
+}
+
+// The exploration rate now: RL_EPSILON_, falling linearly to 0 between
+// RL_EPS_START_ and RL_EPS_END_ when the end is set.
+double AOMDV_QPV::rlEps()
+{
+	if (rl_eps_end_ <= rl_eps_start_)
+		return rl_epsilon_;
+	double t = CURRENT_TIME;
+	if (t <= rl_eps_start_)
+		return rl_epsilon_;
+	if (t >= rl_eps_end_)
+		return 0.0;
+	return rl_epsilon_ * (rl_eps_end_ - t) / (rl_eps_end_ - rl_eps_start_);
+}
+
+// The agents' counters and values of this node, one line per agent, in the
+// routing trace. Reads only: it draws no random number, so a traced run
+// replays the same simulation.
+void AOMDV_QPV::rlTraceDump()
+{
+	if (!logtarget)
+		return;
+	char *b = logtarget->pt_->buffer();
+	int n;
+	if (rl_path_)
+	{
+		n = sprintf(b, "Q %.3f _%d_ P", CURRENT_TIME, index);
+		for (int c = 0; c < 3; c++)
+			for (int a = 0; a < 5; a++)
+				n += sprintf(b + n, " %ld:%.3f", rlp_cnt_[c][a], rlp_q_[c][a]);
+		logtarget->pt_->dump();
+	}
+	if (rl_congestion_)
+	{
+		n = sprintf(b, "Q %.3f _%d_ C", CURRENT_TIME, index);
+		for (int c = 0; c < 3; c++)
+			for (int a = 0; a < 4; a++)
+				n += sprintf(b + n, " %ld:%.3f", rlc_cnt_[c][a], rlc_q_[c][a]);
+		logtarget->pt_->dump();
+	}
+	if (rl_break_)
+	{
+		n = sprintf(b, "Q %.3f _%d_ B", CURRENT_TIME, index);
+		for (int s = 0; s < 2; s++)
+			for (int a = 0; a < 4; a++)
+				n += sprintf(b + n, " %ld:%.3f", rlb_cnt_[s][a], rlb_q_[s][a]);
+		n += sprintf(b + n, " decl %ld %ld %ld %ld alive %ld silent %ld", rlb_decl_cnt_[0], rlb_decl_cnt_[1],
+			     rlb_decl_cnt_[2], rlb_decl_cnt_[3], rlb_false_cnt_, rlb_silent_cnt_);
+		logtarget->pt_->dump();
+	}
+	if (rl_discovery_)
+	{
+		n = sprintf(b, "Q %.3f _%d_ D", CURRENT_TIME, index);
+		for (int k = 0; k < 2; k++)
+			for (int a = 0; a < 3; a++)
+				n += sprintf(b + n, " %ld:%.3f", rld_cnt_[k][a], rld_q_[k][a]);
+		logtarget->pt_->dump();
+	}
+	if (rl_discard_)
+	{
+		n = sprintf(b, "Q %.3f _%d_ E", CURRENT_TIME, index);
+		for (int a = 0; a < 5; a++)
+			n += sprintf(b + n, " %ld:%.3f", rle_cnt_[a], rle_q_[a]);
+		logtarget->pt_->dump();
+	}
+	Mac802_15_4EvalVSN *m = dynamic_cast<Mac802_15_4EvalVSN *>(mac_);
+	if (m)
+		for (int line = 0; line < 4; line++)
+			if (m->rlTraceLine(line, b, CURRENT_TIME, index))
+				logtarget->pt_->dump();
 }

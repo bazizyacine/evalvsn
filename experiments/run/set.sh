@@ -29,7 +29,8 @@ USAGE="Usage: $0 -ip input_parameters_file -vf video_file -od output_directory -
   -standby period:size - bi-regime scalar flow, 0 (default) none
   -knobs k=v[,k=v] - stack switches forwarded to ns-2 through ns2.sh;
           the header of
-          evalvsn.tcl lists every switch and its default; 0 (default) none
+          evalvsn.tcl lists every switch and its default; 0 (default) none.
+          One knob stays here: simtime=S, a floor on the simulated time
   -dbg  cross-layer traces, 1 by default (historical behaviour)"
 
 parse_args "$USAGE" "$@"
@@ -38,6 +39,25 @@ require_files "${ARG[ip]}" "${ARG[vf]}"
 
 DBG="${ARG[dbg]:-1}"
 videoName="$(basename "${ARG[vf]}" | cut -d. -f1)"
+
+# simtime=S among the knobs: the simulation lasts at least S whole seconds,
+# whatever its last send (decision of 11 Nov 2026: the quality coefficient 0.1
+# sends its last packet 3.5 s earlier than its counterparts at 0.01, and must
+# still simulate their 168 s and the failures that fall in them). It is taken
+# out of the knobs here, so ns2.sh and evalvsn.tcl never see it; without it,
+# the knobs go to ns2.sh untouched and the simulated time is unchanged.
+minSimTime=0
+nsKnobs="${ARG[knobs]:-0}"
+if [[ ",$nsKnobs," == *",simtime="* ]]; then
+  kept=()
+  IFS=',' read -r -a pairs <<< "$nsKnobs"
+  for kv in "${pairs[@]}"; do
+    if [[ "${kv%%=*}" == "simtime" ]]; then minSimTime="${kv#*=}"; else kept+=("$kv"); fi
+  done
+  [[ "$minSimTime" =~ ^[0-9]+$ ]] || die "simtime=$minSimTime: a whole number of seconds is expected"
+  nsKnobs=$(IFS=','; echo "${kept[*]}")
+  [[ -n "$nsKnobs" ]] || nsKnobs=0
+fi
 
 # Traces produced in the current directory by ns-2 and by the packetisation,
 # then moved into the simulation directory. The list is explicit: the original
@@ -108,6 +128,7 @@ while read -r simId encoder fps threshold \
     if [[ "${capPeriod:-0}" != "0" || "${capIpt:-0}" != "0" ]]; then
       simTime=$(awk -F'\t' '!/^#/{t=$1} END{printf "%d", int(t) + 3}' st-packet.dat)
     fi
+    if [[ "$minSimTime" -gt "$simTime" ]]; then simTime="$minSimTime"; fi
 
     # A stale fire schedule from an earlier run in this directory must not
     # be swept into this one.
@@ -117,7 +138,7 @@ while read -r simId encoder fps threshold \
                 -nn "${ARG[nn]}" -rp "${ARG[rp]}" \
                 -dist "${ARG[dist]:-100}" -fire "${ARG[fire]:-0}" \
                 -prop "${ARG[prop]:-tworay}" -standby "${ARG[standby]:-0}" \
-                -knobs "${ARG[knobs]:-0}" \
+                -knobs "$nsKnobs" \
                 -dbg "$DBG" -seed "${ARG[seed]:-0}" \
       || die "the ns-2 simulation failed for $simId"
 
