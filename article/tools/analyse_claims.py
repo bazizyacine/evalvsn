@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Every derived number of the results section that the other tools of tools/
-do not print (precision pass of the revision, 8 Nov 2026; labels P02 to P36): correlations per simulation, the slope of
+do not print (precision pass of the revision, 8 Nov 2026; labels P02 to P42): correlations per simulation, the slope of
 the route requests on the declarations, the pooled p of the AOMDV control, the
 mechanism at T = 7 s, the oracle, the energy, the HELLO counts and the rest.
 
@@ -227,6 +227,10 @@ def main():
           [(min(holm([x['p'] for x in per])), '>', 0.05, 2), (max(abs(x['d']) for x in per), '<=', 0.2, 1)])
     claim('P06', 'même écart par GOP : Holm min. ; le plus grand, GOP 6-6', 'p = 1,00 ; −0,20 (−0,75 à 0,36)',
           [(min(holm([x['p'] for x in per])), '=', 1.00, 2)] + pair_checks(per[SPLITS.index('6M6D')], -0.20, -0.75, 0.36))
+    # the range the text gives
+    claim('P06', 'même écart par GOP : min. et max. (dB) ; Holm min.', '−0,20 à +0,08 ; p = 1,00',
+          [(min(x['d'] for x in per), '=', -0.20, 2), (max(x['d'] for x in per), '=', 0.08, 2),
+           (min(holm([x['p'] for x in per])), '=', 1.00, 2)])
 
     # P07
     r = paired(comp_pooled('hybrid'), comp_pooled('agents'))
@@ -451,10 +455,10 @@ def main():
     claim('P27', 'hybride moins règles à débit égal, GOP 6-6 et 3-9, Holm sur deux', '1,84 (1,22 à 2,45) ; 1,51 (0,80 à 2,22) ; p < 0,001',
           pair_checks(eq[0], 1.84, 1.22, 2.45) + pair_checks(eq[1], 1.51, 0.80, 2.22) + [(max(holm([q['p'] for q in eq])), '<', 0.001, 3)])
 
-    # P37, the quality coefficient 0.1, second series of E4 (decisions d83 and d84),
+    # P37, the quality coefficient 0.1, second series of E4,
     # its sets of tranche 10, simulated for 168 s like their counterparts:
     # the two families fixed before the results, then the losses and the usable
-    # images described without a test (the rate stays in the table, d84).
+    # images described without a test (the rate stays in the table).
     stk = ('pq', 'rules', 'agents', 'hybrid')
     qc = [paired(rev(s + '-q01'), rev(s)) for s in stk]
     hq = holm([q['p'] for q in qc])
@@ -482,18 +486,22 @@ def main():
           pair_checks(hy[0], 0.92, 0.57, 1.27, sign=-1) + [(h5[0], '<', 0.001, 3), (u7[0], '=', 0.35, 2), (u7[1], '=', 2.33, 2)])
     claim('P28', 'hybride moins règles à 18 s, Holm sur cinq périodes', '+0,89 (−0,18 à 1,97), p = 0,205', pair_checks(hy[3], 0.89, -0.18, 1.97) + [(h5[3], '=', 0.205, 3)])
     claim('P28', 'hybride moins règles à 30 s, Holm sur cinq périodes', '−0,53 (−1,44 à 0,38), p = 0,247', pair_checks(hy[4], -0.53, -1.44, 0.38) + [(h5[4], '=', 0.247, 3)])
-    lo7, de7 = paired(rev('hybrid', period='p7', m='loss'), rev('rules', period='p7', m='loss')), paired(rev('hybrid', period='p7', m='declared'), rev('rules', period='p7', m='declared'))
-    claim('P29', '7 s : perte (%) et déclarations, règles et hybride ; p', '63,5 et 58,1 ; 17,3 et 7,1 ; p < 0,001',
+    # the load series, hybrid minus rules: one Holm family over the five periods
+    # for each metric, as for the PSNR (the M1 loss was tested alone before, p = 0.20 at 7 s and 0.25 at 12 s)
+    hl = {m: [paired(rev('hybrid', period=p, m=m), rev('rules', period=p, m=m)) for p in PERIODS]
+          for m in ('loss', 'declared', 'm1loss')}
+    hp = {m: holm([q['p'] for q in v]) for m, v in hl.items()}
+    claim('P29', '7 s : perte (%) et déclarations, règles et hybride ; p, Holm sur cinq périodes', '63,5 et 58,1 ; 17,3 et 7,1 ; p < 0,001',
           [(mean(rev('rules', period='p7', m='loss').values()), '=', 63.5, 1), (mean(rev('hybrid', period='p7', m='loss').values()), '=', 58.1, 1),
            (mean(rev('rules', period='p7', m='declared').values()), '=', 17.3, 1), (mean(rev('hybrid', period='p7', m='declared').values()), '=', 7.1, 1),
-           (max(lo7['p'], de7['p']), '<', 0.001, 3)])
-    r = paired(rev('hybrid', period='p7', m='m1loss'), rev('rules', period='p7', m='m1loss'))
-    claim('P29', '7 s : perte de M1, hybride moins règles (points)', '+1,3 (−0,7 à 3,4), p = 0,20', pair_checks(r, 1.3, -0.7, 3.4, 1) + [(r['p'], '=', 0.20, 2)])
-    # 12 s: the M1 loss and the overall loss, hybrid minus rules (single tests, section 3.10 and 4.1)
-    r = paired(rev('hybrid', period='p12', m='m1loss'), rev('rules', period='p12', m='m1loss'))
-    claim('P29', '12 s : perte de M1, hybride moins règles (points)', '−1,1 (−2,9 à 0,8), p = 0,25', pair_checks(r, -1.1, -2.9, 0.8, 1) + [(r['p'], '=', 0.25, 2)])
-    r = paired(rev('hybrid', period='p12', m='loss'), rev('rules', period='p12', m='loss'))
-    claim('P29', '12 s : perte globale, hybride moins règles (points)', '10,6 de moins (8,4 à 12,8), p < 0,001', pair_checks(r, 10.6, 8.4, 12.8, 1, sign=-1) + [(r['p'], '<', 0.001, 4)])
+           (max(hp['loss'][0], hp['declared'][0]), '<', 0.001, 3)])
+    claim('P29', '7 s : perte de M1, hybride moins règles (points), Holm sur cinq périodes', '+1,3 (−0,7 à 3,4), p = 0,79',
+          pair_checks(hl['m1loss'][0], 1.3, -0.7, 3.4, 1) + [(hp['m1loss'][0], '=', 0.79, 2)])
+    # 12 s: the M1 loss and the overall loss (sections 3.8 and 4.2)
+    claim('P29', '12 s : perte de M1, hybride moins règles (points), Holm sur cinq périodes', '−1,1 (−2,9 à 0,8), p = 0,79',
+          pair_checks(hl['m1loss'][2], -1.1, -2.9, 0.8, 1) + [(hp['m1loss'][2], '=', 0.79, 2)])
+    claim('P29', '12 s : perte globale, hybride moins règles (points), Holm sur cinq périodes', '10,6 de moins (8,4 à 12,8), p < 0,001',
+          pair_checks(hl['loss'][2], 10.6, 8.4, 12.8, 1, sign=-1) + [(hp['loss'][2], '<', 0.001, 4)])
     if FRAMES is None:
         claim('P29', 'mécanisme à 7 s', '', [(None, '=', 0, 0)])
     else:
@@ -527,6 +535,9 @@ def main():
     hg = holm([q['p'] for q in ag])
     claim('P29', 'pile à agents moins règles, Holm sur cinq périodes : 7 s, autres périodes', '< 0,001 ; non significatif',
           [(hg[0], '<', 0.001, 3), (min(hg[1:]), '>', 0.05, 2)])
+    # the difference and the p of the four other periods
+    claim('P29', 'pile à agents moins règles à 9, 12, 18 et 30 s : écart min. et max. (dB) ; Holm min.', '−0,53 à +0,41 ; p ≥ 0,66',
+          [(min(q['d'] for q in ag[1:]), '=', -0.53, 2), (max(q['d'] for q in ag[1:]), '=', 0.41, 2), (min(hg[1:]), '>=', 0.66, 2)])
     r = paired(rev('agents', period='p7', m='m1loss'), rev('rules', period='p7', m='m1loss'))
     claim('P29', '7 s : pile à agents moins règles, PSNR (dB) et perte de M1 (points)', '1,76 de moins (1,41 à 2,11) ; +7,3 (5,0 à 9,6)',
           pair_checks(ag[0], 1.76, 1.41, 2.11, sign=-1) + pair_checks(r, 7.3, 5.0, 9.6, 1))
@@ -593,12 +604,17 @@ def main():
     # P38, the margin of a 40 m link (section 3.4): the shadowing model with
     # sigma 0 (log-distance) and the radio of experiments/run/radio-params.tcl,
     # Friis at 1 m (Pt 0.002 W, 2.4 GHz, unit gains, L = 1), exponent 3.2,
-    # against CSThresh_ 7.94e-13 W (-91 dBm); the step down needs 1 + 1.7 dB
-    lam = 299792458 / 2.4e9
+    # against CSThresh_ 7.94e-13 W (-91 dBm); the step down needs 1 + 1.7 dB.
+    # The wavelength takes the simulator's speed of light, 3e8 m/s
+    # (ns-2.35 mobile/propagation.h:43, SPEED_OF_LIGHT; mac/wireless-phy.cc:101,
+    # lambda_ = SPEED_OF_LIGHT / freq_), as metrics/fire_oracle.py does: 2.700 dB,
+    # which reaches the 2.7 dB (with
+    # 299 792 458 m/s it would be 2.694 dB)
+    lam = 3e8 / 2.4e9
     pr1 = 0.002 * lam ** 2 / (4 * math.pi) ** 2
     marge = 10 * math.log10(pr1 / 7.94e-13) - 10 * 3.2 * math.log10(40)
-    claim('P38', 'marge d\'un lien de 40 m au-dessus de P_CCA, sans interférence (dB) ; sous les 2,7 exigés', '2,69 ; oui',
-          [(marge, '=', 2.69, 2), (marge < 1 + (3 - 1.3), '=', True, 0)])
+    claim('P38', 'marge d\'un lien de 40 m au-dessus de P_CCA, sans interférence (dB) ; atteint les 2,7 exigés', '2,70 ; oui',
+          [(marge, '=', 2.70, 2), (marge >= 1 + (3 - 1.3), '=', True, 0)])
     # P39, the coded frames against the raw image (section 2.6)
     if CODEC is None:
         claim('P39', 'image brute (octets) ; tailles moyennes M et D au-dessus, trois GOP', '25 344 ; oui', [(None, '=', 0, 0)])
@@ -619,6 +635,18 @@ def main():
     hg = [paired(comp('hybrid', g), comp('rules', g)) for g in SPLITS]
     claim('P41', 'pile hybride moins règles au GOP 9-3, Holm sur trois GOP', '2,02 ; p < 0,001',
           [(hg[2]['d'], '=', 2.02, 2), (holm([x['p'] for x in hg])[2], '<', 0.001, 3)])
+
+    # P42, hybrid - rules in usable images at the bounds of the fair class, 25 and
+    # 31 dB, per GOP, Holm over the three GOPs (section 3.6; make_tables_quality.py --stats prints the same tests)
+    u = {m: [paired(rev('hybrid', g, m=m), rev('rules', g, m=m)) for g in SPLITS] for m in ('usable25', 'usable31')}
+    uh = {m: holm([x['p'] for x in v]) for m, v in u.items()}
+    claim('P42', 'images exploitables à 25 dB, hybride moins règles, trois GOP : min., max. ; Holm max.', '+1,07 à +2,03 ; p ≤ 0,005',
+          [(min(x['d'] for x in u['usable25']), '=', 1.07, 2), (max(x['d'] for x in u['usable25']), '=', 2.03, 2),
+           (max(uh['usable25']), '<=', 0.005, 3)])
+    claim('P42', 'images exploitables à 31 dB, GOP 3-9 : écart, Holm ; GOP 6-6 et 9-3 : écarts, Holm max.', '+0,27, p = 0,055 ; +0,98 et +1,28, p < 0,001',
+          [(u['usable31'][0]['d'], '=', 0.27, 2), (uh['usable31'][0], '=', 0.055, 3),
+           (u['usable31'][1]['d'], '=', 0.98, 2), (u['usable31'][2]['d'], '=', 1.28, 2),
+           (max(uh['usable31'][1:]), '<', 0.001, 3)])
 
     width = max(len(l[1]) for l in LINES)
     for block, label, written, computed, verdict in LINES:

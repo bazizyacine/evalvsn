@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Statistics of the quality coefficient 0.1 (study 10, tranches 9 and 10), the
-second series of E4, video coding (decisions d83 and d84), from
+second series of E4, video coding, from
 src/data/revision.tsv. The four stacks at GOP 9-3 and T = 9 s with the
 coefficient 0.1 (arms -q01, the sets of tranche 10, simulated for 168 s like
 their counterparts) share the 60 seeds (3 fires x 20) and the failure schedules
 of study 09, whose sets at the coefficient 0.01 are the reference. The tests
-were fixed before the results (d83), and the tool makes those two and no other:
+were fixed before the results, and the tool makes those two and no other:
 
   1. at the coefficient 0.1, the PSNR of the hybrid stack minus the rules stack
      and of the agents stack minus the rules stack, paired over the 60 seeds,

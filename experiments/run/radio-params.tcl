@@ -53,7 +53,7 @@ $val(netif) set L_          1.0         ;# no additional system loss
 # wpan/p802_15_4const.h and left untouched: the MAC needs no line here.
 
 # The routing timers of the cross-layer stacks, read by AOMDV_QPV below and by
-# the tuned AOMDV control of study 10 (E1, decision d69), so that each value
+# the tuned AOMDV control of study 10 (E1), so that each value
 # is written once. Per-second hellos are the dimensioning of a fast radio: a
 # hundred nodes of them eat a 250 kbit/s channel in collisions before any
 # video is sent, where real sensor stacks beacon in tens of seconds. Five is
@@ -77,8 +77,7 @@ if {$val(rp) == "AOMDV_QPV"} {
     if {$val(hello_queue) != ""}        { Agent/AOMDV_QPV set HELLO_QUEUE_ $val(hello_queue) }
     # The learning MAC (CSMA parameters per class and link), off by default.
     if {$val(rl_access) != ""}          { Mac/802_15_4EvalVSN set RL_ACCESS_ $val(rl_access) }
-    # The learning agents that replace the chapter-4 rules (d22, 10 Oct
-    # 2026), each off by default: path, congestion, link-break detection,
+    # The learning agents that replace the chapter-4 rules, each off by default: path, congestion, link-break detection,
     # discovery jitter, transmit power.
     if {$val(rl_path) != ""}            { Agent/AOMDV_QPV set RL_PATH_ $val(rl_path) }
     if {$val(rl_congestion) != ""}      { Agent/AOMDV_QPV set RL_CONGESTION_ $val(rl_congestion) }
@@ -96,7 +95,7 @@ if {$val(rp) == "AOMDV_QPV"} {
     if {$val(rl_epsilon) != ""}         { Agent/AOMDV_QPV set RL_EPSILON_ $val(rl_epsilon) }
     if {$val(rl_mac_alpha) != ""}       { Mac/802_15_4EvalVSN set RL_MAC_ALPHA_ $val(rl_mac_alpha) }
     if {$val(rl_mac_epsilon) != ""}     { Mac/802_15_4EvalVSN set RL_MAC_EPSILON_ $val(rl_mac_epsilon) }
-    # Early discard by priority (d27): the rule (rule_discard) or its learning agent (rl_discard).
+    # Early discard by priority: the rule (rule_discard) or its learning agent (rl_discard).
     if {$val(rule_discard) != ""}       { Agent/AOMDV_QPV set DISCARD_RULE_ $val(rule_discard) }
     if {$val(rl_discard) != ""}         { Agent/AOMDV_QPV set RL_DISCARD_ $val(rl_discard) }
     Agent/AOMDV_QPV set ACTIVE_ROUTE_TIMEOUT_ $activeRouteTimeout_
@@ -107,7 +106,7 @@ if {$val(rp) == "AOMDV_QPV"} {
     $val(netif) set TxPowerAdapt_        $val(rule_power) ;# closed-loop power per neighbour on the chip's TX_PWR steps; -rule_power, default 1 (4 Oct 2026)
     $val(mac)   set MAX_PRIO_NB          $maxPrioNb_ ;# the cross-layer MAC holds the count (R58)
 }
-# The tuned AOMDV control of study 10 (E1, decision d69), never the reference:
+# The tuned AOMDV control of study 10 (E1), never the reference:
 # the cross-layer stacks' routing timers (the route queue's length is set per
 # agent in evalvsn.tcl). The study knobs hello_interval and rreq_timeout
 # stay QPV-only.

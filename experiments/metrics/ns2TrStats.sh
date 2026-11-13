@@ -173,7 +173,7 @@ BEGIN {
     else if (L == "IFQ" && R == "NEW")                    label = "DROP_IFQ_QFULL_NEW"
     else if (L == "IFQ" && R == "SHRK")                   label = "DROP_IFQ_QFULL_SHRK"
     else if (L == "IFQ" && R == "MANU")                   label = "DROP_IFQ_MANUAL_DROP"
-    # the early discard by priority of AOMDV_QPV (d27); SKIM is its code in the
+    # the early discard by priority of AOMDV_QPV; SKIM is its code in the
     # traces written before 15 Oct 2026
     else if (L == "IFQ" && (R == "EDIS" || R == "SKIM"))  label = "DROP_IFQ_EARLY_DISCARD"
     else if (R == "OUT")                                  label = "DROP_OUTSIDE_SUBNET"
@@ -241,7 +241,7 @@ BEGIN {
     else if (L == "IFQ" && R == "NEW")                    label = "DROP_IFQ_QFULL_NEW"
     else if (L == "IFQ" && R == "SHRK")                   label = "DROP_IFQ_QFULL_SHRK"
     else if (L == "IFQ" && R == "MANU")                   label = "DROP_IFQ_MANUAL_DROP"
-    # the early discard by priority of AOMDV_QPV (d27); SKIM is its code in the
+    # the early discard by priority of AOMDV_QPV; SKIM is its code in the
     # traces written before 15 Oct 2026
     else if (L == "IFQ" && (R == "EDIS" || R == "SKIM"))  label = "DROP_IFQ_EARLY_DISCARD"
     else if (R == "OUT")                                  label = "DROP_OUTSIDE_SUBNET"

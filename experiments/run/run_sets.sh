@@ -57,7 +57,7 @@
 #                 campaign's; a campaign never passes them.
 #   --seed-name=N derive each realisation's seed from the set name N instead
 #                 of the run set's own name: AOMDV then plays the very same
-#                 fire, failures and traffic as the cross-layer set N (d39).
+#                 fire, failures and traffic as the cross-layer set N.
 #   --pair-suffix=S  derive each realisation's seed from the set name with
 #                 the trailing S removed: a variant set (a bench of a knob)
 #                 then starts every realisation from the same seed as the
@@ -140,12 +140,12 @@ done < "$CONF"
 # AOMDV_QPV only), class_cost, hello_queue (0 or 1, AOMDV_QPV only: the ablation
 # switches of the per-class cost and the HELLO queue field),
 # rl_access (0 or 1: the channel-access agent), and the
-# fire elements of decision d23 (10 Oct 2026): firewind (m/s) and firedir
+# fire elements: firewind (m/s) and firedir
 # (degrees) for the wind-driven front, firealpha (dB/m) and firezone (s) for
 # the heated zone ahead of it, firefail (probability) and firefailwin (s) for
 # the failures before combustion; rl_path, rl_congestion, rl_break, rl_discovery, rl_power (0
-# or 1: the learning agents of decision d22 that replace the chapter-4 rules),
-# rule_discard and rl_discard (0 or 1: the early discard by priority of d27, rule or agent).
+# or 1: the learning agents that replace the chapter-4 rules),
+# rule_discard and rl_discard (0 or 1: the early discard by priority, rule or agent).
 # rl_alpha, rl_epsilon, rl_mac_alpha, rl_mac_epsilon: the learning and exploration rates of the
 # routing and MAC agents; all four at 0 freeze every agent on its initial choice (study 10).
 # rl_eps_start, rl_eps_end: exploration falls linearly to 0 between the two instants. rl_break_eps:
@@ -331,7 +331,7 @@ for name in "${SETS[@]}"; do
     # rewrite the kept realisations' copies too
     log_info "  encoding kept (--resume)"
   else
-    # The encoder cuts each level into packets of the set's payload (d53).
+    # The encoder cuts each level into packets of the set's payload.
     run_logged ../../evalvsn/bin/evalvsn -ip "$ip" -vf "$avi" -od "$out/encoding" -mpl "${MPL[$name]}"
   fi
 

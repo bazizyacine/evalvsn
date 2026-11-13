@@ -1610,7 +1610,7 @@ Mac/802_15_4EvalVSN set RL_MAC_ALPHA_ 0.2                           ;# learning 
 Mac/802_15_4EvalVSN set RL_MAC_EPSILON_ 0.1                         ;# learning MAC: exploration rate, non-critical packets only
 Mac/802_15_4EvalVSN set RL_EPS_START_ 0.0                           ;# with RL_EPS_END_ above it, exploration falls linearly to 0 between the two
 Mac/802_15_4EvalVSN set RL_EPS_END_ 0.0
-Mac/802_15_4EvalVSN set RL_POWER_ 0                                 ;# 1: the learning transmit power replaces the PHY's closed loop (d22, 10 Oct 2026)
+Mac/802_15_4EvalVSN set RL_POWER_ 0                                 ;# 1: the learning transmit power replaces the PHY's closed loop
 Mac/802_15_4EvalVSN set RL_POWER_KAPPA_ 0.2                         ;# learning power: weight of the power spent in the reward
 Phy/WirelessPhy/802_15_4EvalVSN set noise_floor_ 7.94328e-15        ;# -111 dBm: thermal noise kTB over the 2 MHz O-QPSK channel
 Phy/WirelessPhy/802_15_4EvalVSN set PowerMonitorThresh_ 2.64776e-15 ;# noise_floor_ / 3, the same ratio the Wi-Fi monitor uses
@@ -1623,11 +1623,11 @@ Agent/AOMDV_QPV set HELLO_INTERVAL_ 1.0                             ;# seconds; 
 Agent/AOMDV_QPV set MAX_RREQ_TIMEOUT_ 1.0                           ;# seconds; historical cap - RFC 3561 says 10, radio-params.tcl applies it per radio
 Agent/AOMDV_QPV set CLASS_COST_ 1                                   ;# chapter 4: first link priced for the class of the packet (0: the discovered cost)
 Agent/AOMDV_QPV set HELLO_QUEUE_ 1                                  ;# chapter 4: next hop's queue from its HELLOs (0: read in memory)
-Agent/AOMDV_QPV set RL_PATH_ 0                                      ;# 1: the path agent replaces the class-priced link cost (d22, 10 Oct 2026)
+Agent/AOMDV_QPV set RL_PATH_ 0                                      ;# 1: the path agent replaces the class-priced link cost
 Agent/AOMDV_QPV set RL_CONGESTION_ 0                                ;# 1: the congestion agent replaces the fixed bypass threshold
 Agent/AOMDV_QPV set RL_BREAK_ 0                                     ;# 1: the link-break detection agent replaces the three failures that declare a neighbour dead
 Agent/AOMDV_QPV set RL_DISCOVERY_ 0                                 ;# 1: the discovery agent replaces the fixed 50 ms RREQ rebroadcast jitter
-Agent/AOMDV_QPV set DISCARD_RULE_ 0                                 ;# 1: early discard by priority, the rule: D frames and high levels discarded first under congestion (d27, 10 Oct 2026)
+Agent/AOMDV_QPV set DISCARD_RULE_ 0                                 ;# 1: early discard by priority, the rule: D frames and high levels discarded first under congestion
 Agent/AOMDV_QPV set RL_DISCARD_ 0                                   ;# 1: early discard by priority, the learning agent: the congestion threshold learnt
 Agent/AOMDV_QPV set RL_ALPHA_ 0.3                                   ;# learning rate of the routing agents (contextual bandits)
 Agent/AOMDV_QPV set RL_EPSILON_ 0.1                                 ;# exploration rate; the path and congestion agents never explore on a critical packet
@@ -1638,7 +1638,7 @@ Agent/AOMDV_QPV set RL_TRACE_ 0                                     ;# 1: the ag
 Agent/AOMDV_QPV set ACTIVE_ROUTE_TIMEOUT_ 10.0                      ;# seconds; historical - radio-params.tcl scales it to the capture calendar
 
 # The fire: the heated zone ahead of the front (mac/fire-propagationEvalVSN).
-Propagation/Shadowing/FireEvalVSN set fireAlpha_ 0.0                   ;# dB lost per metre of link inside the heated zone ahead of the fire front (0: none; d23, 10 Oct 2026; Mphale et al. 2007: 0.14-1.65 dB/m)
+Propagation/Shadowing/FireEvalVSN set fireAlpha_ 0.0                   ;# dB lost per metre of link inside the heated zone ahead of the fire front (0: none; Mphale et al. 2007: 0.14-1.65 dB/m)
 Propagation/Shadowing/FireEvalVSN set fireZone_ 0.0                    ;# seconds ahead of the front where the heated zone starts
 
 # The EvalVSN source, transport and sink, and the criticality-ranked queue.

@@ -499,7 +499,7 @@ void AOMDV_QPV::rt_ll_failed(Packet *p)
 	// The treatment of a MAC failure, every cross-layer stack. The
 	// invalidation hysteresis that once took its place - K(p,t) failures in
 	// a second, a route error at once - was measured against it and refused
-	// (study 07, decisions dt07 and dt08 of 15 Oct 2026); it replays from
+	// (study 07); it replays from
 	// the git tag pre-refactor-2026-10-15.
 	// A transmission abandoned after the MAC's retries is a non-delivery
 	// observed on that link, not evidence that the link is dead: it
@@ -543,7 +543,7 @@ void AOMDV_QPV::rt_ll_failed(Packet *p)
 			else
 				fail_streak_[failed] = 1;
 			fail_mark_[failed] = total;
-			// The link-break detection agent (d22) picks the count when a
+			// The link-break detection agent picks the count when a
 			// run starts and keeps it for the run.
 			static const int RLW_K[4] = {1, 2, 3, 5};
 			if (rl_break_ && fail_streak_[failed] == 1)
@@ -573,11 +573,11 @@ void AOMDV_QPV::rt_ll_failed(Packet *p)
 	}
 
 	aomdv_qpv_rt_entry *rt = rtable.rt_lookup(ih->daddr());
-	// Priority protection (d27), with the early discard: a failed D packet
+	// Priority protection, with the early discard: a failed D packet
 	// is given up at once, its salvage would take the channel from the
 	// main frames. Every other packet takes the salvage below (the extra
 	// retries once given to M1-M3 changed nothing since the corrected
-	// salvage and were removed, finding X-24, 16 Oct 2026).
+	// salvage and were removed).
 	if ((discard_rule_ || rl_discard_) && ch->ptype() == PT_VIDEO && ch->frameType_[0] == 'D')
 	{
 		drop(p, mac_->dropReason(p, DROP_RTR_MAC_CALLBACK));
@@ -592,7 +592,7 @@ void AOMDV_QPV::rt_ll_failed(Packet *p)
 		// already steers it away from the failed neighbour when another
 		// path exists; when none does it goes back to that neighbour, not
 		// declared dead, instead of being dropped as the former strict
-		// exclusion did (finding X-18, study 07, 15 Oct 2026: +2.6 dB on
+		// exclusion did (study 07, 15 Oct 2026: +2.6 dB on
 		// the base point, +6.6 dB on S1).
 		forward(rt, p, NO_AOMDV_QPV_DELAY);
 		return;
@@ -1066,7 +1066,7 @@ void AOMDV_QPV::recvRequest(Packet *p)
 		// Composite metric for the previous hop
 		nsaddr_t prev_hop = ih->saddr();
 		LinkQuality q = getLinkQuality(p, prev_hop);
-		double cost = rlDiscoveryCost(p, q); // the path agent's weights when it is on (d22)
+		double cost = rlDiscoveryCost(p, q); // the path agent's weights when it is on
 
 		// Bottleneck accumulation, as on the forward path: the maximum
 		// per-hop cost plus the per-hop tax (see recvReply).
@@ -1431,7 +1431,7 @@ void AOMDV_QPV::recvReply(Packet *p)
 		{
 			nsaddr_t prev_hop = rp->rp_src;
 			LinkQuality q = getLinkQuality(p, prev_hop);
-			double cost = rlDiscoveryCost(p, q); // the path agent's weights when it is on (d22)
+			double cost = rlDiscoveryCost(p, q); // the path agent's weights when it is on
 
 			// Bottleneck accumulation: a chain is as lossy as its worst
 			// link, so the path metric is the maximum per-hop cost, plus
@@ -1798,7 +1798,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 			HDR_AOMDV_QPV_REQUEST(p)->reserved[1] >= 1 &&
 			HDR_AOMDV_QPV_REQUEST(p)->reserved[1] <= 3)
 		{
-			// The discovery agent of the source chose the window (d22).
+			// The discovery agent of the source chose the window.
 			static const double W[3] = {0.01, 0.025, 0.05};
 			window = W[HDR_AOMDV_QPV_REQUEST(p)->reserved[1] - 1];
 		}
@@ -2043,7 +2043,7 @@ void AOMDV_QPV::sendReply(nsaddr_t ipdst, u_int32_t hop_count, nsaddr_t rpdst,
 		// --- Cross-layer: cumulative cost ---
 		// Composite metric for the next hop, the neighbour the RREP is sent to
 		LinkQuality q = getLinkQuality(p, nexthop);
-		double cost = rlDiscoveryCost(p, q); // the path agent's weights when it is on (d22)
+		double cost = rlDiscoveryCost(p, q); // the path agent's weights when it is on
 
 		// The previous cumulative cost is 0 at the RREP source; otherwise it is read from the path
 		// On the first send it starts at cost, afterwards at cost + the previous cumulative cost
@@ -2474,7 +2474,7 @@ DynamicWeights AOMDV_QPV::getDynamicWeights(packet_t packetType, char frameType,
 {
 	DynamicWeights dw;
 
-	// The path agent (RL_PATH_, d22) replaces the weights below by the
+	// The path agent (RL_PATH_) replaces the weights below by the
 	// profile it picked for the packet's class.
 	if (rl_path_ && rlp_cur_ >= 0)
 	{
@@ -2873,7 +2873,7 @@ priqueueEvalVSN *AOMDV_QPV::get_ifq_for_nexthop(nsaddr_t nexthop)
 }
 
 // ---------------------------------------------------------------------------
-// The learning agents that replace the chapter-4 rules (d22, 10 Oct 2026).
+// The learning agents that replace the chapter-4 rules.
 // ---------------------------------------------------------------------------
 
 void AOMDV_QPVOutcome::frameOutcome(nsaddr_t da, int uid, bool ok, double delay, int cls)
@@ -3103,7 +3103,7 @@ void AOMDV_QPV::rlwAlive(nsaddr_t nb, int streak)
 		rlwScore(st, k, RLW_K[k] <= streak ? -2.0 : 0.5);
 }
 
-// Early discard by priority (d27): admit or discard a packet entering the interface
+// Early discard by priority: admit or discard a packet entering the interface
 // queue.
 bool AOMDV_QPV::discardAdmit(Packet *p)
 {

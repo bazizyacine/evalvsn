@@ -1,13 +1,13 @@
 // pham.cc - Encoder=JPEG, the Pham witness (tranche 3b-2, R34/R27).
 //
-// The MMPEG chain is compared against an external codec that a real image
+// The MMPEG coder is compared against an external codec that a real image
 // sensor runs: C. Pham's ucam-II JPEG encoder, ported byte-faithfully under
 // pham/ (see pham/PROOF.md for what proves the port), and its untouched
 // reference decoder. Both are driven here as external programs, the way the
-// chain already drives ffmpeg, so that the reference decoder stays the
+// tool already drives ffmpeg, so that the reference decoder stays the
 // deposited code and the proof of interoperability keeps its meaning.
 //
-// The contract with the rest of the chain: one st-priority line per Pham
+// The contract with the rest of the tool: one st-priority line per Pham
 // packet, frameType M and dataPriority 1, the line's payload being the
 // packet exactly as the encoder wrote it (the size token, the two offset
 // bytes and the payload, in hexadecimal). The network packetiser then emits

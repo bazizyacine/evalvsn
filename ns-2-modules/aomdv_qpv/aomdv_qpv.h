@@ -231,7 +231,7 @@ private:
 };
 
 
-// Hands the MAC's frame outcomes to the agent's learning agents (d22).
+// Hands the MAC's frame outcomes to the agent's learning agents.
 class AOMDV_QPVOutcome : public FrameOutcomeListener
 {
 public:
@@ -446,8 +446,7 @@ public:
         long rlb_silent_cnt_;  // declared neighbours silent for 15 s
 
         /*
-         * The learning agents that replace the chapter-4 rules (decision
-         * d22, 10 Oct 2026), each behind its own switch, all off by
+         * The learning agents that replace the chapter-4 rules, each behind its own switch, all off by
          * default. They learn from the outcome of every unicast frame,
          * which the derived MAC hands over (FrameOutcomeListener): reward
          * 1 - 0.5 min(1, delay / 0.1 s) if acknowledged, -1 if not, the
@@ -544,7 +543,7 @@ public:
         map<nsaddr_t, RldPending> rld_pending_; // destination -> the flood in flight
 
         /*
-         * Early discard by priority (decision d27, 10 Oct 2026). Under congestion
+         * Early discard by priority. Under congestion
          * the video packets of least value are discarded on arrival in the
          * interface queue - D frames before M frames, the highest levels
          * first - so that the channel carries the main frames' low levels.

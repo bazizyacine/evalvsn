@@ -140,7 +140,7 @@ class AOMDV;
 // ACTIVE_ROUTE_TIMEOUT, MAX_RREQ_TIMEOUT and HELLO_INTERVAL are bound to Tcl
 // (ACTIVE_ROUTE_TIMEOUT_, MAX_RREQ_TIMEOUT_, HELLO_INTERVAL_) with the
 // release's values, 10 s, 1 s and 1 s, as defaults: the tuned AOMDV control
-// of study 10 (E1, decision d69) gives it the cross-layer stacks' timers.
+// of study 10 (E1) gives it the cross-layer stacks' timers.
 #define REV_ROUTE_LIFE          6            // 5  seconds
 // AODV ns-2.31 code
 #define BCAST_ID_SAVE           6            // 3 seconds

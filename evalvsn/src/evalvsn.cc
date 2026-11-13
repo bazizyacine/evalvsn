@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 
         if (getIP(IP, line, errParam))
         {
-            // The reception trace is no longer an ipFile column: the chain
+            // The reception trace is no longer an ipFile column: the tool
             // only ever wrote one name, and which pass runs is the command
             // line's business now.
             IP.rcvFile = decode ? "rt-packet.dat" : "";

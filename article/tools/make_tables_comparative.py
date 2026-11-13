@@ -10,6 +10,7 @@ import argparse
 import os
 
 import analyse_comparative
+import table_cells
 from analyse_comparative import anova_rm, load, paired, stats
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -24,13 +25,13 @@ WORDS = {
            'pairs': (('hybrid', 'rules', 'Hybride $-$ Règles'), ('agents', 'rules', 'Agents $-$ Règles'),
                      ('hybrid', 'agents', 'Hybride $-$ Agents')),
            'terms': {'stack': 'Pile', 'fire': 'Feu', 'split': 'GOP'},
-           'fire': 'Feu', 'factor': 'Facteur', 'df': 'ddl', 'resid': 'Résidus', 'dec': '{,}',
+           'fire': 'Feu', 'factor': 'Facteur', 'df': 'Degrés de liberté (terme, erreur)', 'resid': 'Résidus', 'dec': '{,}',
            'eta': 'Part de variance'},
     'en': {'stacks': (('aomdv', 'AOMDV'), ('rules', 'Rules'), ('agents', 'Agents'), ('hybrid', 'Hybrid')),
            'pairs': (('hybrid', 'rules', 'Hybrid $-$ Rules'), ('agents', 'rules', 'Agents $-$ Rules'),
                      ('hybrid', 'agents', 'Hybrid $-$ Agents')),
            'terms': {'stack': 'Stack', 'fire': 'Fire', 'split': 'GOP'},
-           'fire': 'Fire', 'factor': 'Factor', 'df': 'df', 'resid': 'Residuals', 'dec': '.',
+           'fire': 'Fire', 'factor': 'Factor', 'df': 'Degrees of freedom (term, error)', 'resid': 'Residuals', 'dec': '.',
            'eta': 'Share of variance'},
 }
 W = WORDS['fr']
@@ -55,16 +56,38 @@ def cells(rows, metric):
     return out
 
 
+def cols(stub, widths):
+    """A tabularx preamble: an optional left-aligned stub at its natural
+    width, then centered X columns of relative widths summing to their count.
+    Each X column holds its widest header line or cell plus an equal share of
+    the free width, so that the gaps between columns are equal (measured on
+    the MDPI class, 12 Nov 2026)."""
+    return stub + ''.join('>{\\hsize=%s\\hsize\\centering\\arraybackslash}X' % w for w in widths)
+
+
+# Fire and GOP centered as the codes they are, then the four stacks.
+PSNR_COLS = cols('', ('0.75', '0.89', '1.09', '1.09', '1.09', '1.09'))
+# The PSNR to two decimals, as in every other table and in the text; the
+# loss table, out of the article, keeps its single decimal.
+PSNR_DECIMALS = 2
+# Fire, GOP, then the PSNR gap and its p for each of the three pairs.
+TESTS_COLS = cols('', ('0.62', '0.72') + ('1.30', '0.92') * 3)
+# The factor is a label, left-aligned; the degrees of freedom and the share of
+# variance are the two widest headers (12 Nov 2026).
+ANOVA_COLS = cols('l', ('1.30', '0.60', '0.80', '1.30'))
+
+
 def first(fire, k):
     """The first column as the MDPI template writes it: the value once,
     vertically centered on the rows it spans."""
     return '\\multirow[m]{%d}{*}{%s}' % (len(SPLITS), fire) if k == 0 else ''
 
 
-def rule(k, ncol):
-    """The rule after a GOP row within a fire, as the writing skill asks a
-    rule after every row; the fire's own rule is the \\midrule."""
-    return '\\cmidrule{2-%d}\n' % ncol if k < len(SPLITS) - 1 else ''
+def rules():
+    """The rule after each row, the fire being the group of its GOPs: none
+    between the GOPs of a fire, a \\midrule between two fires
+    (table_cells.rules)."""
+    return table_cells.rules(fire for fire in FIRES for _ in SPLITS)
 
 
 def mean(d):
@@ -96,41 +119,49 @@ def write(lang, rows):
     os.makedirs(OUT, exist_ok=True)
 
     with open(os.path.join(OUT, lang + '_comparatif-psnr.tex'), 'w') as f:
-        f.write(HEAD + '\\begin{tabularx}{\\linewidth}{CCCCCC}\n\\toprule\n')
-        f.write('\\textbf{%s} & \\textbf{GOP\\textsuperscript{1}} & ' % W['fire'] + ' & '.join('\\textbf{%s}' % lab for _, lab in STACKS) + ' \\\\\n')
-        for fire in FIRES:
-            f.write('\\midrule\n')
-            for k, (sp, lab) in enumerate(SPLITS):
-                vals = [psnr.get((fire, sp, st)) for st, _ in STACKS]
-                txt = []
-                for v in vals:
-                    if not v:
-                        txt.append('--')
-                    else:
-                        txt.append('%s $\\pm$ %s' % (fr(mean(v)), fr(half_ci(v))))
-                f.write('%s & %s & %s \\\\\n' % (first(fire, k), lab, ' & '.join(txt)))
-                f.write(rule(k, 6))
-        f.write('\\bottomrule\n\\end{tabularx}\n')
+        # the quantity over the four stacks, as in the load and scenario tables
+        f.write(HEAD + table_cells.setup(lang) + '\n'
+                + '\\begin{tabularx}{\\linewidth}{%s}\n\\toprule\n' % PSNR_COLS)
+        f.write(' & & \\multicolumn{%d}{c}{\\textbf{PSNR (dB)}} \\\\\n\\cmidrule(lr){3-%d}\n' % (len(STACKS), 2 + len(STACKS)))
+        f.write('\\textbf{%s} & \\textbf{GOP} & ' % W['fire'] + ' & '.join('\\textbf{%s}' % lab for _, lab in STACKS) + ' \\\\\n')
+        # means and half-widths aligned on the decimal marker, each in its own column of digits
+        keys = [(fire, sp) for fire in FIRES for sp, _ in SPLITS]
+        mu, hw = [], []
+        for fire, sp in keys:
+            vals = [psnr.get((fire, sp, st)) for st, _ in STACKS]
+            mu.append([fr(mean(v), PSNR_DECIMALS) if v else '--' for v in vals])
+            hw.append([fr(half_ci(v), PSNR_DECIMALS) if v else '' for v in vals])
+        mu, hw = table_cells.align_rows(mu, lang), table_cells.align_rows(hw, lang)
+        f.write('\\midrule\n')
+        for n, ((fire, sp), after) in enumerate(zip(keys, rules())):
+            k = [s for s, _ in SPLITS].index(sp)
+            txt = [m if not h else '%s $\\pm$ %s' % (m, h) for m, h in zip(mu[n], hw[n])]
+            f.write('%s & %s & %s \\\\\n' % (first(fire, k), SPLITS[k][1], ' & '.join(txt)))
+            f.write(after + '\n' if after else '')
+        f.write('\\end{tabularx}\n')
 
     with open(os.path.join(OUT, lang + '_comparatif-pertes.tex'), 'w') as f:
-        f.write(HEAD + '\\begin{tabularx}{\\linewidth}{CCCCCC}\n\\toprule\n')
+        f.write(HEAD + '\\begin{tabularx}{\\linewidth}{%s}\n\\toprule\n' % PSNR_COLS)
         f.write('\\textbf{%s} & \\textbf{GOP} & ' % W['fire'] + ' & '.join('\\textbf{%s}' % lab for _, lab in STACKS) + ' \\\\\n')
+        f.write('\\midrule\n')
+        after = iter(rules())
         for fire in FIRES:
-            f.write('\\midrule\n')
             for k, (sp, lab) in enumerate(SPLITS):
                 txt = []
                 for st, _ in STACKS:
                     a, b = loss.get((fire, sp, st)), m1.get((fire, sp, st))
                     txt.append('%s / %s' % (fr(mean(a)), fr(mean(b))) if a and b else '--')
                 f.write('%s & %s & %s \\\\\n' % (first(fire, k), lab, ' & '.join(txt)))
-                f.write(rule(k, 6))
-        f.write('\\bottomrule\n\\end{tabularx}\n')
+                r = next(after)
+                f.write(r + '\n' if r else '')
+        f.write('\\end{tabularx}\n')
 
     with open(os.path.join(OUT, lang + '_comparatif-tests.tex'), 'w') as f:
-        f.write(HEAD + '\\begin{tabularx}{\\linewidth}{CCCCCCCC}\n\\toprule\n')
+        f.write(HEAD + table_cells.setup(lang) + '\n'
+                + '\\begin{tabularx}{\\linewidth}{%s}\n\\toprule\n' % TESTS_COLS)
         f.write('& & ' + ' & '.join('\\multicolumn{2}{c}{\\textbf{%s}}' % lab for _, _, lab in PAIRS) + ' \\\\\n')
         f.write(''.join('\\cmidrule(lr){%d-%d}' % (3 + 2 * i, 4 + 2 * i) for i in range(len(PAIRS))) + '\n')
-        f.write('\\textbf{%s} & \\textbf{GOP} & ' % W['fire'] + ' & '.join(['\\textbf{$\\Delta$ (dB)\\textsuperscript{1}} & \\textbf{$p$\\textsuperscript{2}}'] * len(PAIRS)) + ' \\\\\n')
+        f.write('\\textbf{%s} & \\textbf{GOP} & ' % W['fire'] + ' & '.join(['\\textbf{PSNR (dB)} & \\textbf{$p$}'] * len(PAIRS)) + ' \\\\\n')
         adj = {}
         for a, b, _ in PAIRS:
             tests = [((fi, sp), paired(psnr[(fi, sp, a)], psnr[(fi, sp, b)]))
@@ -138,16 +169,23 @@ def write(lang, rows):
             holm = stats.holm([(key, None, res[1]) for key, res in tests])
             for (key, res), (_, _, _, pa) in zip(tests, holm):
                 adj[(a, b, key)] = (res[0], pa)
+        body = []
         for fire in FIRES:
-            f.write('\\midrule\n')
             for k, (sp, lab) in enumerate(SPLITS):
                 txt = []
                 for a, b, _ in PAIRS:
                     r = adj.get((a, b, (fire, sp)))
                     txt += [('+' if r[0] >= 0 else '') + fr(r[0], 2), pfr(r[1])] if r else ['--', '--']
-                f.write('%s & %s & %s \\\\\n' % (first(fire, k), lab, ' & '.join(txt)))
-                f.write(rule(k, 8))
-        f.write('\\bottomrule\n\\end{tabularx}\n')
+                body.append(txt)
+        body = table_cells.align_rows(body, lang, pcols=(1, 3, 5))
+        f.write('\\midrule\n')
+        after = iter(rules())
+        for n, fire in enumerate(FIRES):
+            for k, (sp, lab) in enumerate(SPLITS):
+                f.write('%s & %s & %s \\\\\n' % (first(fire, k), lab, ' & '.join(body[n * len(SPLITS) + k])))
+                r = next(after)
+                f.write(r + '\n' if r else '')
+        f.write('\\end{tabularx}\n')
 
     complete = all((fi, sp, st) in psnr for fi in FIRES for sp, _ in SPLITS for st, _ in STACKS)
     if complete:
@@ -156,14 +194,19 @@ def write(lang, rows):
         # the seeds are shared across stacks and splits.
         res = anova_rm([r for r in rows if r['stack'] != 'aomdv'], 'psnr')
         with open(os.path.join(OUT, lang + '_comparatif-anova.tex'), 'w') as f:
-            f.write(HEAD + '\\begin{tabularx}{\\linewidth}{CCCCC}\n\\toprule\n')
-            # the share of variance named in the header: a note marker after
-            # eta^2_p read as a second exponent (eta_p^{22})
-            f.write('\\textbf{%s} & \\textbf{%s\\textsuperscript{1}} & ' % (W['factor'], W['df'])
+            f.write(HEAD + table_cells.setup(lang) + '\n'
+                    + '\\begin{tabularx}{\\linewidth}{%s}\n\\toprule\n' % ANOVA_COLS)
+            # the degrees of freedom of the term and of its error stratum named
+            # in the header, with no note (12 Nov 2026)
+            f.write('\\textbf{%s} & \\textbf{%s} & ' % (W['factor'], W['df'])
                     + '\\textbf{$F$} & \\textbf{$p$} & \\textbf{%s $\\eta^2_p$} \\\\\n' % W['eta'])
-            for k, (term, df, de, F, p, eta) in enumerate(res):
+            # F, p and the share of variance aligned on the decimal marker; the
+            # pair of degrees of freedom stays a centered pair
+            body = [['%d, %d' % (df, de), fr(F, 1), pfr(p), fr(eta, 2)] for _, df, de, F, p, eta in res]
+            body = table_cells.align_rows(body, lang, range(1, 4), pcols=(2,))
+            for (term, *_), terms in zip(res, body):
                 name = ' $\\times$ '.join(W['terms'][t.strip()] for t in term.split(' x '))
-                f.write('\\midrule\n%s & %d, %d & %s & %s & %s \\\\\n' % (name, df, de, fr(F, 1), pfr(p), fr(eta, 2)))
+                f.write('\\midrule\n%s & %s & %s & %s & %s \\\\\n' % ((name,) + tuple(terms)))
             f.write('\\bottomrule\n\\end{tabularx}\n')
     print('tables written to', os.path.relpath(OUT), '' if complete else '(ANOVA waits for the complete design)')
 

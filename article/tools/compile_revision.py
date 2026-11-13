@@ -9,8 +9,7 @@ A set still running is left out. A column that a slimmed set no longer provides
 stays empty. The false declarations follow metrics/fire_oracle.py: the neighbour
 was alive and the link above the floor at the instant it was declared dead.
 
-The sets of the quality coefficient 0.1 (ipFiles/GC-QC-0p1.dat, decisions d82
-to d84) take the arm of their stack with the suffix -q01, at GOP 9-3; they are
+The sets of the quality coefficient 0.1 (ipFiles/GC-QC-0p1.dat) take the arm of their stack with the suffix -q01, at GOP 9-3; they are
 compiled after the others, so that their rows follow. Only the sets of tranche
 10 (-t168-s10) are read: they simulate the 168 s of their study 09
 counterparts, whereas those of tranche 9 (-s10) stopped at 165 s.

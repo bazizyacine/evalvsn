@@ -1,3 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+//
+// This file is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 2 of the License, or (at your option)
+// any later version. It is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details.
+
 #include "priqueueEvalVSN.h"
 #include <iostream>
 #include <aomdv_qpv/aomdv_qpv.h>
@@ -8,7 +18,7 @@ using namespace std;
 #define DROP_IFQ_QFULL_NEW "NEW"
 #define DROP_IFQ_QFULL_SHRK "SHRK"
 #define DROP_IFQ_MANUAL_DROP "MANU"
-#define DROP_IFQ_EARLY_DISCARD "EDIS" // discarded by the early discard by priority (d27)
+#define DROP_IFQ_EARLY_DISCARD "EDIS" // discarded by the early discard by priority
 
 static class priqueueEvalVSNClass : public TclClass
 {
@@ -138,7 +148,7 @@ void priqueueEvalVSN::reset()
  */
 void priqueueEvalVSN::enque(Packet *p)
 {
-    // Early discard by priority (d27): under congestion the agent discards the
+    // Early discard by priority: under congestion the agent discards the
     // video packets of least value before they take the channel.
     if (aomdv_qpv_agent_ && !aomdv_qpv_agent_->discardAdmit(p))
     {

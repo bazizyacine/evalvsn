@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# lib/common.sh - functions shared by the EvalVSN chain scripts.
+# lib/common.sh - functions shared by the simulation scripts.
 #
 # Source it at the top of a script:
 #   source "$(dirname "$(readlink -f "$0")")/lib/common.sh"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Why a D frame of the fire video holds more bytes than an M frame (a question of
-the Sensors revision): EvalVSN's coding chain reproduced on the images EvalVSN
+the Sensors revision): the coding of the EvalVSN tool reproduced on the images EvalVSN
 itself captured for the article's three GOPs, compiled into one TSV so that no
 number of the methods or of the reply letter is read by hand.
 
@@ -27,7 +27,7 @@ Inputs: the encodings of the article's sets,
 experiments/sets/set_AOMDV_QPV_GC-PN-{0p01597,0p02525,0p03}-13_p9-n100-d40-fire-rules/
 encoding/fire_qcif-*/ (capturedImages/, allImages/, st-frame.dat, st-priority.dat),
 their encoder files experiments/ipFiles/GC-PN-*-13.dat, and the frame rate of
-evalvsn/videos/fire_qcif.avi (ffprobe). The chain mirrors evalvsn/src, file:line
+evalvsn/videos/fire_qcif.avi (ffprobe). The reproduction mirrors evalvsn/src, file:line
 in the comments; the tool stops without writing if one frame differs from its
 trace. Needs numpy and Pillow.
 

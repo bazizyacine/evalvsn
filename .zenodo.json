@@ -1,15 +1,35 @@
 {
   "title": "EvalVSN: reinforcement learning agents in a cross-layer stack for video over wireless sensor networks",
-  "version": "v2.0.0",
+  "version": "v2.0.1",
   "upload_type": "software",
   "access_right": "open",
   "license": "GPL-3.0-only",
   "language": "eng",
-  "description": "Supporting material for the article Reinforcement Learning Agents in a Cross-Layer Stack for Forest Fire Video Surveillance over Wireless Sensor Networks (M. Y. Baziz, L. Sekhri and B. Kechar), submitted to Sensors (MDPI), in the version of the revised manuscript: the ns-2.35 modules, the EvalVSN codec and evaluation chain, the simulation and measurement scripts, the results of every simulation of studies 09 and 10 with their seeds, the measurements behind the article, and the exact commands that reproduce them. The code is under GPL-3.0, the data under CC BY 4.0 (LICENSE-data).",
-  "keywords": ["wireless sensor networks", "video", "cross-layer", "reinforcement learning", "forest fire", "IEEE 802.15.4", "multipath routing"],
+  "description": "Material that accompanies the article “Reinforcement Learning Agents in a Cross-Layer Stack for Forest Fire Video Surveillance over Wireless Sensor Networks”, by Mohammed Yassine Baziz, Larbi Sekhri and Bouabdellah Kechar, under revision in Sensors (MDPI), manuscript sensors-4703240. Version v2.0.1 corresponds to the revised manuscript. It contains the code of the EvalVSN tool, the modules added to or modified in ns-2.35, the simulation and measurement scripts, the results of each simulation and the tools that produce the tables and figures of the article; the README gives, for each table and each figure drawn from the data, the command that reproduces it. The source videos, taken from the FLAME 2 dataset, are not redistributed. Licenses: the EvalVSN tool and the scripts under the GNU GPL 3.0; in the ns-2 modules, the files written by the authors under the GNU GPL 2.0 or later, and the files derived from ns-2 and AOMDV under their original license; data and tables under CC BY 4.0; the images decoded from a FLAME 2 video keep the terms of that dataset; the Twemoji pictograms are under CC BY 4.0 (Twitter, Inc. and other contributors).",
+  "keywords": [
+    "wireless sensor networks",
+    "video",
+    "cross-layer",
+    "reinforcement learning",
+    "forest fire",
+    "IEEE 802.15.4",
+    "multipath routing"
+  ],
   "creators": [
-    {"name": "Baziz, Mohammed Yassine", "affiliation": "Laboratory of Research in Industrial Computing and Networks (RIIR), University of Oran 1 Ahmed Ben Bella, Oran, Algeria", "orcid": "0009-0003-2860-3444"},
-    {"name": "Sekhri, Larbi", "affiliation": "Laboratory of Research in Industrial Computing and Networks (RIIR), University of Oran 1 Ahmed Ben Bella, Oran, Algeria", "orcid": "0009-0008-9679-8147"},
-    {"name": "Kechar, Bouabdellah", "affiliation": "Laboratory of Research in Industrial Computing and Networks (RIIR), University of Oran 1 Ahmed Ben Bella, Oran, Algeria", "orcid": "0000-0001-8635-4667"}
+    {
+      "name": "Baziz, Mohammed Yassine",
+      "affiliation": "Laboratory of Research in Industrial Computing and Networks (RIIR), Computer Science Department, Faculty of Exact and Applied Sciences, University of Oran 1 Ahmed Ben Bella, Oran, Algeria",
+      "orcid": "0009-0003-2860-3444"
+    },
+    {
+      "name": "Sekhri, Larbi",
+      "affiliation": "Laboratory of Research in Industrial Computing and Networks (RIIR), Computer Science Department, Faculty of Exact and Applied Sciences, University of Oran 1 Ahmed Ben Bella, Oran, Algeria",
+      "orcid": "0009-0008-9679-8147"
+    },
+    {
+      "name": "Kechar, Bouabdellah",
+      "affiliation": "Laboratory of Research in Industrial Computing and Networks (RIIR), Computer Science Department, Faculty of Exact and Applied Sciences, University of Oran 1 Ahmed Ben Bella, Oran, Algeria",
+      "orcid": "0000-0001-8635-4667"
+    }
   ]
 }

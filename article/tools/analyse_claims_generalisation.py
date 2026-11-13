@@ -275,8 +275,11 @@ def main():
           '2,61 à 4,16 de moins ; ≤ 0,032 ; 4,93',
           [(min(-m1[v]['d'] for v in three), '=', 2.61, 2), (max(-m1[v]['d'] for v in three), '=', 4.16, 2),
            (max(m1[v]['holm'] for v in three), '<=', 0.032, 4), (-gap('hybrid', 'rules', m='m1loss')['d'], '=', 4.93, 2)])
-    claim('G05', 'échange, perte de M1 (points) ; Holm ; PSNR (dB)', '−1,90 (−3,82 à 0,01) ; 0,10 ; 1,25',
-          pair_checks(m1['swap'], -1.90, -3.82, 0.01) + [(m1['swap']['holm'], '=', 0.10, 2), (hr['swap']['d'], '=', 1.25, 2)])
+    # The text writes the difference at one decimal, as every other M1-loss
+    # difference (MDPI check of 13 Nov 2026, 4.5): -1.9, checked at one decimal.
+    claim('G05', 'échange, perte de M1 (points) ; Holm ; PSNR (dB)', '−1,9 (−3,82 à 0,01) ; 0,10 ; 1,25',
+          [(m1['swap']['d'], '=', -1.9, 1), (m1['swap']['lo'], '=', -3.82, 2), (m1['swap']['hi'], '=', 0.01, 2),
+           (m1['swap']['holm'], '=', 0.10, 2), (hr['swap']['d'], '=', 1.25, 2)])
     three_u = ('smoke', 'swap', 'v15')
     claim('G05', 'images exploitables, fumée, échange, vitesse : min., max. ; Holm max. ; référence', '0,98 à 1,85 ; ≤ 0,002 ; 1,93',
           [(min(us[v]['d'] for v in three_u), '=', 0.98, 2), (max(us[v]['d'] for v in three_u), '=', 1.85, 2),

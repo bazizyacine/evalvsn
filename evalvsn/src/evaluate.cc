@@ -421,7 +421,7 @@ double psnrEvaluate(Mat_<double> capturedFrame, Mat_<double> decodedFrame)
         // An exact frame scores the PSNR of the smallest error a frame can
         // carry, one grey level on one pixel: above every lossy frame, so the
         // measure stays monotone (the former 60 dB sat under the 68 dB of a
-        // near-lossless frame, finding X-33).
+        // near-lossless frame).
         psnr = 10.0 * log10((255.0 * 255.0) * capturedFrame.total());
     }
 

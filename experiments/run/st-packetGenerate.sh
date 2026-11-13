@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Turns the encoder's packets, one per line of st-priority.dat since d53
+# Turns the encoder's packets, one per line of st-priority.dat
 # (each cut on whole code words, at most the payload), into st-packet.dat in
 # the current directory, with their send times. A line longer than the
-# payload - an encoding made before d53 - is still cut into slices.
+# payload - an encoding in the earlier format, one line per level - is still cut into slices.
 #
 # Usage: st-packetGenerate.sh -st st-priority.dat -mpl max_payload
 #        [-period P] [-ipt T] [-detect D]

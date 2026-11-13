@@ -2,20 +2,24 @@
 """Draw the article's plots from the data the repository keeps, into
 src/figures/<lang>_*.png at 600 dpi (MDPI takes PNG, JPEG or TIFF, not PDF).
 
-The figures follow the thesis's conventions (its plot_survie.py):
-serif type, means only, the panels lettered and captioned under each panel,
-one framed legend at the top right with one entry per line, legend colours
-equal to the marks', the edition's decimal marker on the axes. The colours
-are the Okabe-Ito palette, readable under every colour-vision deficiency.
+The figures follow the thesis's conventions (its plot_survie.py): means
+only, the panels lettered and captioned under each panel, one framed legend
+at the top right, legend colours equal to the marks', the edition's decimal
+marker on the axes. The colours are the Okabe-Ito palette, readable under
+every colour-vision deficiency, one colour per stack in every figure (grey
+AOMDV, blue rule stack, orange agents stack, green hybrid stack; the
+architecture's TikZ uses the same). The type is a sans-serif, Liberation
+Sans (Arial's metrics), the Helvetica of the TikZ diagrams.
 
 Each figure is drawn at the width it prints at (PRINT below, the width of
 its \\includegraphics in sections/fr_*.tex), so that its type prints at the
 size set here: 8 pt for ticks, legends and labels, 9 pt for axis titles.
 The PNG is 8-bit RGB without alpha, as MDPI asks.
 
-Inputs: src/data/comparative.tsv (the 360 simulations of study 09) and
+Inputs: src/data/comparative.tsv (the 720 simulations of study 09) and
 src/data/fire-map-F1.tsv to fire-map-F3.tsv (its three fires), both from
-compile_comparative.py; src/data/galerie/*.png (frames decoded at the sink).
+compile_comparative.py; src/data/galerie/*.png (frames decoded at the sink)
+and src/data/frames.tsv (their PSNR and M1 loss, from compile_frames.py).
 
 Usage:
     python3 tools/make_figures.py [--lang fr|en|both]
@@ -43,13 +47,16 @@ sys.path.insert(0, HERE)
 
 INK, MUTED, GRID = '#1a1a19', '#6b6a63', '#d9d8d0'
 plt.rcParams.update({
-    'font.family': 'serif', 'font.size': 9, 'axes.titlesize': 9.5,
+    'font.family': 'sans-serif', 'font.sans-serif': ['Liberation Sans', 'DejaVu Sans'],
+    'font.size': 9, 'axes.titlesize': 9.5,
     'axes.labelsize': 9, 'legend.fontsize': 8, 'xtick.labelsize': 8, 'ytick.labelsize': 8,
     'axes.edgecolor': MUTED, 'axes.labelcolor': INK, 'xtick.color': MUTED, 'ytick.color': MUTED,
     'axes.spines.top': False, 'axes.spines.right': False,
     'grid.color': GRID, 'grid.linewidth': 0.6, 'axes.grid': True, 'axes.axisbelow': True,
     'lines.linewidth': 1.6, 'lines.markersize': 5,
-    'mathtext.fontset': 'dejavuserif',  # the symbols in the serif of the labels
+    # the symbols in the sans-serif of the labels
+    'mathtext.fontset': 'custom', 'mathtext.rm': 'Liberation Sans', 'mathtext.it': 'Liberation Sans:italic',
+    'mathtext.bf': 'Liberation Sans:bold', 'mathtext.sf': 'Liberation Sans', 'mathtext.fallback': 'stixsans',
 })
 # The print widths, in inches: the MDPI class's \textwidth (394.355 pt) or its
 # full width under adjustwidth (525.522 pt), times the factor of the figure's
@@ -63,6 +70,8 @@ PAD = 0.04  # white margin around the drawing, inches
 # Okabe-Ito
 GREY, BLUE, SKY, ORANGE, GREEN, VERMIL, PURPLE, YELLOW = (
     '#999999', '#0072B2', '#56B4E9', '#E69F00', '#009E73', '#D55E00', '#CC79A7', '#F0E442')
+# tints of the rule stack's blue, for the early discard's admission region
+RULE_FILL, RULE_CORE = '#d4e6f3', '#9ec6e4'
 LANG = 'fr'
 T = {
     'fr': {'psnr': 'PSNR au puits (dB)',
@@ -70,10 +79,12 @@ T = {
            'x': '$x$ (m)', 'y': '$y$ (m)', 'alive': 'relais en service', 'zone': 'zone chauffée, TZ = 60 s',
            'burnt': 'surface brûlée', 'front': 'détruit par le front', 'early': 'en panne avant le front',
            'heated': 'relais dans la zone chauffée', 'camera': 'caméra (0, 0), mode alarme', 'sink': 'puits (360, 360)', 'ignition': 'allumage du feu',
-           'wind': 'vent $U$', 't': '$t$ = %d s', 'ic': 'IC', 'rank': '$(\\rho - 1)/2L$',
+           'forest': 'forêt instrumentée',
+           'wind': 'vent $U$', 't': '$t$ = %d s', 'ic': 'IC', 'rank': '$(\\rho - 1)/(2L)$',
            'admitted': 'admis, IC$_0$ = 0,2', 'other': 'limite pour IC$_0$ = 0,1, 0,3 ou 0,5',
            'mframes': 'frames M', 'dframes': 'frames D', 'always': '$\\rho \\leq 3$ toujours admis',
            'ref': 'codée,\nsans perte réseau',
+           # the stacks' short names, those of the tables (vocabulary-symbols.md)
            'stack': {'aomdv': 'AOMDV', 'rules': 'Règles', 'agents': 'Agents', 'hybrid': 'Hybride'},
            'md': 'GOP (M-D)', 'm1loss': 'perte du niveau M1 (%)'},
     'en': {'psnr': 'PSNR at the sink (dB)',
@@ -81,12 +92,13 @@ T = {
            'x': '$x$ (m)', 'y': '$y$ (m)', 'alive': 'relay in service', 'zone': 'heated zone, TZ = 60 s',
            'burnt': 'burned area', 'front': 'destroyed by the front', 'early': 'failed before the front',
            'heated': 'relay in the heated zone', 'camera': 'camera (0, 0), alarm mode', 'sink': 'sink (360, 360)', 'ignition': 'fire ignition',
-           'wind': 'wind $U$', 't': '$t$ = %d s', 'ic': 'IC', 'rank': '$(\\rho - 1)/2L$',
+           'forest': 'instrumented forest',
+           'wind': 'wind $U$', 't': '$t$ = %d s', 'ic': 'IC', 'rank': '$(\\rho - 1)/(2L)$',
            'admitted': 'admitted, IC$_0$ = 0.2', 'other': 'limit for IC$_0$ = 0.1, 0.3 or 0.5',
            'mframes': 'M frames', 'dframes': 'D frames', 'always': '$\\rho \\leq 3$ always admitted',
            'ref': 'coded,\nno network loss',
            'stack': {'aomdv': 'AOMDV', 'rules': 'Rules', 'agents': 'Agents', 'hybrid': 'Hybrid'},
-           'md': 'GOP (M-D)', 'm1loss': 'level M1 loss (%)'},
+           'md': 'GOP (M-D)', 'm1loss': 'M1 level loss (%)'},
 }
 
 
@@ -108,10 +120,12 @@ def letter_panels(axes, titles):
         a.set_xlabel((xl + '\n\n' if xl else '') + f'({chr(97 + i)}) {titles[i]}')
 
 
-def top_legend(fig, handles, labels, ncol=1):
-    return fig.legend(handles, labels, loc='upper right', bbox_to_anchor=(1.0, 1.0), ncol=ncol, frameon=True,
-                      fancybox=False, edgecolor='#9a9a92', framealpha=1.0, borderpad=0.5, handlelength=1.8,
-                      labelspacing=0.35, borderaxespad=0.1)
+def top_legend(fig, handles, labels, ncol=1, **kw):
+    style = dict(loc='upper right', bbox_to_anchor=(1.0, 1.0), ncol=ncol, frameon=True, fancybox=False,
+                 edgecolor='#9a9a92', framealpha=1.0, borderpad=0.5, handlelength=1.8, labelspacing=0.35,
+                 borderaxespad=0.1)
+    style.update(kw)
+    return fig.legend(handles, labels, **style)
 
 
 def below(fig, artist, gap=0.06):
@@ -137,14 +151,21 @@ def fit_width(fig, name, layout=None, keep_aspect=False):
         layout()
 
 
-def save(fig, name):
-    """600 dpi, 8-bit RGB: matplotlib writes RGBA, MDPI asks for RGB."""
+def save(fig, name, fill_print=False):
+    """600 dpi, 8-bit RGB: matplotlib writes RGBA, MDPI asks for RGB.
+    `fill_print`: the drawing is narrower than its print width, which the
+    \\includegraphics enlarges; the dpi rises so that the PNG still prints at
+    600 ppi or more (one more dot per inch for pdfTeX's rounding of the scale)."""
     path = os.path.join(OUT, f'{LANG}_{name}.png')
+    dpi = 600
+    if fill_print:
+        w = fig.get_tightbbox(fig.canvas.get_renderer()).width + 2 * PAD
+        dpi = max(600, math.ceil(600 * PRINT[name] / w) + 1)
     buf = io.BytesIO()
-    fig.savefig(buf, format='png', dpi=600, bbox_inches='tight', pad_inches=PAD, facecolor='white')
+    fig.savefig(buf, format='png', dpi=dpi, bbox_inches='tight', pad_inches=PAD, facecolor='white')
     plt.close(fig)
     buf.seek(0)
-    Image.open(buf).convert('RGB').save(path, dpi=(600, 600))
+    Image.open(buf).convert('RGB').save(path, dpi=(dpi, dpi))
     return os.path.basename(path)
 
 
@@ -204,16 +225,23 @@ def scenario_figure():
     The maps print as large as before the print-size drawing (7.14 in drawn,
     printed at the PRINT width): the pictograms, discs and strokes are scaled
     by g, the type is not, so that it prints at 9 pt (panels), 8 pt (wind and
-    legend)."""
+    legend). The layout is set in inches from the bottom: the legend, a gap,
+    the panel captions, then the maps, whose wind band is just tall enough for
+    its arrow and label."""
     import random
     L = T[LANG]
     t = 150
     W = PRINT['scenario-carte'] - 2 * PAD
     g = PRINT['scenario-carte'] / 7.14  # the drawn width before, at the same map size on paper
     fires = [('F%d' % k,) + read_map('fire-map-F%d.tsv' % k) for k in (1, 2, 3)]
-    fig = plt.figure(figsize=(W, 3.32))
-    H = fig.get_figheight()
-    axes = [fig.add_axes((0.005 + k * 0.333, 0.30, 0.325, 0.69)) for k in range(3)]
+    # inches: the legend's height and bottom, the gap under the panel captions,
+    # the captions' band, the maps' height (their width, 0.325 W, sets the
+    # scale: 430 m across, 467 m high with the wind band)
+    lh, lb, gap, cap = 0.655, 0.02, 0.06, 0.22
+    mh = 0.325 * W * 467 / 430
+    H = lb + lh + gap + cap + mh + 0.01
+    fig = plt.figure(figsize=(W, H))
+    axes = [fig.add_axes((0.005 + k * 0.333, (lb + lh + gap + cap) / H, 0.325, mh / H)) for k in range(3)]
     for k, (ax, (label, meta, rows)) in enumerate(zip(axes, fires)):
         forest = ax.add_patch(plt.Rectangle((-32, -32), 424, 424, facecolor=FOREST, edgecolor='#7fae6a',
                                             lw=1.0 * g, zorder=0))
@@ -245,21 +273,25 @@ def scenario_figure():
         place(ax, 'fire', meta['ix'], meta['iy'], 0.05 * g, z=6)
         # The wind, in a band above the map so that it hides no relay.
         th = math.radians(meta['wind_dir'])
-        cx, cy, r = 150, 420, 22
+        cx, cy, r = 150, 412, 20
         ax.annotate('', xy=(cx + r * math.cos(th), cy + r * math.sin(th)),
                     xytext=(cx - r * math.cos(th), cy - r * math.sin(th)),
                     arrowprops=dict(arrowstyle='-|>', color=INK, lw=1.4 * g), zorder=8)
         ax.text(cx - 40, cy, L['wind'], fontsize=8, color=INK, ha='right', va='center', zorder=8)
-        ax.set_xlim(-35, 395); ax.set_ylim(-35, 450); ax.set_aspect('equal')
+        ax.set_xlim(-35, 395); ax.set_ylim(-35, 432); ax.set_aspect('equal')
         ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
         for sp in ax.spines.values():
             sp.set_visible(False)
         ax.set_xlabel(f'({chr(97 + k)}) {label}, ' + L['t'] % t, labelpad=4)
     # The legend, framed under the panels: three columns, each as wide as its
-    # longest label, so that 8 pt type fits the print width.
-    items = [(('disc', S_ALIVE), L['alive']), (('disc', S_ZONE), L['heated']), (('disc', S_EARLY), L['early']),
-             (('disc', S_FRONT), L['front']), (('patch', '#f0b8a8'), L['burnt']), (('patch', '#fbe3c4'), L['zone']),
-             (('icon', 'camera'), L['camera']), (('icon', 'sink'), L['sink']), (('icon', 'fire'), L['ignition'])]
+    # longest label, so that 8 pt type fits the print width; the relays'
+    # four states, the three grounds (burnt area, heated zone, the forest and
+    # its trees, which MDPI asks to explain like every pictogram), the three
+    # pictograms of the camera, the sink and the fire.
+    columns = [[(('disc', S_ALIVE), L['alive']), (('disc', S_ZONE), L['heated']), (('disc', S_EARLY), L['early']),
+                (('disc', S_FRONT), L['front'])],
+               [(('patch', '#f0b8a8'), L['burnt']), (('patch', '#fbe3c4'), L['zone']), (('forest', None), L['forest'])],
+               [(('icon', 'camera'), L['camera']), (('icon', 'sink'), L['sink']), (('icon', 'fire'), L['ignition'])]]
     rnd_ = fig.canvas.get_renderer()
 
     def width(s, fs):
@@ -268,27 +300,39 @@ def scenario_figure():
         tx.remove()
         return w
     fs, key, gap, margin = 8, 0.24, 0.22, 0.10  # inches: the key and its gap, between columns, inside the frame
-    cols = [max(width(lab, fs) for _, lab in items[c * 3:c * 3 + 3]) + key for c in range(3)]
+    cols = [max(width(lab, fs) for _, lab in col) + key for col in columns]
     total = sum(cols) + 2 * gap + 2 * margin
-    lh = 0.62  # legend height, inches
-    lax = fig.add_axes(((W - total) / 2 / W, 0.012, total / W, lh / H))
+    lax = fig.add_axes(((W - total) / 2 / W, lb / H, total / W, lh / H))
     lax.set_xlim(0, total); lax.set_ylim(0, lh)
     lax.set_xticks([]); lax.set_yticks([]); lax.grid(False)
     for sp in lax.spines.values():
         sp.set_visible(True); sp.set_edgecolor('#9a9a92'); sp.set_linewidth(0.8)
-    for k, ((kind, val), label) in enumerate(items):
-        c = k // 3
-        cx = margin + sum(cols[:c]) + c * gap
-        cy = lh * (0.80 - (k % 3) * 0.30)
-        if kind == 'disc':
-            lax.plot(cx + 0.07, cy, 'o', ms=7 * g, color=val, markeredgecolor='white')
-            place(lax, 'relay', cx + 0.07, cy, 0.018 * g)
-        elif kind == 'icon':
-            place(lax, val, cx + 0.07, cy, 0.032 * g)
-        else:
-            lax.add_patch(plt.Rectangle((cx, cy - 0.065), 0.15, 0.13, facecolor=val, edgecolor='#b03a2e', lw=0.6))
-        lax.text(cx + key, cy, label, va='center', ha='left', fontsize=fs, color=INK)
-    return save(fig, 'scenario-carte')
+    for c, col in enumerate(columns):
+        for r, ((kind, val), label) in enumerate(col):
+            # rows 0.155 in apart from the top; a three-entry column leaves its last row empty
+            cx = margin + sum(cols[:c]) + c * gap
+            cy = lh / 2 + (1.5 - r) * 0.155
+            draw_key(lax, kind, val, cx, cy)
+            lax.text(cx + key, cy, label, va='center', ha='left', fontsize=fs, color=INK)
+    # the maps span 0.991 of W, so the PNG is 0.9 % narrower than it prints
+    return save(fig, 'scenario-carte', fill_print=True)
+
+
+def draw_key(lax, kind, val, cx, cy):
+    """One key of the scenario legend, left edge at cx, centred on cy (inches)."""
+    g = PRINT['scenario-carte'] / 7.14
+    if kind == 'disc':
+        lax.plot(cx + 0.07, cy, 'o', ms=7 * g, color=val, markeredgecolor='white')
+        place(lax, 'relay', cx + 0.07, cy, 0.018 * g)
+    elif kind == 'icon':
+        place(lax, val, cx + 0.07, cy, 0.032 * g)
+    elif kind == 'forest':  # the map's ground and edge, with one of its trees
+        lax.add_patch(plt.Rectangle((cx, cy - 0.05), 0.15, 0.10, facecolor=FOREST, edgecolor='#7fae6a', lw=0.8))
+        place(lax, 'tree', cx + 0.075, cy, 0.028 * g)
+    else:  # the edges of the map's ellipses: solid for the burnt area, dashed for the heated zone
+        burnt = val == '#f0b8a8'
+        lax.add_patch(plt.Rectangle((cx, cy - 0.05), 0.15, 0.10, facecolor=val, lw=0.8 if burnt else 0.7,
+                                    edgecolor='#b03a2e' if burnt else '#e0a060', ls='-' if burnt else '--'))
 
 
 # --- the early discard ------------------------------------------------------------
@@ -300,10 +344,12 @@ def discard_figure():
 
     def limit(ic0):
         return np.clip(np.where(ic <= ic0, 1.0, 1 - (ic - ic0) / 0.4), 0, 1)
-    fig, ax = plt.subplots(figsize=(3.95, 2.85))
-    ax.fill_between(ic, 0, limit(0.2), color='#cfe8d9', zorder=1)
-    ax.fill_between(ic, 0, 3 / (2 * Lv), color='#9fd3b5', zorder=1)
-    ax.plot(ic, limit(0.2), color=GREEN, lw=1.8, zorder=3)
+    fig, ax = plt.subplots(figsize=(3.95, 2.72))
+    # IC_0 = 0.2 is the rule stack's threshold: its region takes the rule
+    # stack's blue, the agent's other thresholds stay grey
+    ax.fill_between(ic, 0, limit(0.2), color=RULE_FILL, zorder=1)
+    ax.fill_between(ic, 0, 3 / (2 * Lv), color=RULE_CORE, zorder=1)
+    ax.plot(ic, limit(0.2), color=BLUE, lw=1.8, zorder=3)
     for ic0 in (0.1, 0.3, 0.5):
         ax.plot(ic, limit(ic0), color=GREY, lw=0.9, ls='--', zorder=2)
     ax.axhline(0.5, color=MUTED, lw=0.8, ls=':')
@@ -312,10 +358,10 @@ def discard_figure():
     ax.set_xlim(0, 1); ax.set_ylim(0, 1)
     ax.set_xlabel(L['ic']); ax.set_ylabel(L['rank'])
     decimal_axes(ax)
-    h = [Patch(facecolor='#cfe8d9', edgecolor=GREEN), Patch(facecolor='#9fd3b5'),
+    h = [Patch(facecolor=RULE_FILL, edgecolor=BLUE), Patch(facecolor=RULE_CORE),
          Line2D([], [], color=GREY, lw=0.9, ls='--')]
     leg = top_legend(fig, h, [L['admitted'], L['always'], L['other']])
-    fit_width(fig, 'rejet-anticipe', lambda: fig.tight_layout(rect=(0, 0, 1, below(fig, leg)), pad=0.5))
+    fit_width(fig, 'rejet-anticipe', lambda: fig.tight_layout(rect=(0, 0, 1, below(fig, leg, 0.01)), pad=0.3))
     return save(fig, 'rejet-anticipe')
 
 
@@ -339,7 +385,7 @@ def comp_figure(c, metric, ylabel, name, floor=False, ylim=None, yticks=None):
     """One panel per fire, the M-D split on the x axis, one line per stack;
     means only, the tables carry the deviations and the tests."""
     L = T[LANG]
-    fig, axes = plt.subplots(1, 3, figsize=(PRINT[name], 2.85), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(PRINT[name], 2.72), sharey=True)
     for ax, fire in zip(axes, ('F1', 'F2', 'F3')):
         for st, col, mk in STACKS:
             xs, ys = [], []
@@ -354,6 +400,7 @@ def comp_figure(c, metric, ylabel, name, floor=False, ylim=None, yticks=None):
         ax.set_xticks(range(len(SPLITS)))
         ax.set_xticklabels([lab for _, lab in SPLITS])
         ax.set_xlabel(L['md'])
+        ax.grid(False, axis='x')  # three categories: the ticks suffice
         if ylim:
             ax.set_ylim(*ylim)
         if yticks is not None:  # the ticks of the larger drawing, kept at print size
@@ -366,17 +413,45 @@ def comp_figure(c, metric, ylabel, name, floor=False, ylim=None, yticks=None):
         ax.set_xticklabels([lab for _, lab in SPLITS])
     h, lab = axes[0].get_legend_handles_labels()
     leg = top_legend(fig, h, lab, ncol=len(h))
-    fit_width(fig, name, lambda: fig.tight_layout(rect=(0, 0, 1, below(fig, leg)), pad=0.5, w_pad=0.8))
+    fit_width(fig, name, lambda: fig.tight_layout(rect=(0, 0, 1, below(fig, leg, 0.01)), pad=0.3, w_pad=0.8))
     return save(fig, name)
 
 
-def gallery_figure(c):
+# The gallery's frame (src/data/galerie/README.md): image 8 of r01, F1, GOP
+# 9-3, T = 9 s (study 09); the arms of frames.tsv, AOMDV being 'pq'.
+GALLERY = {'fire': 'F1', 'period': 'p9', 'realisation': 'r01', 'image': '8'}
+ARM = {'aomdv': 'pq', 'rules': 'rules', 'agents': 'agents', 'hybrid': 'hybrid'}
+
+
+def gallery_frame():
+    """The gallery frame's PSNR at the sink (dB) and the loss of its first
+    level (%), per stack, read in frames.tsv; the frame is a main one, so
+    that level is M1."""
+    out, head = {}, None
+    for line in open(os.path.join(DATA, 'frames.tsv'), encoding='utf8'):
+        if line.startswith('#'):
+            continue
+        v = line.rstrip('\n').split('\t')
+        if head is None:
+            head = v
+            continue
+        r = dict(zip(head, v))
+        if all(r[k] == x for k, x in GALLERY.items()):
+            out[r['arm']] = r
+    for st, arm in ARM.items():
+        if out.get(arm, {}).get('type') != 'M':
+            sys.exit(f'frames.tsv: no main frame {GALLERY} for {arm}')
+    return {st: (float(out[arm]['psnr']), float(out[arm]['l1loss'])) for st, arm in ARM.items()}
+
+
+def gallery_figure():
     """Frame 8 of the first simulation of F1 at the 9-3 split (study 09),
     coded without network loss then as the sink decodes it for each stack;
-    under each, the PSNR of that simulation."""
+    under each, the PSNR of that frame and the loss of its M1 level."""
     L = T[LANG]
     stacks = [('reference', None), ('aomdv', 'aomdv'), ('rules', 'rules'), ('agents', 'agents'),
               ('hybrid', 'hybrid')]
+    frame = gallery_frame()
     fig, axes = plt.subplots(1, len(stacks), figsize=(PRINT['galerie'], 1.80))
     titles = []
     for ax, (f, st) in zip(axes, stacks):
@@ -388,8 +463,8 @@ def gallery_figure(c):
         if st is None:
             titles.append(L['ref'])
         else:
-            r01 = [r for r in c[('F1', '9M3D', st)] if r['real'] == 'r01'][0]
-            titles.append(L['stack'][st] + '\n' + num(float(r01['psnr'])) + ' dB')
+            psnr, m1 = frame[st]
+            titles.append(L['stack'][st] + '\n' + num(psnr) + ' dB, M1 ' + num(m1, 0) + ' %')
     for i, (ax, t) in enumerate(zip(axes, titles)):
         ax.set_xlabel(f'({chr(97 + i)}) ' + t, fontsize=8)
     fit_width(fig, 'galerie', lambda: fig.tight_layout(w_pad=0.5))
@@ -411,7 +486,7 @@ def main():
                           yticks=range(16, 31, 2)))
         print(comp_figure(c, 'm1loss', T[LANG]['m1loss'], 'comparatif-m1', ylim=(0, 80),
                           yticks=range(0, 81, 10)))
-        print(gallery_figure(c))
+        print(gallery_figure())
 
 
 if __name__ == '__main__':

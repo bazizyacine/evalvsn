@@ -1,4 +1,14 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:t; -*- */
+// SPDX-License-Identifier: GPL-2.0-or-later
+//
+// This file is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 2 of the License, or (at your option)
+// any later version. It is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details.
+
 //
 // phy-802_15_4EvalVSN.h - the 802.15.4 PHY carrying the EvalVSN cross-layer
 // measures.
@@ -53,7 +63,7 @@ public:
 	void onTxPowerFeedback(nsaddr_t neighbor, bool reported, double rssiDbm,
 			       double sinrDb);
 	bool txPowerControlled() const { return TxPowerAdapt_ != 0; }
-	// The learning power of the MAC (RL_POWER_, d22) sets the step towards
+	// The learning power of the MAC (RL_POWER_) sets the step towards
 	// a neighbour frame by frame; from its first call the PHY applies the
 	// steps it is given and stops scoring the HELLO reports.
 	void setExternalStep(nsaddr_t neighbor, int step)

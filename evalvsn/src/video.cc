@@ -323,7 +323,7 @@ int videoDecoder(inputParameters IP, string videoFile, string outputDirectory)
 
     // The first frame, always of type M, decodes from what survived even
     // when nothing did: every coefficient at zero, a uniform grey (the
-    // decoder before d53 read the sender's stream and always had it).
+    // earlier decoder read the sender's stream and always had it).
     if (decodedFrames[0].frameNb != 1)
     {
         decodedFrames[0].frameNb = 1;

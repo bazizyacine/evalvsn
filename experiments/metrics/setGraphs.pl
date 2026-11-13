@@ -387,7 +387,7 @@ sub calculate_Applicative_Metrics {
         my ($frameNb, $psnr) = split /\t/, $line;
         next unless defined $psnr && $psnr ne 'na';
         # A frame none of whose packets arrived is the previous image held
-        # on screen: neither decoded nor usable (finding X-34).
+        # on screen: neither decoded nor usable.
         my $done = $frame_done{$frameNb};
         next unless defined $done;
         $decoded++;
@@ -489,7 +489,7 @@ sub calculate_Jitter {
     # Delay and jitter. The jitter is the mean variation of the delay
     # between two packets received in a row, |d(i) - d(i-1)| (the IP packet
     # delay variation of RFC 3393); it used to be the gap between their
-    # arrival times, which measures the pacing, not the delay (X-34).
+    # arrival times, which measures the pacing, not the delay.
     my (@delays, @jitters);
     my $prev_delay;
     for my $id (sort { $recv_packets{$a} <=> $recv_packets{$b} } keys %recv_packets) {

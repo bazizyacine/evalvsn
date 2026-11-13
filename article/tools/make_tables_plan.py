@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Tables of the experimental plan of the Sensors revision (decisions d70 and
-d83), French and English: tab:fr-plan / tab:en-plan, one row per experiment and
-per measure, and tab:fr-equite / tab:en-equite, what each comparison changes
+"""Tables of the experimental plan of the Sensors revision, French and English: tab:fr-plan / tab:en-plan, one row per series of an
+experiment (the experiment, its question, counts and sections written once over
+its series), and tab:fr-equite / tab:en-equite, what each comparison changes
 besides its factor.
 
-The plan (decision d83, amended by d84, 11 November 2026): six experiments, E0 to
+The plan: six experiments, E0 to
 E5, and two measures named without a code, the agents' traces and the overheads
 for a node. An experiment holds one series or several (the levels or groups of
 variants of its factor); each series keeps its own Holm family.
@@ -22,6 +22,8 @@ PHD_EXPERIMENTS=DIR overrides the experiments directory (a copy run elsewhere).
 import os
 import re
 import sys
+
+import table_cells
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
@@ -43,7 +45,7 @@ RULES = (
     ('E5', 'fire', r'-(az015|az05|az165|pf0|pf025|pf075|fd1)-s10$'),
     ('E5', 'scenario', r'-(forest|smoke|j8|swap|v15)-s10$'),
     # the coding series at 0.1 was first run at 165 s (tranche 9); the article
-    # reads its replay at 168 s (tranche 10); the 165 s sets were purged (d86)
+    # reads its replay at 168 s (tranche 10); the 165 s sets were purged
     # and are commented out in sets.txt
     ('E4', 'coding', r'_GC-QC-0p1_.*-t168-s10$'),
 )
@@ -51,7 +53,7 @@ ORDER = ('E0', 'E1', 'E2', 'E3', 'E4', 'E5', 'traces', 'costs')
 MEASURES = ('traces', 'costs')      # named in full, no code in the table
 SERIES_ORDER = [s for _, s, _ in RULES if s is not None]
 # The Holm family of each series, said once in the method (section 2.7), not in
-# the table. The coding series: its tests were fixed before reading (d83, d84).
+# the table. The coding series: its tests were fixed before reading.
 FAMILY = {
     'E0': '9 cells, or 3 GOPs',
     'ctl': '3 GOPs', 'tuned': '3 GOPs',
@@ -62,12 +64,14 @@ FAMILY = {
     'load': '5 periods', 'fire': '7 variants', 'scenario': '5 variants',
     'traces': 'none', 'costs': 'none',
 }
+# the stacks in the order of every table: AOMDV, rules, agents, hybrid
 STACKS = (('pq', 'AOMDV', 'AOMDV'), ('rules', 'règles', 'rules'),
-          ('hybrid', 'hybride', 'hybrid'), ('agents', 'agents', 'agents'))
+          ('agents', 'agents', 'agents'), ('hybrid', 'hybride', 'hybrid'))
+assert tuple(x for x, _, _ in STACKS) == table_cells.STACKS
 # GOP of a set: the GOP coefficient (gopCoef) of its encoder file; the other
 # videos are coded at the coefficient that gives them nine M frames (9 M and 3 D).
 GOP = {'0.01597': '3-9', '0.02525': '6-6', '0.03': '9-3'}
-GOPS = ('3-9', '6-6', '9-3')
+GOPS = table_cells.GOPS
 
 # Results subsection of each experiment (the labels of the article's Results
 # section), one label per subsection: sensibilite and generalisation sit in 3.8.
@@ -77,43 +81,47 @@ SECTION = {'E0': ('oracle', 'aomdv', 'learning', 'm1', 'gop'), 'E1': ('aomdv',),
 
 TEXT = {
     'fr': {
-        'head': ('Exp.', 'Question', 'Facteur et niveaux', 'Piles', 'GOP',
-                 'Configurations (simulations)\\textsuperscript{1}', 'Section'),
+        'head': ('Expérience', 'Question', 'Facteur et niveaux', 'Piles', 'GOP',
+                 'Configurations (simulations)', 'Section'),
         'E0': ('Effet de la pile, du feu et du GOP', 'pile~; feu F1 à F3~; GOP'),
-        'E1': ("Implémentation d'AOMDV", "couche d'accès modifiée et son chien de garde (AOMDV de contrôle), puis temporisations et file de route des piles inter-couches (AOMDV aux temporisations inter-couches)"),
+        'E1': ("Implémentation d'AOMDV", {'ctl': "couche d'accès modifiée et son chien de garde (AOMDV de contrôle)",
+                                          'tuned': "temporisations et file de route des piles inter-couches (AOMDV aux temporisations inter-couches)"}),
         'E2': ('Contribution de chaque décision', "un agent seul sur la pile à règles (7), un agent retiré de la pile hybride (6)"),
-        'E3': ('Adaptation des agents', r"$\varepsilon = 0{,}1$ (E0), apprentissage et exploration mis à 0 (figée), ou $\varepsilon$ décroissant jusqu'à 0 entre 60 et \SI{114}{\second}"),
-        'E4': ('Codage de la vidéo, volume du GOP et coefficient de qualité', r"débit moyen du GOP 9-3, $T = 9{,}32$ et \SI{9,65}{\second}~; coefficient de qualité de 0,1 au lieu de 0,01"),
-        'E5': ("Portée de l'avance de la pile hybride", r"$T = 7$, 12, 18 et \SI{30}{\second} (charge)~; AZ, PF ou loi des pannes, 7 variantes (feu)~; vidéo, grille, caméra et puits, vitesse du feu, 5 variantes (scénario)"),
+        'E3': ('Adaptation des agents', {'frozen': r"apprentissage et exploration mis à 0 (figée), contre $\varepsilon = 0{,}1$ dans E0",
+                                         'edec': r"$\varepsilon$ décroissant jusqu'à 0 entre 60 et \SI{114}{\second} ($\varepsilon$ décroissant)"}),
+        'E4': ('Codage de la vidéo, volume du GOP et coefficient de qualité', {'rate': r"débit moyen du GOP 9-3, $T = 9{,}32$ et \SI{9,65}{\second} (débit égal)",
+                                                                               'coding': "coefficient de qualité de 0,1 au lieu de 0,01 (coefficient~0,1)"}),
+        'E5': ("Portée de l'avance de la pile hybride", {'load': r"$T = 7$, 12, 18 et \SI{30}{\second} (charge)",
+                                                         'fire': "AZ (3~valeurs), PF (3~valeurs) ou loi des pannes (1), 7 variantes (feu)",
+                                                         'scenario': r"vidéo forêt ou fumée, grille de \SI{30}{\metre}, caméra et puits échangés, vitesse de tête~$\times 1{,}5$, 5 variantes (scénario)"}),
         'traces': ('Traces des agents', r"aucun~: simulations de E0, choix et valeurs des agents écrits toutes les \SI{20}{\second}"),
-        'costs': ('Coûts pour un nœud', 'aucune simulation, mesures de E0 à E3, E5 et des traces'),
-        'series': {'ctl': 'AOMDV de contrôle', 'tuned': 'AOMDV aux temporisations inter-couches', 'frozen': 'figée',
-                   'edec': r'$\varepsilon$ décroissant', 'load': 'charge', 'fire': 'feu',
-                   'scenario': 'scénario', 'rate': 'débit égal', 'coding': 'coefficient 0,1'},
-        'all': 'les quatre', 'none': '--', 'measure': '--', 'colon': '~: ', 'semi': '~; ',
+        'costs': ('Coûts pour un nœud capteur', 'aucune simulation, mesures de E0 à E3, E5 et des traces'),
+        'all': 'les quatre', 'none': '--', 'measure': '--',
     },
     'en': {
-        'head': ('Exp.', 'Question', 'Factor and levels', 'Stacks', 'GOP',
-                 'Configurations (simulations)\\textsuperscript{1}', 'Section'),
+        'head': ('Experiment', 'Question', 'Factor and levels', 'Stacks', 'GOP',
+                 'Configurations (simulations)', 'Section'),
         'E0': ('Effect of the stack, the fire and the GOP', 'stack; fire F1 to F3; GOP'),
-        'E1': ("AOMDV's implementation", 'derived access layer and its watchdog (control AOMDV), then the timers and route queue of the cross-layer stacks (AOMDV with cross-layer timers)'),
+        'E1': ('Implementation of AOMDV', {'ctl': 'derived access layer and its watchdog (control AOMDV)',
+                                          'tuned': 'timers and route queue of the cross-layer stacks (AOMDV with cross-layer timers)'}),
         'E2': ('Contribution of each decision', 'one agent alone on the rule stack (7), one agent removed from the hybrid stack (6)'),
-        'E3': ("Agents' adaptation", r'$\varepsilon = 0.1$ (E0), learning and exploration set to 0 (frozen), or $\varepsilon$ decaying to 0 between 60 and \SI{114}{\second}'),
-        'E4': ('Video coding, GOP volume and quality coefficient', r'mean rate of GOP 9-3, $T = 9.32$ and \SI{9.65}{\second}; quality coefficient of 0.1 instead of 0.01'),
-        'E5': ("Extent of the hybrid stack's lead", r'$T = 7$, 12, 18 and \SI{30}{\second} (load); AZ, PF or distribution of the failure instants, 7 variants (fire); video, grid, camera and sink, fire speed, 5 variants (scenario)'),
-        'traces': ("Agents' traces", r"none: simulations of E0, the agents' choices and values written every \SI{20}{\second}"),
-        'costs': ('Overheads for a node', 'no simulation, measures of E0 to E3, E5 and the traces'),
-        'series': {'ctl': 'control AOMDV', 'tuned': 'AOMDV with cross-layer timers', 'frozen': 'frozen',
-                   'edec': r'decaying $\varepsilon$', 'load': 'load', 'fire': 'fire',
-                   'scenario': 'scenario', 'rate': 'equal rate', 'coding': 'coefficient 0.1'},
-        'all': 'all four', 'none': '--', 'measure': '--', 'colon': ': ', 'semi': '; ',
+        'E3': ('Adaptation of the agents', {'frozen': r'learning and exploration set to 0 (frozen), against $\varepsilon = 0.1$ in E0',
+                                      'edec': r'$\varepsilon$ decaying to 0 between 60 and \SI{114}{\second} (decaying $\varepsilon$)'}),
+        'E4': ('Video coding, GOP volume and quality coefficient', {'rate': r'mean rate of GOP 9-3, $T = 9.32$ and \SI{9.65}{\second} (equal rate)',
+                                                                    'coding': 'quality coefficient of 0.1 instead of 0.01 (coefficient~0.1)'}),
+        'E5': ('Reach of the lead of the hybrid stack', {'load': r'$T = 7$, 12, 18 and \SI{30}{\second} (load)',
+                                                    'fire': 'AZ (3~values), PF (3~values) or distribution of the failure instants (1), 7 variants (fire)',
+                                                    'scenario': r'forest or smoke video, \SI{30}{\metre} grid, camera and sink swapped, head spread rate~$\times 1.5$, 5 variants (scenario)'}),
+        'traces': ('Traces of the agents', r'none: simulations of E0, the choices and values of the agents written every \SI{20}{\second}'),
+        'costs': ('Costs for a sensor node', 'no simulation, measurements of E0 to E3, E5 and the traces'),
+        'all': 'all four', 'none': '--', 'measure': '--',
     },
 }
 
 # What differs besides the factor, and what handles it (one row per comparison).
 EQUITE = {
     'fr': (('Comparaison', 'Ce qui diffère en plus du facteur', 'Traitement'), (
-        ('Règles, hybride, agents', r"rien : seules les décisions comparées changent, avec la structure qu'elles portent (section~\ref{sec:fr-methods-protocol})", '--'),
+        ('Règles, hybride, agents', r"rien : seules les décisions comparées changent, avec la structure qu'elles portent (section~\ref{sec:fr-methods-protocol})", 'sans objet'),
         ('AOMDV : la pile',
          r"routage, file ordonnée par rang, mesures de la couche physique dérivée, puissance en boucle fermée, jusqu'à 26 chemins (2 par niveau de priorité) contre 3, délai de rediffusion des demandes de route de 50 contre \SI{10}{\milli\second}",
          'facteur comparé'),
@@ -143,17 +151,17 @@ EQUITE = {
         ('Point de fonctionnement', r"$T$ et les trois feux calibrés sur la pile à règles, pour 40 à \SI{60}{\percent} de pertes au GOP 9-3", 'E5, charge'),
     )),
     'en': (('Comparison', 'What differs besides the factor', 'Handled by'), (
-        ('Rules, hybrid, agents', r'nothing: only the compared decisions change, with the structure they carry (Section~\ref{sec:methods-protocol})', '--'),
+        ('Rules, hybrid, agents', r'nothing: only the compared decisions change, with the structure they carry (Section~\ref{sec:methods-protocol})', 'not applicable'),
         ('AOMDV: the stack',
-         r'routing, queue ordered by rank, measures of the derived physical layer, closed-loop power, up to 26 paths (2 per priority level) against 3, route-request rebroadcast delay of 50 against \SI{10}{\milli\second}',
+         r'routing, queue ordered by rank, measurements of the derived physical layer, closed-loop power, up to 26 paths (2 per priority level) against 3, route-request rebroadcast delay of 50 against \SI{10}{\milli\second}',
          'compared factor'),
         ('AOMDV: the access layer', 'original access layer, without the transmission watchdog', 'E1, control AOMDV'),
         ('AOMDV: the timers',
          r'HELLO messages every second against every \SI{5}{\second}, longest delay before a new route request 1 against \SI{10}{\second}, active route 10 against \SI{35}{\second}, 64 against 16 packets waiting for a route',
          'E1, AOMDV with cross-layer timers'),
         ('E3: frozen stack against the rules',
-         r"fixed power at \SI{+3}{dBm} against the closed loop, congestion threshold fixed at half the queue, path cost without the neighbor's queue occupancy, link-cost weights without $\kappa(P)$ and the M-frame profile for control, level 1 of the D frames and discovery",
-         "E3's frozen series compares the frozen stack with the same stack learning"),
+         r"fixed power at \SI{+3}{dBm} against the closed loop, congestion threshold fixed at half the queue, path cost without the queue occupancy of the neighbor, link-cost weights without $\kappa(P)$ and the M-frame profile for control, level 1 of the D frames and discovery",
+         'the frozen series of E3 compares the frozen stack with the same stack learning'),
         ('E4, equal rate: against GOP 9-3',
          r'packets of an image spaced 15.5 and \SI{16.1}{\milli\second} apart instead of 15, last image captured 3.5 and \SI{7.2}{\second} later, simulated duration of 173 and \SI{177}{\second} against 169, nodes out of service before the end 5.8 to 6.5 against 4.5 to 6.0',
          'mean rate equalized, not the instantaneous rate'),
@@ -166,7 +174,7 @@ EQUITE = {
         (r'E5, scenario: \SI{30}{\metre} grid',
          r'nodes moved by at most \SI{8}{\metre} on each axis, the same deployment in every run; \SI{30}{\metre} links received \SI{4.0}{\deci\bel} stronger, diagonal links in range, at least ten hops from the camera to the sink against eighteen; ignitions brought to 0.75 times their position; speed, wind and heated zone unchanged; nodes out of service before the end from 9.0 to 11.4 against 4.5 to 6.0',
          'stacks compared within a variant'),
-        ('E5, scenario: camera and sink swapped', "ignitions unchanged: F2 closes the sink's corner, F3 the camera's", 'stacks compared within a variant'),
+        ('E5, scenario: camera and sink swapped', 'ignitions unchanged: F2 closes the corner of the sink, F3 that of the camera', 'stacks compared within a variant'),
         (r'E5, scenario: head spread rate $\times 1.5$',
          r'wind unchanged, F2 and F3 at \SI{15}{\percent} of the open wind instead of 10; heated zone and failure window of \SI{60}{\second}, hence 1.5 times deeper in meters; nodes out of service before the end from 9.4 to 13.0 against 4.5 to 6.0',
          'stacks compared within a variant'),
@@ -270,43 +278,52 @@ def gops_text(g, lang):
     return ', '.join(x for x in GOPS if x in g) if g else TEXT[lang]['none']
 
 
-def series_cell(series, key, text, lang):
-    """One cell over the series of an experiment. Equal in every series: the value
-    alone. Otherwise the value of a strict majority of series stands alone first
-    and the other series are named (E5's stacks); without one, every series is
-    named (E3's and E4's GOPs)."""
-    t = TEXT[lang]
-    groups = []
-    for name, r in series.items():
-        v = text(r[key], lang)
-        for g in groups:
-            if g[0] == v:
-                g[1].append(name)
-                break
-        else:
-            groups.append([v, [name]])
-    if len(groups) == 1:
-        return groups[0][0]
-    sizes = sorted((len(g[1]) for g in groups), reverse=True)
-    head = [g for g in groups if len(g[1]) == sizes[0]][0] if sizes[0] > 1 and sizes[0] > sizes[1] else None
-    parts = [head[0]] if head else []
-    for v, members in groups:
-        if head is not None and members == head[1]:
-            continue
-        parts.extend('%s%s%s' % (t['series'][m], t['colon'], v) for m in members)
-    return t['semi'].join(parts)
+# Column widths (they sum to 7) and the space between columns: the factor and
+# its levels, the longest cells, get the width the short cells of the stacks,
+# the GOP and the counts do not need; the question keeps its longest word
+# ("Implémentation", 71 pt), the stacks hold "agents, hybride" (68.3 pt) and
+# the GOP "3-9, 6-6, 9-3" (50.0 pt) on one line, "Configurations" (68.3 pt
+# bold), "Section" (33.9 pt) and the first header, "Experiment" (52.8 pt bold,
+# the explanatory heading MDPI asks for instead of "Exp."), hold on one line;
+# the question of E4 keeps its four lines in French (81 pt). Measured on the
+# MDPI class, 12 Nov 2026: one width unit is 69.0 pt at the full length,
+# 525.2 pt, less 3 pt on each side of the seven columns.
+PLAN_WIDTHS = ('0.78', '1.18', '1.80', '1.00', '0.74', '1.00', '0.50')
+PLAN_SEP = '3pt'
+# The series of an experiment, one per line of a nested tabular that spans the
+# factor, stacks and GOP columns (the author's reading of 12 Nov 2026: no
+# partial rule cuts the row of an experiment). Its columns take the widths of
+# the columns they sit under: an X column of this table is w/7 of the full
+# length less the 14 column separations, and two inner columns stay apart by
+# the two separations of the outer table. The series are set apart by this
+# space, the experiments by a \midrule; the experiment, its question, counts
+# and sections, plain cells of the outer row, are centered on all its series
+# (the X columns of the MDPI class are m columns).
+SERIES_GAP = '3pt'  # as the groups of text rows of Table 1 (13 Nov 2026)
+
+
+def series_block(cells):
+    """The series of one experiment (factor, stacks, GOP per series) as one
+    cell spanning the three columns, a series per line."""
+    spec = '@{\\hspace{2\\tabcolsep}}'.join(
+        '>{\\centering\\arraybackslash}m{\\dimexpr(\\fulllength-14\\tabcolsep)*%d/700\\relax}' % round(float(w) * 100)
+        for w in PLAN_WIDTHS[2:5])
+    body = (' \\\\ \\addlinespace[%s]\n' % SERIES_GAP).join(' & '.join(c) for c in cells)
+    return '\\multicolumn{3}{c}{\\begin{tabular}[c]{@{}%s@{}}\n%s\n\\end{tabular}}' % (spec, body)
 
 
 def write_plan(lang, rows):
     t = TEXT[lang]
-    # column widths (sum 7): the series cells of E3 and E4 need a wider GOP column
     out = ['% generated by make_tables_plan.py from studies/*/sets.txt, sets.conf and ipFiles/',
-           '\\begin{tabularx}{\\fulllength}{>{\\hsize=0.4\\hsize\\centering\\arraybackslash}X'
-           '>{\\hsize=1.2\\hsize\\centering\\arraybackslash}X>{\\hsize=1.7\\hsize\\centering\\arraybackslash}X'
-           '>{\\hsize=1.0\\hsize\\centering\\arraybackslash}X>{\\hsize=1.0\\hsize\\centering\\arraybackslash}X'
-           '>{\\hsize=1.1\\hsize\\centering\\arraybackslash}X>{\\hsize=0.6\\hsize\\centering\\arraybackslash}X}',
+           table_cells.setup(lang), '\\setlength{\\tabcolsep}{%s}' % PLAN_SEP,
+           '\\begin{tabularx}{\\fulllength}{%s}'
+           % ''.join('>{\\hsize=%s\\hsize\\centering\\arraybackslash}X' % w for w in PLAN_WIDTHS),
            '\\toprule', ' & '.join('\\textbf{%s}' % h for h in t['head']) + ' \\\\', '\\midrule']
-    for i, e in enumerate(ORDER):
+    # The two measurements (agents' traces, costs for a node) have no factor of
+    # their own: the choice of 12 Nov 2026 moves them to the text of
+    # section 2.7; the table lists the experiments E0 to E5 only.
+    exps = [e for e in ORDER if e not in MEASURES]
+    for i, e in enumerate(exps):
         series = rows[e]
         # the Holm family of each series is said once, in the method (section 2.7)
         q, f = t[e]
@@ -316,9 +333,15 @@ def write_plan(lang, rows):
         # the English labels are the French ones without the fr- infix
         sec = ', '.join('\\ref{sec:%sresults-%s}' % ('fr-' if lang == 'fr' else '', s) for s in SECTION[e])
         code = t['measure'] if e in MEASURES else e
-        out.append(' & '.join((code, q, f, series_cell(series, 'stacks', stacks_text, lang),
-                               series_cell(series, 'gops', gops_text, lang), conf_cell, sec)) + ' \\\\')
-        out.append('\\bottomrule' if i == len(ORDER) - 1 else '\\midrule')
+        # one line per series, its factor and levels, stacks and GOPs; the
+        # experiment, its question, counts and sections written once, centered
+        # on its series; no rule between the series of an experiment, a
+        # \\midrule between experiments
+        cells = [(f[name] if isinstance(f, dict) else f, stacks_text(r['stacks'], lang), gops_text(r['gops'], lang))
+                 for name, r in series.items()]
+        middle = ' & '.join(cells[0]) if len(cells) == 1 else series_block(cells)
+        out.append(' & '.join((code, q, middle, conf_cell, sec)) + ' \\\\')
+        out.append('\\bottomrule' if i == len(exps) - 1 else '\\midrule')
     out.append('\\end{tabularx}')
     path = os.path.join(OUT, '%s_revision-plan.tex' % lang)
     open(path, 'w').write('\n'.join(out) + '\n')

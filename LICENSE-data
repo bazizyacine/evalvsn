@@ -1,11 +1,12 @@
-Data licence of the EvalVSN companion repository
+Data license of the EvalVSN companion repository
 
 The data of this repository are licensed under the Creative Commons
-Attribution 4.0 International licence (CC BY 4.0), whose legal code follows.
+Attribution 4.0 International license (CC BY 4.0), whose legal code follows.
 They are:
 
   - experiments/studies/*/results/: the results of every simulation of
-    studies 09 and 10 (runs.tsv) and their routing counters (routing.tsv);
+    studies 09 and 10 (runs.tsv), their moments per set (sets.tsv) and their
+    routing counters (routing.tsv);
   - article/src/data/: the measurements behind the numbers of the article;
   - the tables and figures the tools of article/tools/ generate from them
     (article/src/tables/, article/src/figures/).
@@ -18,9 +19,13 @@ Not covered: the frames of article/src/data/galerie/, and the gallery figure
 drawn from them, are decoded from a video of the FLAME 2 dataset (Chen et
 al., IEEE DataPort, 2022) and keep the dataset's terms; the Twemoji
 pictograms of article/src/figures-src/icons/ are under their own CC BY 4.0
-licence (Twitter, Inc. and other contributors, LICENSE-GRAPHICS beside
-them). The code is under the GNU General Public License, version 3
-(LICENSE).
+license (Twitter, Inc. and other contributors, LICENSE-GRAPHICS beside
+them). The code is under the GNU General Public License: version 3 for the
+EvalVSN tool and the scripts (LICENSE); version 2 or any later version for
+the files of ns-2-modules/ written by the authors
+(ns-2-modules/LICENSE-GPL-2.0); and, for the files of ns-2-modules/ that
+come from ns-2.35 or derive from it, the original license their headers
+state.
 
 =======================================================================
 

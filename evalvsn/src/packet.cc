@@ -1,12 +1,12 @@
 #include "evalvsn.h"
 
-// The packets of a priority level (decision d53, 16 October 2026). Each
+// The packets of a priority level. Each
 // packet starts on a code word and carries, in its first two bytes, the
 // index of its first coefficient in the level: it decodes alone, and a lost
 // packet costs the coefficients it carries and no others, as a slice of
 // H.264 or a restart interval of JPEG. The former stream was cut every
 // 74 bytes in the middle of the code words, and the decoder read the
-// sender's whole stream to place what survived (finding X-27).
+// sender's whole stream to place what survived.
 
 static const int kPacketHeaderBits = 16;
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the comparative study (study 09, decisions d42 and d45) into
+"""Compile the comparative study (study 09) into
 src/data/comparative.tsv, one line per realisation, so that the article's
 tables are generated from data the repository keeps (the sets are gitignored
 machine-local artifacts).

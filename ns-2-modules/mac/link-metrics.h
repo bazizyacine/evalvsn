@@ -1,4 +1,14 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:t; -*- */
+// SPDX-License-Identifier: GPL-2.0-or-later
+//
+// This file is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 2 of the License, or (at your option)
+// any later version. It is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details.
+
 //
 // link-metrics.h - the cross-layer link quality store, shared by the EvalVSN
 // MAC layers.
@@ -44,8 +54,7 @@ struct LinkMetrics
 };
 
 // What a cross-layer routing agent needs of a MAC, and nothing more.
-// The outcome of each unicast frame, handed to the routing's learning agents
-// (decision d22, 10 Oct 2026): the base MAC reports failures only
+// The outcome of each unicast frame, handed to the routing's learning agents: the base MAC reports failures only
 // (Mac802_15_4::callBack = 1), so an agent that learns from deliveries needs
 // the successes too. The derived MAC calls this once per frame it tracks,
 // when the frame is acknowledged or abandoned.

@@ -56,7 +56,7 @@
 #             on every stack (R56); each stack drains it at its own radio's
 #             rates.
 #   -rule_power: 802.15.4 transmit power control of the cross-layer stack, 1
-#             or 0 (default: 1, the author's decision of 4 Oct 2026). Closed
+#             or 0 (default: 1, the choice of 4 Oct 2026). Closed
 #             loop per neighbour on the AT86RF231's sixteen TX_PWR steps,
 #             driven by the reports each neighbour carries in its HELLO.
 #   -dbg    : Cross-layer debug traces, 1 or 0 (default: 1). Controls
@@ -85,7 +85,7 @@
 #   -firex  : Ignition X in meters (default: 0, the camera's corner - the
 #             network films the fire that is consuming it).
 #   -firey  : Ignition Y in meters (default: 0).
-#   The four elements of decision d23 (10 Oct 2026), each off by default so
+#   The four elements of the fire model, each off by default so
 #   that every existing set replays unchanged:
 #   -firewind: Midflame wind speed in m/s (default 0: radial front). The
 #             front becomes FARSITE's ellipse (Finney 1998, eq. 13-17):
@@ -344,8 +344,7 @@ set val(simt)       $val(simt)                    ;# Simulation time in Secondes
 # the release's stack as distributed - its priority queue, its IEEE 802.15.4
 # PHY and MAC, its AOMDV. The EvalVSN derivations of the PHY and MAC (the
 # original wpan/ classes are never modified), their TX watchdog included,
-# belong to the cross-layer stacks only (decision of 15 Oct 2026, finding
-# X-19).
+# belong to the cross-layer stacks only (decision of 15 Oct 2026).
 if {$val(rp) == "AOMDV"} {
     set val(ifq)        Queue/DropTail/PriQueue       ;# Interface queue type
     set val(netif)      Phy/WirelessPhy/802_15_4      ;# Network interface type

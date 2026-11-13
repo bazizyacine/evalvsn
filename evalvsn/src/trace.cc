@@ -285,7 +285,7 @@ void traceEncoder(inputParameters IP, vector<prioritiesInfo> vecPI, vector<frame
             PI.data.clear();
             PI = binaryEncoder(IP, PI);
 
-            // One line per packet (d53): each packet of the level, cut on
+            // One line per packet: each packet of the level, cut on
             // the code words, its coefficient index in its first two bytes.
             // st-packetGenerate.sh then sends each line as one packet.
             for (const string &unit : packetEncoder(IP, PI, elems, rle))
@@ -321,7 +321,7 @@ vector<prioritiesInfo> traceDecoder(inputParameters IP, string unitsName, bool r
     // The packets of each frame and level: every packet of st-priority.dat
     // for the reference decoding, the payloads that reached the sink (the
     // deduplicated reception trace) for the decoding after the network. The
-    // decoder reads nothing else of the sender (d53, finding X-27).
+    // decoder reads nothing else of the sender.
     map<pair<int, int>, vector<string>> units;
     map<pair<int, int>, prioritiesInfo> heads;
     ifstream trace(unitsName, ifstream::in);

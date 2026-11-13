@@ -1,4 +1,14 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:t; -*- */
+// SPDX-License-Identifier: GPL-2.0-or-later
+//
+// This file is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 2 of the License, or (at your option)
+// any later version. It is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details.
+
 //
 // mac-802_15_4EvalVSN.h - the 802.15.4 MAC carrying the EvalVSN cross-layer
 // store.
@@ -127,13 +137,12 @@ public:
 	void rlmFrameDone();
 	static void rlmXmitFailed(Packet *p, void *arg);
 
-	// The routing's learning agents (d22) learn from every unicast frame's
+	// The routing's learning agents learn from every unicast frame's
 	// outcome; the frame is tracked through the same wrappers as above.
 	void setOutcomeListener(FrameOutcomeListener *l) { outcomeListener_ = l; }
 
 	/*
-	 * Learning transmit power (RL_POWER_, off by default; d22, 10 Oct
-	 * 2026), the agent that replaces the closed-loop rule of the PHY. Per
+	 * Learning transmit power (RL_POWER_, off by default), the agent that replaces the closed-loop rule of the PHY. Per
 	 * neighbour, one value per output step among six of the AT86RF231's
 	 * (+3, +1.3, 0, -3, -7, -12 dBm); each unicast frame takes the step of
 	 * highest value, or with probability epsilon a random one when the

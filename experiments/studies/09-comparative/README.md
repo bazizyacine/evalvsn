@@ -18,5 +18,9 @@ realisation, and every comparison is paired. The seed of realisation k is
 `cksum("<name>-<k>") mod 900000 + 1` (`../../run/run_sets.sh`, `seed_for`).
 
 **Results.** `results/runs.tsv` holds one row per simulation, with its seed
-(`../../metrics/compile_runs.py`); `results/routing.tsv` the routing counters
-of the AOMDV and rule stacks at GOP 9-3 (`../../metrics/routing_events.py`).
+(`../../metrics/compile_runs.py`); `results/sets.tsv` one row per set, the
+mean, standard deviation, minimum and maximum over its realisations of each
+measure of `sim/mt.dat`, and the aggregates of `../../metrics/setGraphs.pl`
+for the others (`../../metrics/compile_sets.py`); `results/routing.tsv` the
+routing counters of the AOMDV and rule stacks at GOP 9-3
+(`../../metrics/routing_events.py`).

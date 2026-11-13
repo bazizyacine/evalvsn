@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Compile study 08 (the learning agents on three use cases, decisions
-d22-d34) into the thesis's data/feu-agents.tsv, one line per realisation, so
+"""Compile study 08 (the learning agents on three use cases) into the thesis's data/feu-agents.tsv, one line per realisation, so
 that the thesis's tables are generated from data the repository keeps (the
 sets are gitignored machine-local artifacts). Its trace readers serve
 compile_comparative.py too.
@@ -8,7 +7,7 @@ compile_comparative.py too.
 Columns: level, arm, realisation, psnr (dB), loss, mloss, m1loss, m1to3loss
 (levels M1 to M3 together), dloss (%), recoverable (% of the packets sent,
 from metrics/fire_oracle.py). Six cells: levels 0 to 3, u1 and u2. The arm is
-the set's suffix in the nomenclature of 15 October 2026 (d48): pq, base (the
+the set's suffix in the nomenclature of 15 October 2026: pq, base (the
 rules without early discard), rules, agents, hybrid, the ag<letters>
 ablations, and aomdv, AOMDV on its own seeds.
 
@@ -29,7 +28,7 @@ import fire_oracle  # noqa: E402
 SETS = os.path.join(EXP, 'sets')  # study 08 (the bench sets, adopted on 11 Oct 2026)
 # level -> cell: 0 the agent-by-agent level, 1 to 3 the fire scenario with
 # headroom, u1 the intact base network, u2 S1 at half destruction (study 08's
-# use cases 1 and 2, decision d34).
+# use cases 1 and 2).
 LEVELS = (('0', 'GC-PN-0p03-13_p10-n100-d40-fsev'), ('1', 'GC-PN-0p03-13_p9-n100-d40-fire'),
           ('2', 'GC-PN-0p03-13_p8-n100-d40-fire'), ('3', 'GC-PN-0p03-13_p7-n100-d40-fire'),
           ('u1', 'GC-PN-0p03-13_p30-n100-d200'), ('u2', 'GC-PN-0p03-13_p30-n100-d40-m50'))
@@ -40,7 +39,7 @@ ARMS = (('aomdv', 'set_AOMDV_{c}'), ('base', 'set_AOMDV_QPV_{c}'),
         ('agP', 'set_AOMDV_QPV_{c}-agP'), ('agC', 'set_AOMDV_QPV_{c}-agC'),
         ('agD', 'set_AOMDV_QPV_{c}-agD'), ('agT', 'set_AOMDV_QPV_{c}-agT'),
         ('agA', 'set_AOMDV_QPV_{c}-agA'),
-        # decisions d37 and d39: the agents without the early discard, AOMDV on
+        # the agents without the early discard, AOMDV on
         # the cross-layer seeds; the proposed stack without the channel-access
         # agent (the level-3 diagnosis)
         ('agPCDAT', 'set_AOMDV_QPV_{c}-agPCDAT'), ('pq', 'set_AOMDV_{c}-pq'),

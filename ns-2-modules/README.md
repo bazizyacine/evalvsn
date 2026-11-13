@@ -6,7 +6,7 @@ untouched: the MAC and PHY of this work derive from it.
 
 ## Modules added
 
-| Path under `ns-2.35/` | Role in the chain |
+| Path under `ns-2.35/` | Role in the simulator |
 |---|---|
 | `aomdv_qpv/` (`aomdv_qpv.{cc,h}`, `_rtable`, `_rqueue`, `_packet.h`, `_logs.cc`) | the cross-layer routing agent AOMDV_QPV, derived from the release's AOMDV: the reserve of paths with their cumulative cost, the per-class link cost, the congestion threshold read from the next hop's HELLO, the handling of MAC failures, the early discard by priority, and the learning agents of the path, the congestion, the link-break detection, the discovery and the early discard |
 | `queue/priqueueEvalVSN.{cc,h}` | the interface queue that inserts, serves and drops by criticality rank, and asks the routing agent whether to admit a packet (early discard) |
@@ -48,3 +48,16 @@ listed in `experiments/studies/10-revision/README.md`.
 
 After a change to a header, rebuild ns-2.35 from scratch (`make clean`, then
 `make`): the release's Makefile does not track header dependencies.
+
+## Licenses
+
+Each file keeps the license its header states.
+
+| License | Files |
+|---|---|
+| GNU GPL, version 2 or any later version (`LICENSE-GPL-2.0`): the files written by the authors | `mac/fire-propagationEvalVSN.cc`, `mac/fire-propagationEvalVSN.h`, `mac/link-metrics.h`, `mac/mac-802_15_4EvalVSN.cc`, `mac/mac-802_15_4EvalVSN.h`, `mac/phy-802_15_4EvalVSN.cc`, `mac/phy-802_15_4EvalVSN.h`, `queue/priqueueEvalVSN.cc`, `queue/priqueueEvalVSN.h` |
+| GNU GPL, version 2, with the ns-2 linking exception (M. Caleffi, 2008), and Carnegie Mellon University's notice (1997, 1998): AOMDV, and AOMDV_QPV, which derives from it | `aomdv/aomdv.cc`, `aomdv/aomdv.h`, `aomdv/aomdv_rqueue.h`, `aomdv_qpv/aomdv_qpv.cc`, `aomdv_qpv/aomdv_qpv.h`, `aomdv_qpv/aomdv_qpv_logs.cc`, `aomdv_qpv/aomdv_qpv_packet.h`, `aomdv_qpv/aomdv_qpv_rqueue.cc`, `aomdv_qpv/aomdv_qpv_rqueue.h`, `aomdv_qpv/aomdv_qpv_rtable.cc`, `aomdv_qpv/aomdv_qpv_rtable.h` |
+| GNU GPL, version 2 or any later version, with the ns-2 linking exception (Xerox Corporation, 1997): derived from `ns-2.35/trace/traffictrace.cc` and `ns-2.35/apps/udp.{cc,h}` | `evalvsn/evalvsn.cc`, `evalvsn/evalvsn.h`, `evalvsn/evalvsnSink.cc`, `evalvsn/evalvsnSink.h`, `evalvsn/evalvsnUDP.cc`, `evalvsn/evalvsnUDP.h` |
+| GNU GPL, version 2, with the ns-2 linking exception (Mercedes-Benz Research & Development North America and University of Karlsruhe, 2007): derived from `ns-2.35/mac/wireless-phyExt.{cc,h}` | `mac/power-monitorEvalVSN.cc`, `mac/power-monitorEvalVSN.h` |
+| GNU GPL, version 2, with the ns-2 linking exception (University of Southern California, 2000) | `linkstate/ls.h` |
+| the BSD-style license of the Regents of the University of California, as in ns-2.35 | `Makefile.in`, `common/agent.cc`, `common/agent.h`, `common/packet.h`, `tcl/lib/ns-agent.tcl`, `tcl/lib/ns-default.tcl`, `tcl/lib/ns-lib.tcl`, `tcl/lib/ns-mobilenode.tcl`, `tcl/lib/ns-packet.tcl`, `trace/cmu-trace.cc`, `trace/cmu-trace.h` |

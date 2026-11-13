@@ -6,8 +6,8 @@ bin/
 build/
 __pycache__/
 
-# What the chain writes: the raw sets, and the tables and figures the tools
-# regenerate from article/src/data/
+# What the simulations and the tools write: the raw sets, and the tables and
+# figures the tools regenerate from article/src/data/
 experiments/sets/
 article/src/tables/
 article/src/figures/

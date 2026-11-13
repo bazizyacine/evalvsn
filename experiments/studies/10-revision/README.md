@@ -18,14 +18,14 @@ column of `../../sets.conf`, and the simulator's switches in
 | E1 | AOMDV with cross-layer timers | `-pq-tuned-s10` | AOMDV | 3-9, 6-6, 9-3 | 9 (180) | the control AOMDV with the cross-layer stacks' routing timers and route queue (`aomdv_tuned=1`); a control, never the reference |
 | E2 | one agent alone | `-only<X>-s10` | rules | 9-3 | 21 (420) | one agent alone: agent X in place of its rule on the rule stack |
 | E2 | one agent out | `-no<X>-s10` | hybrid | 9-3 | 18 (360) | one agent out: agent X taken out of the hybrid stack |
-| E3 | frozen | `-frozen` | hybrid, agents | 3-9, 6-6, 9-3 | 18 (360) | every learning and exploration rate at 0: each agent stays on its initial choice |
-| E3 | decaying ε | `-edec-s10` | hybrid, agents | 9-3 | 6 (120) | exploration falling linearly to 0 between 60 and 114 s |
+| E3 | frozen | `-frozen` | agents, hybrid | 3-9, 6-6, 9-3 | 18 (360) | every learning and exploration rate at 0: each agent stays on its initial choice |
+| E3 | decaying ε | `-edec-s10` | agents, hybrid | 9-3 | 6 (120) | exploration falling linearly to 0 between 60 and 114 s |
 | E4 | equal rate | `_p9r65`, `_p9r32` | rules, hybrid | 3-9, 6-6 | 12 (240) | GOPs 3-9 and 6-6 at the mean packet rate of GOP 9-3 (T = 9.65 and 9.32 s) |
 | E4 | coefficient 0.1 | `_GC-QC-0p1_`, `-t168-s10` | all four | 9-3 | 12 (240) | the quality coefficient 0.1 instead of 0.01 (`../../ipFiles/GC-QC-0p1.dat`), simulated for the 168 s of their study 09 counterparts (`simtime=168`) |
 | E5 | load | `_p7`, `_p12`, `_p18`, `_p30` | all four | 9-3 | 48 (960) | alarm periods of 7, 12, 18 and 30 s instead of 9 s |
 | E5 | fire | `-az015`, `-az05`, `-az165`, `-pf0`, `-pf025`, `-pf075`, `-fd1` | rules, hybrid | 9-3 | 42 (840) | heated-zone attenuation of 0.15, 0.5 and 1.65 dB/m instead of 1; failure probability of 0, 0.25 and 0.75 instead of 0.5; failures closer to the front |
 | E5 | scenario | `-forest`, `-smoke`, `-j8`, `-swap`, `-v15` | all four | 9-3 | 60 (1200) | two other videos, at their own GOP 9-3 coefficients; a 30 m grid with an irregular deployment of ±8 m and scaled ignitions; camera and sink swapped; head speed times 1.5 |
-| the agents' traces |  | `-tr-s10` | hybrid, agents | 9-3 | 6 (120) | `rl_trace=1`: each agent's action counts and values every 20 s; the runs replay those of study 09 exactly |
+| the agents' traces |  | `-tr-s10` | agents, hybrid | 9-3 | 6 (120) | `rl_trace=1`: each agent's action counts and values every 20 s; the runs replay those of study 09 exactly |
 
 The agents' letters: P (path), C (congestion threshold), B (link-break
 detection), D (discovery), A (channel access), T (transmit power), E (early
@@ -40,6 +40,15 @@ T8, the tuned AOMDV; T9, the quality coefficient 0.1 at 165 s; T10, the same
 at 168 s. T6 and T7 were dropped before they ran.
 
 **Results.** `results/runs.tsv` holds one row per simulation, with its seed
-(`../../metrics/compile_runs.py`). The routing counters come from each set's
-`events.tsv` (`../../metrics/routing_events.py`), written before the packet
-traces were deleted.
+(`../../metrics/compile_runs.py`): 5460 rows, the 5220 simulations of
+the sets of `sets.txt`, then the 240 of the 12 sets of tranche T9,
+which `sets.txt` no longer lists and the article does not read (the article
+reads their replay of tranche T10); their keys of `revision.tsv` are empty.
+Their declarations stay in `../../sets.conf`. `results/sets.tsv` gives one row
+per set, the 12 of T9 included: the mean, standard deviation, minimum and
+maximum over its realisations of each measure of `sim/mt.dat`, and the
+aggregates of `../../metrics/setGraphs.pl` for the others
+(`../../metrics/compile_sets.py`).
+The routing counters come from each set's `events.tsv`
+(`../../metrics/routing_events.py`), written before the packet traces were
+deleted.

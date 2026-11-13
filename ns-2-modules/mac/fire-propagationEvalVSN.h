@@ -1,7 +1,17 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:t; -*- */
+// SPDX-License-Identifier: GPL-2.0-or-later
+//
+// This file is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 2 of the License, or (at your option)
+// any later version. It is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details.
+
 //
 // fire-propagationEvalVSN.h - log-normal shadowing with the attenuation of a
-// forest fire's flame and plume (decision d23 of 10 Oct 2026).
+// forest fire's flame and plume.
 //
 // Derivation, never modification: mobile/shadowing.cc stays the reference
 // model; this class adds a loss on top of it for the links whose ends stand

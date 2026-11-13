@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Connectivity oracle of the fire scenario (decisions d23 and d24, 10 Oct 2026).
+"""Connectivity oracle of the fire scenario.
 
 Splits the video packets a run lost into recoverable and unrecoverable ones.
 A lost packet is recoverable when, at the instant it left the camera, a path

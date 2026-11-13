@@ -24,9 +24,11 @@ A node writes its snapshot at its first HELLO after each 20 s mark, so the
 snapshots of the bin [t, t + 20 s) fall anywhere in it: each point is drawn
 at the bin's middle, t + 10 s.
 
-The style is make_figures.py's (serif type, Okabe-Ito palette, framed legend
-at the top right, lettered panels, the edition's decimal marker); importing
-it only sets matplotlib's rcParams.
+The style is make_figures.py's (sans-serif type, Okabe-Ito palette, framed
+legend at the top right, in two columns: the first three agents of the hybrid
+stack, then its early discard and the agents stack's link-break detection;
+lettered panels, the edition's decimal marker); importing it only sets
+matplotlib's rcParams.
 
 Usage:
     python3 tools/make_figure_trajectories.py [--lang fr|en|both]
@@ -58,11 +60,11 @@ AGENTS = [('path', 'hybrid', mf.INK, 'o', '-'),
           ('break', 'agents', mf.ORANGE, 'v', '-.')]
 T = {
     'fr': {'path': 'chemin', 'congestion': 'congestion', 'access': 'accès au canal', 'discard': 'rejet anticipé',
-           'break': 'détection de rupture', 'hybrid': 'pile hybride', 'agents': 'pile à agents',
+           'break': 'détection de rupture', 'hybrid': 'Hybride', 'agents': 'Agents',
            'x': '$t$ (s)', 'share': 'hors du choix initial (%)', 'count': 'décisions par nœud',
            'a': 'couples de nœud et d\u2019état', 'b': 'nœuds qui ont décidé'},
     'en': {'path': 'path', 'congestion': 'congestion', 'access': 'channel access', 'discard': 'early discard',
-           'break': 'link-break detection', 'hybrid': 'hybrid stack', 'agents': 'agents stack',
+           'break': 'link-break detection', 'hybrid': 'Hybrid', 'agents': 'Agents',
            'x': '$t$ (s)', 'share': 'away from the initial choice (%)', 'count': 'decisions per node',
            'a': 'node-state pairs', 'b': 'nodes that decided'},
 }
@@ -87,7 +89,7 @@ def plain(v, _):
 
 def figure(rows):
     L = T[mf.LANG]
-    fig, (a, b) = plt.subplots(1, 2, figsize=(WIDTH, 3.2))
+    fig, (a, b) = plt.subplots(1, 2, figsize=(WIDTH, 2.75))
     handles, labels = [], []
     for agent, arm, col, mk, ls in AGENTS:
         style = dict(color=col, marker=mk, ls=ls, lw=1.3, ms=3.6 if mk != 'D' else 3.0)
@@ -115,8 +117,8 @@ def figure(rows):
     mf.decimal_axes(a, b)
     b.yaxis.set_major_formatter(FuncFormatter(plain))
     mf.letter_panels((a, b), [L['a'], L['b']])
-    leg = mf.top_legend(fig, handles, labels)
-    mf.fit_width(fig, 'trajectoires', lambda: fig.tight_layout(rect=(0, 0, 1, mf.below(fig, leg)), pad=0.5,
+    leg = mf.top_legend(fig, handles, labels, ncol=2, columnspacing=1.2)
+    mf.fit_width(fig, 'trajectoires', lambda: fig.tight_layout(rect=(0, 0, 1, mf.below(fig, leg, 0.01)), pad=0.3,
                                                                   w_pad=1.6))
     return mf.save(fig, 'trajectoires')
 
