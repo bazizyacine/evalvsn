@@ -3,13 +3,13 @@
 Supporting material for the article *Reinforcement Learning Agents in a
 Cross-Layer Stack for Forest Fire Video Surveillance over Wireless Sensor
 Networks* (M. Y. Baziz, L. Sekhri and B. Kechar), under revision in
-*Sensors* (MDPI). This release, v2.0.3, is the version of the revised
+*Sensors* (MDPI). This release, v2.0.4, is the version of the revised
 manuscript: the code that ran the simulations, the results of every
 simulation and the commands that reproduce them.
 
 | Directory | Contents |
 |---|---|
-| `evalvsn/` | the EvalVSN tool, which codes the video of the camera and evaluates it at the sink (C++17, OpenCV 4.6), with its `CMakeLists.txt` |
+| `evalvsn/` | the EvalVSN tool, which codes the video of the camera and evaluates it at the sink (C++11 with GNU extensions, gnu++0x, OpenCV 4.6), with its `CMakeLists.txt` |
 | `ns-2-modules/` | every file added to or modified in ns-2.35, at its path under `ns-2.35/`: the cross-layer routing agent `aomdv_qpv/` (AOMDV Quality Prioritized Video, AOMDV_QPV) with its learning agents, the derived 802.15.4 MAC and PHY, the power monitor and the fire propagation model under `mac/`, the priority interface queue under `queue/`, the video source and sink under `evalvsn/`, and the release files they touch, `aomdv/` among them; its `README.md` lists them, with the switches of the revision's experiments |
 | `experiments/` | the simulation and measurement scripts: `run/` drives the simulations, `metrics/` extracts the measurements and holds the connectivity oracle, `ipFiles/` holds the encoder parameters, `sets.conf` declares every set; `studies/09-comparative/` (the 36 sets of the main study, experiment E0) and `studies/10-revision/` (the 261 sets of the other experiments) each hold `sets.txt`, a `README.md` and `results/`, with `runs.tsv`, one row per simulation |
 | `article/tools/` | the compilation of the simulations, the analysis of the codec, the paired tests with Holm correction, the analyses of variance, and the tables and figures of the article |
@@ -58,7 +58,7 @@ reads their replay at 168 s, in E4. Their declarations stay in
 2. The EvalVSN tool: `cmake . && make` under `evalvsn/`, which builds
    `bin/evalvsn`.
 3. The videos: each content is a 12 s cut of a video of the FLAME 2 dataset
-   (Chen et al., IEEE DataPort, 2022), which this repository does not
+   (Hopkins et al., IEEE DataPort, 2022), which this repository does not
    redistribute: in the YUV file, 300 frames at 25 frames per second,
    QCIF (176 × 144 pixels), YUV 4:2:0, under `evalvsn/videos/`; the encoder
    reads the AVI file and codes twelve frames of each in grayscale (Table
@@ -322,7 +322,7 @@ simulations read have these SHA-256 sums:
 | 10, Controls at GOP 9-3, means over 60 seeds | `make_tables_revision.py` | `analyse_revision.py` |
 | 11, Paired PSNR differences between the cross-layer stacks, means per cell | `make_tables_comparative.py` | `analyse_comparative.py` |
 | 12, Usable images, delay and missed deadlines of the four stacks, means over 60 seeds | `make_tables_quality.py` | `make_tables_quality.py --stats` |
-| 13, Repeated-measures analysis of the PSNR, 540 simulations over 60 seeds | `make_tables_comparative.py` | `analyse_comparative.py`; `mixed_model.py`, the mixed-model check |
+| 13, Repeated-measures analysis of the PSNR, 540 simulations over 60 seeds | `make_tables_comparative.py` | `analyse_comparative.py`; `mixed_model.py`, a further check the article does not report |
 | 14, GOP at T = 9 s and at equal rate, means over 60 seeds, T denoting the alarm period | `make_tables_volume.py` | `analyse_claims.py`, rows P26, the tests at equal rate |
 | 15, Quality coefficient (0.01 or 0.1) at GOP 9-3, means over 60 seeds | `make_tables_volume.py` | `analyse_qualite.py`, the tests of the coefficient 0.1 |
 | 16, Alarm period T at GOP 9-3, means over 60 seeds | `make_tables_charge.py` |  |
@@ -353,7 +353,9 @@ the same way. Their labels are in French, and their numbers carry a decimal
 comma; the numbers are those of the article. Five lines of
 `analyse_claims_aomdv.py` print MISSING (A09 to A11): they need the simulation
 sets themselves (`PROGRESS.txt`) or an energy of tuned AOMDV that
-`overhead.tsv` does not hold, and the article prints none of their numbers.
+`overhead.tsv` does not hold. The article prints one of their numbers, the
+180 simulations of AOMDV with cross-layer timers, which `revision.tsv`
+counts (arm `pq-tuned`).
 
 `make_tables_overhead.py` reads the size of the agents' tables from the
 simulator's headers: from ns-2.35 if it is unpacked at
@@ -374,7 +376,7 @@ The licenses go by directory:
 
 ## Citation
 
-This release, v2.0.3, is archived at Zenodo. All its versions share the
+This release, v2.0.4, is archived at Zenodo. All its versions share the
 concept DOI [10.5281/zenodo.24147853](https://doi.org/10.5281/zenodo.24147853), which
 leads to the latest one; the Zenodo record of each version gives the DOI of
 that version.

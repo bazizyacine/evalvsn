@@ -16,8 +16,8 @@ Agents in a Cross-Layer Stack for Forest Fire Video Surveillance over
 Wireless Sensor Networks", Sensors (MDPI), and this repository (CITATION.cff).
 
 Not covered: the frames of article/src/data/galerie/, and the gallery figure
-drawn from them, are decoded from a video of the FLAME 2 dataset (Chen et
-al., IEEE DataPort, 2022) and keep the dataset's terms; the Twemoji
+drawn from them, are decoded from a video of the FLAME 2 dataset (Hopkins
+et al., IEEE DataPort, 2022) and keep the dataset's terms; the Twemoji
 pictograms of article/src/figures-src/icons/ are under their own CC BY 4.0
 license (Twitter, Inc and other contributors, LICENSE-GRAPHICS beside
 them). The code is under the GNU General Public License: version 3 for the

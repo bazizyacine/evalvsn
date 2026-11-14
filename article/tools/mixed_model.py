@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mixed model of the PSNR of the three cross-layer stacks (study 09), random
-intercept per seed (fire and realisation): the check that the methods' sentence
-on the mixed model rests on. Prints the Wald test of each fixed term.
+intercept per seed (fire and realisation): a further check of the ANOVA that
+the article does not report. Prints the Wald test of each fixed term.
 
 Usage: python3 tools/mixed_model.py   (needs statsmodels; the other tools do not)
 """
