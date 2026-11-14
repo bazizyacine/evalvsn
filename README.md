@@ -3,7 +3,7 @@
 Supporting material for the article *Reinforcement Learning Agents in a
 Cross-Layer Stack for Forest Fire Video Surveillance over Wireless Sensor
 Networks* (M. Y. Baziz, L. Sekhri and B. Kechar), under revision in
-*Sensors* (MDPI). This release, v2.0.2, is the version of the revised
+*Sensors* (MDPI). This release, v2.0.3, is the version of the revised
 manuscript: the code that ran the simulations, the results of every
 simulation and the commands that reproduce them.
 
@@ -14,7 +14,7 @@ simulation and the commands that reproduce them.
 | `experiments/` | the simulation and measurement scripts: `run/` drives the simulations, `metrics/` extracts the measurements and holds the connectivity oracle, `ipFiles/` holds the encoder parameters, `sets.conf` declares every set; `studies/09-comparative/` (the 36 sets of the main study, experiment E0) and `studies/10-revision/` (the 261 sets of the other experiments) each hold `sets.txt`, a `README.md` and `results/`, with `runs.tsv`, one row per simulation |
 | `article/tools/` | the compilation of the simulations, the analysis of the codec, the paired tests with Holm correction, the analyses of variance, and the tables and figures of the article |
 | `article/src/data/` | the measurements behind every number of the article: `comparative.tsv` and `revision.tsv`, one row per simulation, and the files listed below |
-| `article/src/figures-src/icons/` | the Twemoji pictograms the scenario figure is drawn with (Twitter, Inc. and other contributors, CC BY 4.0, license beside them) |
+| `article/src/figures-src/icons/` | the Twemoji pictograms of Figures 1 and 2 (Twitter, Inc and other contributors, CC BY 4.0, license beside them) |
 | `LICENSE`, `LICENSE-data`, `ns-2-modules/LICENSE-GPL-2.0` | the licenses: GPL-3.0 for the EvalVSN tool and the scripts, GPL-2.0 or later for the files of the ns-2 modules written by the authors, CC BY 4.0 for the data (see License) |
 | `CITATION.cff`, `.zenodo.json` | the reference of this release, and its record at Zenodo |
 
@@ -122,7 +122,7 @@ Table 2. Parameters of the EvalVSN tool.
 | Parameter | Value |
 |---|---|
 | Videos | FLAME 2 (fire, forest before the burn, smoke), cut with FFmpeg 6.1.1; 176 × 144 pixels in grayscale, 12 frames |
-| Encoder | Modified Moving Picture Experts Group (MMPEG) of Aghdasi et al., as implemented in EvalVSN |
+| Encoder | Modified Moving Picture Experts Group (MMPEG), as implemented in EvalVSN |
 | Frame rate | 1 image per second, hence 12 of the 301 images of the source, at 25 images per second, that is, one in 26, every 1.04 s (one in 25, every 1.00 s, for the 300 images of the forest and smoke videos of the scenario variants, Section 2.7) |
 | Skip threshold | zero, no skipped image |
 | GOP coefficient GC | 0.01597, 0.02525 or 0.03, that is, GOP 3-9, 6-6 or 9-3, a studied factor of E0 |
@@ -370,11 +370,11 @@ The licenses go by directory:
 | `ns-2-modules/`, the 9 files written by the authors (`SPDX-License-Identifier: GPL-2.0-or-later` in their header) | GNU General Public License, version 2 or any later version (`ns-2-modules/LICENSE-GPL-2.0`), so that they combine with the GPL version 2 of AOMDV, with which they are compiled |
 | `ns-2-modules/`, the 31 files that come from ns-2.35 or derive from it, AOMDV and AOMDV_QPV among them | their original license, as the notices of their headers state it; `ns-2-modules/README.md` lists each file by license |
 | `experiments/studies/*/results/`, `article/src/data/` and the tables the tools generate from them | Creative Commons Attribution 4.0 International (`LICENSE-data`), except the frames of `article/src/data/galerie/`, decoded from a FLAME 2 video, which keep the dataset's terms |
-| `article/src/figures-src/icons/` | the Twemoji pictograms, by Twitter, Inc. and other contributors, under CC BY 4.0 (`LICENSE-GRAPHICS` beside them) |
+| `article/src/figures-src/icons/` | the Twemoji pictograms, by Twitter, Inc and other contributors, under CC BY 4.0 (`LICENSE-GRAPHICS` beside them) |
 
 ## Citation
 
-This release, v2.0.2, is archived at Zenodo. All its versions share the
+This release, v2.0.3, is archived at Zenodo. All its versions share the
 concept DOI [10.5281/zenodo.24147853](https://doi.org/10.5281/zenodo.24147853), which
 leads to the latest one; the Zenodo record of each version gives the DOI of
 that version.
