@@ -42,14 +42,13 @@ public:
 	// The measuring override; the base reception chain is otherwise intact.
 	int sendUp(Packet *p);
 
-	// Transmit power control in closed loop, per neighbour (chapter 4;
+	// Transmit power control in closed loop, per neighbour (
 	// rewritten after the bench of 4 Oct 2026). The former open loop set
 	// the node's single Pt_ from the packets it received - the power of the
 	// neighbour, not its own - and scored the margin above RXThresh_
 	// (-101 dBm) while WirelessPhy::sendUp() drops every frame under
 	// CSThresh_ (-91 dBm): on the 200 m grid it parked 42 nodes of 100 at
-	// -5 dBm, 0.07 dB under the floor, mute (audit file
-	// power-control-diagnosis.md). Here each neighbour reports, in its
+	// -5 dBm, 0.07 dB under the floor, mute. Here each neighbour reports, in its
 	// HELLO, the mean power and SINR at which it received this node's
 	// unicast frames; the score is taken on that report, its margin counted
 	// from the floor the stack really applies, and the step towards that
@@ -124,9 +123,9 @@ protected:
 	double noise_floor_;		// environmental noise floor (W)
 	double PowerMonitorThresh_;	// record interference above this level (W)
 	double SINRThresh_;		// linear SINR the modulation requires
-	int TxPowerAdapt_;		// 1 = adapt Pt_ on the AT86RF231 steps (R51)
+	int TxPowerAdapt_;		// 1 = adapt Pt_ on the AT86RF231 steps
 	int MAX_PRIO_NB;		// the PHY's own copy for its score;
-					// the MAC holds the authoritative one (R58)
+					// the MAC holds the authoritative one
 
 	PowerMonitorEvalVSN *powerMonitor;
 

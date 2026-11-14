@@ -32,7 +32,7 @@
 #                 setGraphs.pl has run, and a ten-realisation campaign over two
 #                 protocols would otherwise leave about 19 GB behind - which is
 #                 how the previous 19 GB accumulated. The measurements under
-#                 graphs/ are what the article and the thesis read, and they are
+#                 graphs/ are what the analyses read, and they are
 #                 kept.
 #   --sims=N      override the realisation count of every named set, without
 #                 touching sets.conf. This is what makes the repository's
@@ -52,7 +52,7 @@
 #   --out=D       write the sets under D instead of ../sets, with
 #   --ipdir=D     the encoder files under D instead of ../ipFiles and
 #   --videodir=D  the videos under D instead of ../../evalvsn/videos. The four
-#                 serve the test bench (../tools/bench.py), which keeps its own
+#                 serve a test bench, which keeps its own
 #                 declarations, encoder files, videos and outputs out of the
 #                 campaign's; a campaign never passes them.
 #   --seed-name=N derive each realisation's seed from the set name N instead
@@ -117,7 +117,7 @@ DECLARED=()
 # The trailing columns are optional: a declaration without them behaves
 # exactly as before, computing everything over a single realisation of the
 # static scenario on the historical propagation. The order tells the set's
-# story (the author's rule of 24/08/2026): terrain, source, then the
+# story: terrain, source, then the
 # scenario played on it - propagation, standby regime, fire - and last the
 # harvest: metrics second to last, sims closing the line.
 while read -r name rp xl mpl nn dist capture video prop standby fire metrics sims knobs; do
@@ -144,7 +144,7 @@ done < "$CONF"
 # (degrees) for the wind-driven front, firealpha (dB/m) and firezone (s) for
 # the heated zone ahead of it, firefail (probability) and firefailwin (s) for
 # the failures before combustion; rl_path, rl_congestion, rl_break, rl_discovery, rl_power (0
-# or 1: the learning agents that replace the chapter-4 rules),
+# or 1: the learning agents that replace the cross-layer rules),
 # rule_discard and rl_discard (0 or 1: the early discard by priority, rule or agent).
 # rl_alpha, rl_epsilon, rl_mac_alpha, rl_mac_epsilon: the learning and exploration rates of the
 # routing and MAC agents; all four at 0 freeze every agent on its initial choice (study 10).
@@ -324,7 +324,7 @@ for name in "${SETS[@]}"; do
   # The encoding depends only on the video and the encoder parameters - not on
   # the seed, not on the routing protocol. Running it once and sharing it across
   # realisations is what takes a ten-realisation campaign from about twenty
-  # hours to about four; it is the single largest cost in the chain.
+  # hours to about four; it is the single largest cost of a campaign.
   log_step "$name 2/4 - EvalVSN, encoding (once, shared by all realisations)"
   if [[ $RESUME -eq 1 ]] && compgen -G "$out/encoding/*/st-priority.dat" >/dev/null; then
     # the realisations hard-link these files: rewriting them in place would
@@ -341,7 +341,7 @@ for name in "${SETS[@]}"; do
     # An explicit --seed applies to every realisation, which is how a single run
     # is reproduced exactly; otherwise each realisation gets its own derived
     # seed - except a single-realisation set, which runs ns-2's own sequence
-    # (seed 0), the author's rule of 27/08/2026: one realisation means the
+    # (seed 0): one realisation means the
     # deterministic run, no drawn seed, as every seed-0 diagnosis ran.
     if [[ "$SEED" != "0" ]]; then seed="$SEED"
     elif [[ "$sims" -eq 1 ]]; then seed=0

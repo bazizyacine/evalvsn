@@ -2,7 +2,7 @@
 """stats.py - the statistical protocol of the comparative study.
 
 Reads computed sets under experiments/sets/ and applies, on one metric, the
-tests the thesis audit's rubric etude-comparative prescribes:
+tests the statistical protocol of the comparative study prescribes:
 
   ci        per set: n, mean, standard deviation, 95 % Student interval,
             minimum and maximum (the minimum carries the 28 dB criterion)

@@ -291,7 +291,7 @@ def gops_text(g, lang):
 PLAN_WIDTHS = ('0.78', '1.18', '1.80', '1.00', '0.74', '1.00', '0.50')
 PLAN_SEP = '3pt'
 # The series of an experiment, one per line of a nested tabular that spans the
-# factor, stacks and GOP columns (the author's reading of 12 Nov 2026: no
+# factor, stacks and GOP columns (no
 # partial rule cuts the row of an experiment). Its columns take the widths of
 # the columns they sit under: an X column of this table is w/7 of the full
 # length less the 14 column separations, and two inner columns stay apart by

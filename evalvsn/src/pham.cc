@@ -1,8 +1,8 @@
-// pham.cc - Encoder=JPEG, the Pham witness (tranche 3b-2, R34/R27).
+// pham.cc - Encoder=JPEG, the Pham witness.
 //
 // The MMPEG coder is compared against an external codec that a real image
 // sensor runs: C. Pham's ucam-II JPEG encoder, ported byte-faithfully under
-// pham/ (see pham/PROOF.md for what proves the port), and its untouched
+// pham/ (a directory this release does not include), and its untouched
 // reference decoder. Both are driven here as external programs, the way the
 // tool already drives ffmpeg, so that the reference decoder stays the
 // deposited code and the proof of interoperability keeps its meaning.

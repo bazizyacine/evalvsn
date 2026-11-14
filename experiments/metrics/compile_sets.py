@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""compile_sets.py - one table of every set's harvest, for the thesis.
+"""compile_sets.py - one table of every set's harvest.
 
 The sets under experiments/sets/ are machine-local and unversioned (traces,
-images, hundreds of gigabytes); what the thesis reads is a compilation of
-their harvest, small and versioned beside the chapters. This writes it: one
+images, hundreds of gigabytes); what the analyses read is a compilation of
+their harvest, small and versioned. This writes it: one
 row per set, its declaration (protocol, label, terrain, scenario, knobs)
 and, per metric, the moments the statistical protocol of the comparative
 study runs on.
@@ -16,7 +16,7 @@ life time, delay, jitter, throughput, delivery, alert latency, usable
 images, ...) graphs/<Metric>/<Metric>.dat gives mean, standard deviation
 and count, as setGraphs.pl aggregated them.
 
-    python3 compile_sets.py -o ../../thesis/data/palier-a.tsv $(grep -hv '^#' ../studies/02-codec/sets.txt ../studies/03-network/sets.txt)
+    python3 compile_sets.py -o sets.tsv $(grep -hv '^#' ../studies/09-comparative/sets.txt)
     python3 compile_sets.py -o out.tsv set_A set_B                       # some sets
     python3 compile_sets.py --list                                       # the columns
 
@@ -65,7 +65,7 @@ def declarations():
     return out
 
 
-USABLE_PSNR_DB = 28.0   # the acceptability threshold, evalvsn's and the thesis's
+USABLE_PSNR_DB = 28.0   # the acceptability threshold, evalvsn's and the article's
 
 
 def moments(values):

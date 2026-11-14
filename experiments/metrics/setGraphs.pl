@@ -38,7 +38,7 @@ END_HELP
 # Metric catalogue
 #
 # The catalogue is complete and stays complete. A set narrows what it computes
-# through -metrics; it never removes anything from here. The thesis draws on
+# through -metrics; it never removes anything from here. Other studies draw on
 # metrics the Sensors article does not report, and a set computed without them
 # has to be run again from scratch to get them back - hours, to save minutes.
 my %CATALOGUE = (
@@ -202,7 +202,7 @@ sub setGraphs {
         my @fields  = split /\s+/, $line;
         my $simId   = $fields[0] // '';
         my $Encoder = $fields[1] // '';
-        # MMPEG, or the JPEG line of the Pham witness (tranche 3b-2): the
+        # MMPEG, or the JPEG line of the Pham witness: the
         # traces it leaves carry the same columns, one priority level.
         next unless $Encoder eq 'MMPEG' || $Encoder eq 'JPEG';
         push @simid_order, $simId;
@@ -231,7 +231,7 @@ sub setGraphs {
             my $stName  = "$stPath/st-packet.dat";
             # The reception trace. rcvFile stopped being an ipFile column when
             # the decoding pass moved to -decode; on the modern recipes the
-            # field is empty and the name is the chain's own, rt-packet.dat.
+            # field is empty and the name is the tool's own, rt-packet.dat.
             # Without this fallback the name resolved to the sim/ directory
             # itself and every reception-based metric - delay, jitter,
             # throughput - was silently zero.
@@ -318,8 +318,7 @@ sub setGraphs {
     }
 }
 
-# The applicative metrics of the survival study (the author's R16 answer of
-# 23/08/2026): what a surveillance operator reads, beside the image quality.
+# The applicative metrics of the survival study (23/08/2026): what a surveillance operator reads, beside the image quality.
 #
 #   Alert Latency    seconds between detection - the first send instant of
 #                    the capture calendar - and the completion of the first

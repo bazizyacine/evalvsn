@@ -67,7 +67,7 @@ while IFS=$'\t' read -r sendTime frameNb frameType dataPriority dataSize data; d
     "$tail" >> "$OUT"
 done < "${ARG[st]}"
 
-# The capture calendar (R25/R40, tranche 5). The encoder stamps every packet
+# The capture calendar. The encoder stamps every packet
 # of a frame at the same instant - a playback, not a sensor. With a period,
 # frame k leaves at detect + (k-1)*period; with an inter-packet time, packets
 # drain sequentially and never regress: each send time is the later of its

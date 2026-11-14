@@ -171,8 +171,8 @@ int evalvsnFile::setup()
             nf = sscanf(line, "%lf %i %i %i %9s %i %i %4095s",
                         &sTime, &seqNb, &pSize, &frameNb, frameType, &prioNb, &offset, payloadBuf);
 
-            // Eight columns, strictly: the refonte has one trace format and
-            // the author closed the seven-column tolerance with it. An old
+            // Eight columns, strictly: the tool has one trace format and
+            // no longer tolerates seven columns. An old
             // trace fails loudly instead of playing without its payload.
             if (nf != 8)
             {
@@ -195,7 +195,7 @@ int evalvsnFile::setup()
 
             t->offset = offset;
 
-            // Eighth column: the hexadecimal payload (R17), always present.
+            // Eighth column: the hexadecimal payload, always present.
             // A payload that fills the buffer to the brim was truncated by
             // fgets: refuse the record loudly rather than transport a
             // corrupt payload. The "-" marker carries an empty one.
@@ -295,7 +295,7 @@ void evalvsn::timeout()
 
     agent_->set_offset(trec_.offset);
 
-    // The payload travels in the packet (R17): attached as PacketData, the
+    // The payload travels in the packet: attached as PacketData, the
     // ns-2 mechanism evalvsnUDP::sendmsg() already forwards via setdata().
     // The simulated size stays pSize - the payload is the same bytes the
     // size already counts, not an addition to them.

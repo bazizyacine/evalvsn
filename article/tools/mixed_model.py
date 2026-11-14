@@ -3,7 +3,7 @@
 intercept per seed (fire and realisation): the check that the methods' sentence
 on the mixed model rests on. Prints the Wald test of each fixed term.
 
-Usage: python3 tools/mixed_model.py   (needs statsmodels; the other tools of the chain do not)
+Usage: python3 tools/mixed_model.py   (needs statsmodels; the other tools do not)
 """
 import os
 import warnings

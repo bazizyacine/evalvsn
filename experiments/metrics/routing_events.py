@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """routing_events.py - the routing events of each realisation, read from its ns-2 trace.
 
-The routing measures of study 07 (chapter 4) rest on counts the harvest does
+The routing measures of study 07 rest on counts the harvest does
 not keep: how many route requests the camera
 and the whole network sent, how many route errors, how many video packets the
 MAC gave up on, how many the camera's routing queue refused while it waited
 for a route, how many went to a neighbour already dead. setGraphs.pl never
 reads them, so they are counted here from sets/<set>/r*/*/st-packet.tr, which
-only a set run without --prune, and not yet reached by the weekly purge of
-tools/purge.sh --install-cron, still holds.
+only a set run without --prune still holds.
 
-    python3 routing_events.py -o ../studies/07-ablation/results/routing.tsv set_A set_B ...
+    python3 routing_events.py -o ../studies/09-comparative/results/routing.tsv set_A set_B ...
 
 One row per realisation: set, realisation, the camera's node, then
 rreq_camera (RREQ the camera originated), rreq_all (RREQ sent by every node,

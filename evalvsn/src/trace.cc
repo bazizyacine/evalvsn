@@ -61,7 +61,7 @@ bool getIP(inputParameters &IP, const string &line, string &errParam)
         lineStream >> FPSStr >> thresholdStr >> gopCoefStr >> qualityCoefStr >> priorityNbStr >> claStr >> IP.rleLevel >> IP.binLevel;
 
         // DCT and zoneSize travel as one field - CLA8, the notation the
-        // README already used (R32): the alphabetic prefix names the
+        // README already used: the alphabetic prefix names the
         // transform, the digits give the zone size. rcvFile is no longer a
         // column either: decoding is asked with -decode on the command line.
         size_t claDigit = claStr.find_first_of("0123456789");
@@ -125,7 +125,7 @@ bool getIP(inputParameters &IP, const string &line, string &errParam)
         // zoneSize - 1 levels at most (7 for LLM8 and BIN8), where CLA, the
         // full 8x8 DCT, carries 13. More levels than that were silently
         // capped; the encoder refuses them since the test bench of 14
-        // September 2026 (the author's choice: the transforms are compared
+        // September 2026 (the transforms are compared
         // at seven levels).
         if (IP.DCT.compare("CLA") != 0 && stoi(priorityNbStr) > stoi(zoneSizeStr) - 1)
         {
@@ -399,7 +399,7 @@ vector<packetsInfo> lostPackets(inputParameters IP, string stPacketName, string 
 
     while (getline(packetTrace, line, '\n'))
     {
-        // Exactly eight fields: one trace format, the author ruled, the
+        // Exactly eight fields: one trace format, the
         // payload always last.
         if (line[0] != '#' && line[0] != ' ' && !(line.empty()) && (count(line.begin(), line.end(), '\t') + 1) == 8)
         {

@@ -147,7 +147,7 @@ void evalvsnUDP::sendmsg(int nbytes, AppData *data, const char *flags)
 
     fprintf(SenderTraceFile, "%f\t%i\t%i\t%i\t%s\t%i\t%i", Scheduler::instance().clock(), ch->seqNb_, ch->pSize_, ch->frameNb_, ch->frameType_, ch->prioNb_, ch->offset__);
 
-    // Eighth column, always (one format, the author ruled): the payload
+    // Eighth column, always (one format): the payload
     // this packet carries, or "-" when it carries none.
     if (data != 0 && data->type() == PACKET_DATA)
         fprintf(SenderTraceFile, "\t%s\n", (char *)((PacketData *)data)->data());

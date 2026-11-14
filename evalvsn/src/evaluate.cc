@@ -165,7 +165,7 @@ int traceEvaluate(inputParameters IP, string videoFile, string outputDirectory)
 
         while (getline(inTrace, line, '\n'))
         {
-            // Exactly eight fields: one trace format, the author ruled,
+            // Exactly eight fields: one trace format,
             // the payload always last and "-" carrying an empty one.
             if (line[0] != '#' && line[0] != ' ' && !(line.empty()) && (count(line.begin(), line.end(), '\t') + 1) == 8)
             {

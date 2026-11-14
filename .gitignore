@@ -12,5 +12,5 @@ experiments/sets/
 article/src/tables/
 article/src/figures/
 
-# Internal review reports, written by the working repository's audit.
+# Local reports, not part of the release.
 AUDIT-*.md

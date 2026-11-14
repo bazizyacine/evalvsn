@@ -41,7 +41,7 @@ ROWS = ((None, REFERENCE % ('Référence', '0{,}5'), REFERENCE % ('Reference', '
 GROUPS = {'fr': ('PSNR (dB)', 'Hybride $-$ Règles'),
           'en': ('PSNR (dB)', 'Hybrid $-$ Rules')}
 # The rule stack's loss first, its stack heading the column, as in the load and
-# scenario tables (the author's request of 12 Nov 2026). Images and Decl. are
+# scenario tables. Images and Decl. are
 # defined in the metrics table (tab:metriques) and the reference values in the
 # reference row; the only note left defines the failure law near the front.
 LOSS_STACK = {'fr': 'Règles', 'en': 'Rules'}

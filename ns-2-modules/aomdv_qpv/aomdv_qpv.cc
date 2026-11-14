@@ -176,7 +176,7 @@ int AOMDV_QPV::command(int argc, const char *const *argv)
 			btimer.handle((Event *)0);
 
 			// HELLO maintenance runs together with the link-layer
-			// failure hysteresis (chapter 4): the hellos keep the
+			// failure hysteresis: the hellos keep the
 			// neighbour table and carry the queue occupancy, the
 			// hysteresis decides when MAC failures mean a dead link.
 			htimer.handle((Event *)0);
@@ -499,8 +499,7 @@ void AOMDV_QPV::rt_ll_failed(Packet *p)
 	// The treatment of a MAC failure, every cross-layer stack. The
 	// invalidation hysteresis that once took its place - K(p,t) failures in
 	// a second, a route error at once - was measured against it and refused
-	// (study 07); it replays from
-	// the git tag pre-refactor-2026-10-15.
+	// (study 07).
 	// A transmission abandoned after the MAC's retries is a non-delivery
 	// observed on that link, not evidence that the link is dead: it
 	// enters the delivery ratio at once, so that the next packets weigh
@@ -509,7 +508,7 @@ void AOMDV_QPV::rt_ll_failed(Packet *p)
 	// a row or the silence of the neighbour's HELLOs remove it.
 	// Without this a destroyed neighbour kept its last ratio and its
 	// paths for 22.5 s: on S1 at half destruction 96 to 100 % of the
-	// video losses were packets sent to it (audit of 5 Oct 2026).
+	// video losses were packets sent to it (measured on 5 Oct 2026).
 	struct hdr_cmn *ch = HDR_CMN(p);
 	struct hdr_ip *ih = HDR_IP(p);
 	nsaddr_t failed = ch->next_hop_;
@@ -531,7 +530,7 @@ void AOMDV_QPV::rt_ll_failed(Packet *p)
 		// acknowledgement, with no packet sent to the neighbour in
 		// between, declare it dead as its HELLO silence would:
 		// a relay with no other path otherwise kept losing its traffic
-		// for 22.5 s while upstream knew nothing (S1, audit of 5 Oct
+		// for 22.5 s while upstream knew nothing (S1, measured on 5 Oct
 		// 2026). Consecutive means the radio's count of packets sent to
 		// it moved by this packet alone since the previous failure.
 		int total = mac_ ? mac_->totalTxPackets(failed) : -1;
@@ -1683,7 +1682,7 @@ void AOMDV_QPV::forward(aomdv_qpv_rt_entry *rt, Packet *p, double delay)
 			// unless every path is congested, in which case the least bad one is taken.
 
 			// One path selection for every stack (selectPath): the
-			// chapter-4 rules, with the path or the congestion agent taking
+			// cross-layer rules, with the path or the congestion agent taking
 			// over its own decision when it is on. The agents' decision is
 			// kept by packet uid until the MAC reports the frame's outcome.
 			int theta = -1, prof = -1;
@@ -2521,7 +2520,7 @@ DynamicWeights AOMDV_QPV::getDynamicWeights(packet_t packetType, char frameType,
 	// getMaxPrioNb() = 13 -- so the weighting decreases without ever
 	// degenerating.
 	// kappa of the priority level; 1 outside the codec's levels (control,
-	// scalar readings carry no level), as chapter 4 defines it.
+	// scalar readings carry no level).
 	int maxPrio = mac_->getMaxPrioNb();
 	double prioFactor = (priority >= 1 && priority <= maxPrio)
 		? double(maxPrio + 1 - priority) / double(maxPrio) : 1.0;
@@ -2553,7 +2552,7 @@ DynamicWeights AOMDV_QPV::getDynamicWeights(packet_t packetType, char frameType,
  * @param q Reference to the LinkQuality structure containing LQI, SNR, and PRR metrics.
  * @return The computed link cost as a double. Lower values represent higher quality links.
  */
-// Chapter 4: the weights of the link cost depend on the class of the packet
+// The weights of the link cost depend on the class of the packet
 // (type of frame and level). The path cost stored at discovery was priced
 // on the control messages that built the path; at forwarding time the node
 // prices its own first link again with the weights of the packet in hand and
@@ -2601,7 +2600,7 @@ double AOMDV_QPV::linkCost(Packet *p, LinkQuality &q)
 
 	double normLQI = clampMetric(q.LQI / 255.0, 0.0, 1.0);
 	// The SNR is graded on the radio's own window, as everywhere else in
-	// the chain: the 10 dB decode floor the radio states (SINRThresh_)
+	// the stack: the 10 dB decode floor the radio states (SINRThresh_)
 	// up to floor+30 dB, the same 30 dB
 	// span the LQI mapping and the PHY score use. The former /50 was a
 	// span that kept a 23 dB link (283 m, past the two-ray
@@ -2873,7 +2872,7 @@ priqueueEvalVSN *AOMDV_QPV::get_ifq_for_nexthop(nsaddr_t nexthop)
 }
 
 // ---------------------------------------------------------------------------
-// The learning agents that replace the chapter-4 rules.
+// The learning agents that replace the cross-layer rules.
 // ---------------------------------------------------------------------------
 
 void AOMDV_QPVOutcome::frameOutcome(nsaddr_t da, int uid, bool ok, double delay, int cls)
@@ -2937,7 +2936,7 @@ int AOMDV_QPV::rlcTheta(int cls, bool explore)
 // The path for a packet, every stack. Each live path of the reserve (not
 // expired) is priced and judged congested or not; a congested path is
 // skipped while an uncongested one exists, and the cheapest remaining path
-// wins, the first on a tie. The chapter-4 rules decide by default: the
+// wins, the first on a tie. The cross-layer rules decide by default: the
 // class-priced cost plus the occupancy term, and the next hop's announced
 // congestion flag and class threshold. The path agent (RL_PATH_) replaces the cost's weights by a
 // learnt profile; the congestion agent (RL_CONGESTION_) replaces the threshold and

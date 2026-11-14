@@ -2,8 +2,7 @@
 """The two tables of video coding
 (study 10, tranches T3 and T10; experiment E4), French and English,
 from src/data/revision.tsv; means over the
-60 seeds, a cell without all 60 printing as a dash. One comparison per table
-(the author's reading of 12 Nov 2026):
+60 seeds, a cell without all 60 printing as a dash. One comparison per table:
 
 - {lang}_revision-volume.tex, the equal-rate series: one row per GOP and alarm
   period, the GOPs in the order of every table (3-9, 6-6, 9-3), GOPs 3-9 and

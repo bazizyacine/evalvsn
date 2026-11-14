@@ -16,7 +16,7 @@
 // Derivation, never modification: wpan/p802_15_4mac.cc is the reference
 // implementation of the standard and stays untouched. Everything EvalVSN adds
 // lives here. Keeping the original
-// intact is what allows the two configurations the thesis compares to run in
+// intact is what allows the two configurations this work compares to run in
 // the same binary - cross-layer 802.15.4 against plain 802.15.4 - so that the
 // difference measured is the contribution and not the build.
 //
@@ -79,15 +79,15 @@ public:
 	double get_average_lqi(nsaddr_t neighbor);
 	double get_average_snr(nsaddr_t neighbor);
 
-	// Enriches the base reason with the frame type and priority (R58): both
+	// Enriches the base reason with the frame type and priority: both
 	// fields live in the common
 	// header, so no PHY pointer is needed - the 802.15.4 MAC keeps none by
 	// design, the metrics reach it through the header.
 	char *dropReason(Packet *p, char *reason);
 
 	// The count comes from the coding scheme, not from the radio, so it is
-	// held here rather than read from a PHY (R58: the MAC holds the count on
-	// every stack). Thirteen is what the MMPEG chain produces (M1..M13,
+	// held here rather than read from a PHY (the MAC holds the count on
+	// every stack). Thirteen is what the MMPEG coder produces (M1..M13,
 	// D1..D13); the scenario sets it per run - "Mac/802_15_4EvalVSN set
 	// MAX_PRIO_NB ..." - since the sets vary priorityNb.
 	int getMaxPrioNb() const { return max_prio_nb_; }

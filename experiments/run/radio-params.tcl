@@ -2,18 +2,18 @@
 # radio-params.tcl - the radio and MAC parameters of the two stacks
 # evalvsn.tcl can run, in one file.
 #
-# The radio is IEEE 802.15.4, the only one of the thesis (the author's rule
-# of 14 September 2026: no 802.11 anywhere); -rp decides whether the EvalVSN
+# The radio is IEEE 802.15.4, the only one of this work (no 802.11
+# anywhere); -rp decides whether the EvalVSN
 # cross-layer extras apply, so this file branches on $val(rp) alone.
 # $val(netif) and $val(mac) name the right classes before it is sourced.
 #
-# The values are anchored to the radio the thesis cites - the AT86RF231 of
-# the IoT-LAB M3 node (R48/R49): +3 dBm maximum output, -101 dBm
+# The values are anchored to the radio this work cites - the AT86RF231 of
+# the IoT-LAB M3 node: +3 dBm maximum output, -101 dBm
 # sensitivity, the 2.4 GHz O-QPSK band - and the power-monitor constants sit
 # on the -111 dBm thermal floor of its 2 MHz channel.
 # ------------------------------------------------------------------------------
 
-# The queue length the radio's real buffers justify (R48), applied when the
+# The queue length the radio's real buffers justify, applied when the
 # scenario asked for -ifqlen radio: 16 frames - the order of the Contiki and
 # TinyOS transmit queues, and a sane share of the M3's 64 KB.
 if {$val(ifqlen) == "radio"} {
@@ -21,8 +21,8 @@ if {$val(ifqlen) == "radio"} {
     puts "Interface queue length (radio-anchored): $val(ifqlen)"
 }
 
-# The battery is the stack's, not the terrain's (R56), and both stacks live
-# on the same refonte model, the author ruled: no historical carve-outs. One
+# The battery is the stack's, not the terrain's, and both stacks live
+# on the same energy model: no historical carve-outs. One
 # real 650 mAh / 3.7 V pack (some 8,658 J) everywhere.
 if {$val(initeng) == ""} {
     set val(initeng) 8658
@@ -57,7 +57,7 @@ $val(netif) set L_          1.0         ;# no additional system loss
 # is written once. Per-second hellos are the dimensioning of a fast radio: a
 # hundred nodes of them eat a 250 kbit/s channel in collisions before any
 # video is sent, where real sensor stacks beacon in tens of seconds. Five is
-# conservative on that scale (R49). A 1 s cap on the RREQ backoff makes a
+# conservative on that scale. A 1 s cap on the RREQ backoff makes a
 # hundred nodes rebroadcast a rediscovery every second - the measured
 # ~63,000-drop storm; 10 s is RFC 3561's own value. Routes outlive the
 # capture period (30 s at the base point, 9 s under the fires of study 09),
@@ -71,13 +71,13 @@ if {$val(rp) == "AOMDV_QPV"} {
     if {$val(hello_interval) != ""}     { Agent/AOMDV_QPV set HELLO_INTERVAL_ $val(hello_interval) } ;# study knob
     Agent/AOMDV_QPV set MAX_RREQ_TIMEOUT_ $maxRreqTimeout_
     if {$val(rreq_timeout) != ""}       { Agent/AOMDV_QPV set MAX_RREQ_TIMEOUT_ $val(rreq_timeout) } ;# study knob
-    # Ablation knobs of the mechanisms aligned on chapter 4: the per-class
+    # Ablation knobs of the cross-layer mechanisms: the per-class
     # link cost and the HELLO queue field (default on).
     if {$val(class_cost) != ""}         { Agent/AOMDV_QPV set CLASS_COST_ $val(class_cost) }
     if {$val(hello_queue) != ""}        { Agent/AOMDV_QPV set HELLO_QUEUE_ $val(hello_queue) }
     # The learning MAC (CSMA parameters per class and link), off by default.
     if {$val(rl_access) != ""}          { Mac/802_15_4EvalVSN set RL_ACCESS_ $val(rl_access) }
-    # The learning agents that replace the chapter-4 rules, each off by default: path, congestion, link-break detection,
+    # The learning agents that replace the cross-layer rules, each off by default: path, congestion, link-break detection,
     # discovery jitter, transmit power.
     if {$val(rl_path) != ""}            { Agent/AOMDV_QPV set RL_PATH_ $val(rl_path) }
     if {$val(rl_congestion) != ""}      { Agent/AOMDV_QPV set RL_CONGESTION_ $val(rl_congestion) }
@@ -102,9 +102,9 @@ if {$val(rp) == "AOMDV_QPV"} {
     $val(netif) set noise_floor_         7.94328e-15 ;# -111 dBm: thermal noise kTB over the 2 MHz channel
     $val(netif) set PowerMonitorThresh_  2.64776e-15 ;# noise_floor_ / 3, the monitor's ratio
     $val(netif) set SINRThresh_          10.0        ;# 10 dB: the -101 dBm sensitivity over the -111 dBm floor
-    $val(netif) set MAX_PRIO_NB          $maxPrioNb_ ;# the PHY's own copy for its score (R58)
+    $val(netif) set MAX_PRIO_NB          $maxPrioNb_ ;# the PHY's own copy for its score
     $val(netif) set TxPowerAdapt_        $val(rule_power) ;# closed-loop power per neighbour on the chip's TX_PWR steps; -rule_power, default 1 (4 Oct 2026)
-    $val(mac)   set MAX_PRIO_NB          $maxPrioNb_ ;# the cross-layer MAC holds the count (R58)
+    $val(mac)   set MAX_PRIO_NB          $maxPrioNb_ ;# the cross-layer MAC holds the count
 }
 # The tuned AOMDV control of study 10 (E1), never the reference:
 # the cross-layer stacks' routing timers (the route queue's length is set per

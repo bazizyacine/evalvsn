@@ -73,7 +73,7 @@ count=0
 # simulation of every set would be silently skipped.
 #
 # The source family - resolution, frame count, duration - is read from the
-# video itself since R39, so the simulation time comes from ffprobe on the
+# video itself, so the simulation time comes from ffprobe on the
 # AVI rather than from a column. All remaining fields are named even though
 # only two are used: the list documents the ipFile column order, described
 # in README.md. rcvFile is no longer a column either - the decoding pass is
@@ -103,7 +103,7 @@ while read -r simId encoder fps threshold \
 
   if [[ -z "$simId" || "$simId" == \#* ]]; then simId=""; continue; fi
 
-  # Two grammars share the file: the MMPEG line and, since tranche 3b-2,
+  # Two grammars share the file: the MMPEG line and
   # the JPEG line of the Pham witness (simId JPEG FPS Threshold QF MSS);
   # the columns beyond the second are named for MMPEG and read positionally,
   # and none of them is used here, so both run the same steps.

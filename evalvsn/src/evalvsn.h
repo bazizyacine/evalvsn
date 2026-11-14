@@ -27,7 +27,7 @@ struct inputParameters
     string rleLevel;
     string binLevel;
     string rcvFile;
-    // Encoder=JPEG, the Pham witness (tranche 3b-2): the quality factor of
+    // Encoder=JPEG, the Pham witness: the quality factor of
     // the ucam-II encoder and the packet size it packetises to.
     int qualityFactor = 0;
     int mss = 0;

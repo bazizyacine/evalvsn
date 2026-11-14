@@ -1604,7 +1604,7 @@ Agent/MDART set etxMetric_ true
 # the monitor's own constants are new, anchored to the 2.4 GHz O-QPSK
 # channel and the AT86RF231 radio of the IoT-LAB M3 node.
 
-Mac/802_15_4EvalVSN set MAX_PRIO_NB 13                              ;# priority levels of the MMPEG chain; the scenario overrides it per set
+Mac/802_15_4EvalVSN set MAX_PRIO_NB 13                              ;# priority levels of the MMPEG coder; the scenario overrides it per set
 Mac/802_15_4EvalVSN set RL_ACCESS_ 0                                ;# 1: the channel-access agent, CSMA backoff exponent and backoff count per class and link (9 Oct 2026)
 Mac/802_15_4EvalVSN set RL_MAC_ALPHA_ 0.2                           ;# learning MAC: learning rate
 Mac/802_15_4EvalVSN set RL_MAC_EPSILON_ 0.1                         ;# learning MAC: exploration rate, non-critical packets only
@@ -1616,13 +1616,13 @@ Phy/WirelessPhy/802_15_4EvalVSN set noise_floor_ 7.94328e-15        ;# -111 dBm:
 Phy/WirelessPhy/802_15_4EvalVSN set PowerMonitorThresh_ 2.64776e-15 ;# noise_floor_ / 3, the same ratio the Wi-Fi monitor uses
 Phy/WirelessPhy/802_15_4EvalVSN set SINRThresh_ 10.0                ;# 10 dB: AT86RF231 sensitivity (-101 dBm) over the -111 dBm floor
 Phy/WirelessPhy/802_15_4EvalVSN set TxPowerAdapt_ 0                 ;# 1 = closed-loop power per neighbour on the AT86RF231 TX_PWR steps, reported in the HELLO (rewritten 4 Oct 2026)
-Phy/WirelessPhy/802_15_4EvalVSN set MAX_PRIO_NB 13                  ;# the PHY's own copy for its score, as on Wi-Fi; the MAC holds the authoritative one (R58)
+Phy/WirelessPhy/802_15_4EvalVSN set MAX_PRIO_NB 13                  ;# the PHY's own copy for its score, as on Wi-Fi; the MAC holds the authoritative one
 
 # The cross-layer routing agent and its learning agents.
 Agent/AOMDV_QPV set HELLO_INTERVAL_ 1.0                             ;# seconds; the AODV classic - radio-params.tcl scales it per radio
 Agent/AOMDV_QPV set MAX_RREQ_TIMEOUT_ 1.0                           ;# seconds; historical cap - RFC 3561 says 10, radio-params.tcl applies it per radio
-Agent/AOMDV_QPV set CLASS_COST_ 1                                   ;# chapter 4: first link priced for the class of the packet (0: the discovered cost)
-Agent/AOMDV_QPV set HELLO_QUEUE_ 1                                  ;# chapter 4: next hop's queue from its HELLOs (0: read in memory)
+Agent/AOMDV_QPV set CLASS_COST_ 1                                   ;# first link priced for the class of the packet (0: the discovered cost)
+Agent/AOMDV_QPV set HELLO_QUEUE_ 1                                  ;# next hop's queue from its HELLOs (0: read in memory)
 Agent/AOMDV_QPV set RL_PATH_ 0                                      ;# 1: the path agent replaces the class-priced link cost
 Agent/AOMDV_QPV set RL_CONGESTION_ 0                                ;# 1: the congestion agent replaces the fixed bypass threshold
 Agent/AOMDV_QPV set RL_BREAK_ 0                                     ;# 1: the link-break detection agent replaces the three failures that declare a neighbour dead

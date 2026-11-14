@@ -2,7 +2,7 @@
 """Draw the article's plots from the data the repository keeps, into
 src/figures/<lang>_*.png at 600 dpi (MDPI takes PNG, JPEG or TIFF, not PDF).
 
-The figures follow the thesis's conventions (its plot_survie.py): means
+The figures follow these conventions: means
 only, the panels lettered and captioned under each panel, one framed legend
 at the top right, legend colours equal to the marks', the edition's decimal
 marker on the axes. The colours are the Okabe-Ito palette, readable under
@@ -84,7 +84,7 @@ T = {
            'admitted': 'admis, IC$_0$ = 0,2', 'other': 'limite pour IC$_0$ = 0,1, 0,3 ou 0,5',
            'mframes': 'frames M', 'dframes': 'frames D', 'always': '$\\rho \\leq 3$ toujours admis',
            'ref': 'codée,\nsans perte réseau',
-           # the stacks' short names, those of the tables (vocabulary-symbols.md)
+           # the stacks' short names, those of the tables
            'stack': {'aomdv': 'AOMDV', 'rules': 'Règles', 'agents': 'Agents', 'hybrid': 'Hybride'},
            'md': 'GOP (M-D)', 'm1loss': 'perte du niveau M1 (%)'},
     'en': {'psnr': 'PSNR at the sink (dB)',
@@ -206,7 +206,7 @@ S_FRONT, S_EARLY, S_ZONE, S_ALIVE = '#8e1b12', '#d94a2b', '#f2a65a', '#9a9a92'
 
 
 def place(ax, name, x, y, zoom, z=5):
-    """A Twemoji pictogram (CC BY 4.0), the drawings of the thesis's maps."""
+    """A Twemoji pictogram (CC BY 4.0), the drawings of the maps."""
     from matplotlib.image import imread
     from matplotlib.offsetbox import OffsetImage, AnnotationBbox
     ab = AnnotationBbox(OffsetImage(imread(os.path.join(ICONS, f'icon-{name}.png')), zoom=zoom), (x, y),
@@ -217,7 +217,7 @@ def place(ax, name, x, y, zoom, z=5):
 
 def scenario_figure():
     """The three fires of study 09, 90 s after the detection, in the
-    illustrated style of the thesis's maps: the forest as a light ground, the
+    illustrated style of a drawn map: the forest as a light ground, the
     relays as antenna pictograms on a disc whose shade gives their state at
     time t, the burnt ellipse and the heated zone ahead of it, the camera, the
     sink, the fire and its wind as pictograms.

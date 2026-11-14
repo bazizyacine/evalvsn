@@ -3,7 +3,7 @@
 Supporting material for the article *Reinforcement Learning Agents in a
 Cross-Layer Stack for Forest Fire Video Surveillance over Wireless Sensor
 Networks* (M. Y. Baziz, L. Sekhri and B. Kechar), under revision in
-*Sensors* (MDPI). This release, v2.0.1, is the version of the revised
+*Sensors* (MDPI). This release, v2.0.2, is the version of the revised
 manuscript: the code that ran the simulations, the results of every
 simulation and the commands that reproduce them.
 
@@ -59,9 +59,10 @@ reads their replay at 168 s, in E4. Their declarations stay in
    `bin/evalvsn`.
 3. The videos: each content is a 12 s cut of a video of the FLAME 2 dataset
    (Chen et al., IEEE DataPort, 2022), which this repository does not
-   redistribute: 300 frames at 25 frames per second, QCIF (176 × 144 pixels),
-   YUV 4:2:0, under `evalvsn/videos/`; the encoder codes twelve frames of each
-   in grayscale (Table 2 of the article).
+   redistribute: in the YUV file, 300 frames at 25 frames per second,
+   QCIF (176 × 144 pixels), YUV 4:2:0, under `evalvsn/videos/`; the encoder
+   reads the AVI file and codes twelve frames of each in grayscale (Table
+   2 of the article).
 
    | Content | FLAME 2 video | From | Read by |
    |---|---|---|---|
@@ -69,17 +70,30 @@ reads their replay at 168 s, in E4. Their declarations stay in
    | `forest_qcif` | `#18) RGB Preburn Video 2.MP4` | 60.0 s | E5 (scenario) |
    | `smoke_qcif` | `#7) RGB Video 7.MP4` | 170.0 s | E5 (scenario) |
 
+   With FFmpeg 6.1.1, these two commands write the `fire_qcif` files the
+   simulations read, byte for byte (their SHA-256 sums are given below):
+
    ```bash
    ffmpeg -ss 27.0 -t 12 -i "#6) RGB Video 6.MP4" -vf "fps=25,scale=176:144" \
      -frames:v 300 -pix_fmt yuv420p -f rawvideo evalvsn/videos/fire_qcif.yuv
-   ffmpeg -s qcif -i evalvsn/videos/fire_qcif.yuv evalvsn/videos/fire_qcif.avi
+   ffmpeg -ss 27.0 -t 12 -i "#6) RGB Video 6.MP4" -vf "fps=25,scale=176:144" \
+     -pix_fmt yuv420p -q:v 2 evalvsn/videos/fire_qcif.avi
    ```
 
-   The other contents are cut the same way, from the instants above. The
-   start of `fire_qcif` was found afterwards, by matching its first frame
-   (mean squared error of 4.4), and the AVI may depend on the ffmpeg version:
-   a new cut can differ from the files the simulations read, whose SHA-256
-   sums are given below.
+   The AVI of `fire_qcif` is cut from the FLAME 2 video itself, at the
+   quantizer 2 (`-q:v 2`). Its header declares 301 frames
+   (12.04 s): 300 coded frames and an empty entry after the
+   first one. EvalVSN takes the frame count from the header
+   (`CAP_PROP_FRAME_COUNT`, `evalvsn/src/evalvsn.cc`) and codes one frame in
+   26 (Table 2 of the article). An AVI converted from
+   `fire_qcif.yuv` declares 300 frames: EvalVSN would code one frame
+   in 25, other images. The other contents are cut with the first
+   command, from their video and instant in the table above, then converted
+   with `ffmpeg -s qcif -i evalvsn/videos/<content>.yuv evalvsn/videos/<content>.avi`, which writes their AVI byte for byte.
+   `experiments/run/run_sets.sh` converts the YUV file only when the AVI is
+   missing or `--regen-avi` is passed: write `fire_qcif.avi` with the command
+   above before running a set. The start of `fire_qcif` was found afterwards,
+   by matching its first frame (mean squared error of 4.4).
 
 ## Configuration of the main study
 
@@ -360,7 +374,7 @@ The licenses go by directory:
 
 ## Citation
 
-This release, v2.0.1, is archived at Zenodo. All its versions share the
+This release, v2.0.2, is archived at Zenodo. All its versions share the
 concept DOI [10.5281/zenodo.24147853](https://doi.org/10.5281/zenodo.24147853), which
 leads to the latest one; the Zenodo record of each version gives the DOI of
 that version.

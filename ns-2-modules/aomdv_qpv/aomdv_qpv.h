@@ -129,7 +129,7 @@ class priqueueEvalVSN;
 // timeout after doing network-wide search RREQ_RETRIES times
 // The cap on the network-wide RREQ backoff left its #define too: at 1.0 s a
 // hundred nodes rebroadcast a source's rediscovery every second - the storm
-// the 802.15.4 audit measured at ~63,000 collision drops. Bound as
+// an 802.15.4 diagnosis measured at ~63,000 collision drops. Bound as
 // MAX_RREQ_TIMEOUT_ (default 1.0);
 // radio-params.tcl sets RFC 3561's 10 s where the radio needs it.
 
@@ -364,7 +364,7 @@ public:
 
         void setMac(LinkMetricsStore *mac) { mac_ = mac; }
         // The agent needs a link-metrics store, not a particular MAC: the
-        // IEEE 802.15.4 derivation is the one store the thesis runs.
+        // IEEE 802.15.4 derivation is the one store this work runs.
         LinkMetricsStore *getMac() const { return mac_; }
 
         void setAOMDV_QPVifqueue(PriQueue *ifq) { AOMDV_QPVifqueue = ifq; }
@@ -419,7 +419,7 @@ public:
                 RxFeedback() : rssi_sum(0.0), sinr_sum(0.0), n(0) {}
         };
         map<nsaddr_t, RxFeedback> rx_fb_;
-        // The three mechanisms aligned on chapter 4, switchable from Tcl
+        // The three cross-layer mechanisms, switchable from Tcl
         // for the bench (1 = on, the default; 0 = the former behaviour).
         // Consecutive MAC failures towards each neighbour: the radio's count
         // of packets sent to it at the last failure, and the run length.
@@ -446,7 +446,7 @@ public:
         long rlb_silent_cnt_;  // declared neighbours silent for 15 s
 
         /*
-         * The learning agents that replace the chapter-4 rules, each behind its own switch, all off by
+         * The learning agents that replace the cross-layer rules, each behind its own switch, all off by
          * default. They learn from the outcome of every unicast frame,
          * which the derived MAC hands over (FrameOutcomeListener): reward
          * 1 - 0.5 min(1, delay / 0.1 s) if acknowledged, -1 if not, the

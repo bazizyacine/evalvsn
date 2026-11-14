@@ -41,7 +41,7 @@ static inline double clampMetric(double v, double lo, double hi)
 
 // Moving averages of LQI and SNR, per neighbour: each new frame weighs
 // 0.1, so that the average follows a link over its last twenty frames or
-// so. The cumulative mean it replaces (audit of 5 Oct 2026) no longer moved
+// so. The cumulative mean it replaces no longer moved
 // after a few hundred frames, whatever became of the link.
 #define LINK_METRICS_EWMA_WEIGHT 0.1
 struct LinkMetrics
@@ -84,11 +84,11 @@ public:
 	// PHY being exposed - which is what kept the agent tied to one MAC type.
 	virtual char *dropReason(Packet *p, char *reason) = 0;
 
-	// Number of priority levels the chain carries. It is a property of the
+	// Number of priority levels the coded video carries. It is a property of the
 	// coding scheme, not of the radio, so every MAC answers the same thing.
 	virtual int getMaxPrioNb() const = 0;
 
-	// Closed-loop transmit power control (chapter 4): the routing agent
+	// Closed-loop transmit power control: the routing agent
 	// carries the reports in its HELLO and relays what a neighbour said of
 	// this node's frames; the MAC hands it to its PHY. A MAC without power
 	// control ignores both.

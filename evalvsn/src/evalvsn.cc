@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
     // Parse arguments. -decode takes no value: it selects the decoding pass,
     // which used to be asked through the rcvFile column of a second,
-    // otherwise identical ipFile (R32).
+    // otherwise identical ipFile.
     bool decode = false;
 
     for (int i = 1; i < argc;)
@@ -96,11 +96,10 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // The source family is read from the video itself (R39): resolution,
+    // The source family is read from the video itself: resolution,
     // frame count and duration belong to the file, and a declaration that
     // contradicted it used to pass without an error. What the file cannot
-    // tell is the capture cadence - FPS stays a column, and joins the
-    // capture calendar when the tranche-5 bricks land.
+    // tell is the capture cadence - FPS stays a column.
     VideoCapture probe(videoFile);
 
     if (!probe.isOpened())

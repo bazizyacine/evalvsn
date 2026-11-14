@@ -649,7 +649,7 @@ int priqueueEvalVSN::computeCongestionThresholdFor(Packet *p, int qlen, int qlim
     // from the first unit of occupancy. The +1 lets it decrease without
     // degenerating.
     // kappa of the level; 1 outside the codec's levels (control, scalar
-    // readings), as chapter 4 defines it.
+    // readings).
     int maxPrio = aomdv_qpv_agent_->mac_->getMaxPrioNb();
     double prio_factor = (priority >= 1 && priority <= maxPrio)
         ? double(maxPrio + 1 - priority) / double(maxPrio) : 1.0;

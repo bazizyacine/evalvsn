@@ -5,7 +5,7 @@ the article's compiled tables are drawn from.
 The sets under experiments/sets/ are machine-local and unversioned (traces,
 images, hundreds of gigabytes), and they are purged once their study is
 delivered. This keeps, for every realisation of every set a study lists in
-studies/<study>/sets.txt, what the chain measured on it and the seed it ran
+studies/<study>/sets.txt, what the simulation measured on it and the seed it ran
 on, small enough to be versioned and published:
 
   - sim/mt.dat: the PSNR, the SSIM and their loss-free references, the packet
@@ -32,7 +32,7 @@ compilation, so that a published table never silently lacks a set.
 Columns: set, realisation, seed; arm, fire, split, period, dist, the keys of
 the article's revision.tsv (empty for a set revision.tsv does not hold, such
 as the sets of the quality coefficient 0.1 that stopped at 165 s); then the
-mt.dat columns as the chain wrote them (psnr refPSNR ssim refSSIM pktLoss
+mt.dat columns as the tools wrote them (psnr refPSNR ssim refSSIM pktLoss
 pktLossM pktLossD pktlossM1..13 pktlossD1..13; dB, SSIM in [0, 1], losses in
 %); then psnr_i<k>, ssim_i<k>, loss_i<k> for each image k at the sink; then
 rreq_camera rreq_all rerr mac_drop rq_overflow cbk rrep hello (messages or

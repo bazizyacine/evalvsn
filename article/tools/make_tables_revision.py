@@ -15,8 +15,8 @@ SRC = os.path.join(HERE, '..', 'src')
 # The agents' policy in its own column, the stacks in the article's order
 # (agents, then hybrid) under each policy: frozen, the constant exploration
 # of E0 (epsilon = 0.1), then the decaying exploration; the rule stack, which
-# has no agent, first and alone, its policy cell saying so rather than a dash
-# (the author's reading of 12 Nov 2026). (policy, arm, traced arm, stack)
+# has no agent, first and alone, its policy cell saying so rather than a dash.
+# (policy, arm, traced arm, stack)
 POLICIES = {'fr': {'': 'sans agent', 'frozen': 'figée', 'const': '$\\varepsilon$ constant', 'edec': '$\\varepsilon$ décroissant'},
             'en': {'': 'no agent', 'frozen': 'frozen', 'const': 'constant $\\varepsilon$', 'edec': 'decaying $\\varepsilon$'}}
 ARMS = (('', 'rules', 'rules', 'rules'),

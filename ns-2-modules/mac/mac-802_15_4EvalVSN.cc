@@ -80,7 +80,7 @@ Mac802_15_4EvalVSN::Mac802_15_4EvalVSN(MAC_PIB *mp) : Mac802_15_4(mp), max_prio_
 	outcomeListener_(0), rl_power_(0), rlp_kappa_(0.2)
 {
 	// Tcl-bound so the scenario can carry the set's priorityNb; the default
-	// in ns-default.tcl is the thirteen the MMPEG chain produces.
+	// in ns-default.tcl is the thirteen the MMPEG coder produces.
 	bind("MAX_PRIO_NB", &max_prio_nb_);
 	bind("RL_ACCESS_", &rl_access_);
 	bind("RL_MAC_ALPHA_", &rlm_alpha_);

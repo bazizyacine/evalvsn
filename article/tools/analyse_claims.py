@@ -8,7 +8,7 @@ One line per number: the block, what is computed, the value as the proposed
 text writes it, the value computed here, and OK or DIFFERS. The last lines
 count them. Pairs share their seeds (fire, realisation): mean difference, 95 %
 Student interval, p, Holm within the family the text names. Rounding is half
-up, as everywhere in the chain. Reads src/data/ only: comparative.tsv,
+up, as everywhere in these tools. Reads src/data/ only: comparative.tsv,
 revision.tsv, agent-trace.tsv, break-agent.tsv, overhead.tsv, frames.tsv,
 oracle-s10.tsv and codec-frames.tsv; a missing file turns its lines into
 MISSING. P38 and P40 compute from the radio and capture constants they name.
@@ -600,7 +600,7 @@ def main():
     claim('P34', 'RREQ par déclaration : configurations, simulations, pente, corrélation', '49 ; 2 940 ; 83 ; 0,95',
           [(n, '=', 49, 0), (len(xs), '=', 2940, 0), (slope(xs, ys), '=', 83, 0), (pearson(xs, ys), '=', 0.95, 2)])
 
-    # P38 to P41, final audit of 12 Nov 2026 (findings M1, I9, I5 and M18)
+    # P38 to P41 (12 Nov 2026)
     # P38, the margin of a 40 m link (section 3.4): the shadowing model with
     # sigma 0 (log-distance) and the radio of experiments/run/radio-params.tcl,
     # Friis at 1 m (Pt 0.002 W, 2.4 GHz, unit gains, L = 1), exponent 3.2,

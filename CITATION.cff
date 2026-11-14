@@ -2,9 +2,9 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "EvalVSN: reinforcement learning agents in a cross-layer stack for video over wireless sensor networks"
-version: "v2.0.1"
+version: "v2.0.2"
 doi: 10.5281/zenodo.24147853
-date-released: 2026-11-13
+date-released: 2026-11-14
 identifiers:
   - type: doi
     value: 10.5281/zenodo.24147853

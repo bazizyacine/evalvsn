@@ -1,11 +1,11 @@
 {
   "title": "EvalVSN: reinforcement learning agents in a cross-layer stack for video over wireless sensor networks",
-  "version": "v2.0.1",
+  "version": "v2.0.2",
   "upload_type": "software",
   "access_right": "open",
   "license": "GPL-3.0-only",
   "language": "eng",
-  "description": "Material that accompanies the article “Reinforcement Learning Agents in a Cross-Layer Stack for Forest Fire Video Surveillance over Wireless Sensor Networks”, by Mohammed Yassine Baziz, Larbi Sekhri and Bouabdellah Kechar, under revision in Sensors (MDPI), manuscript sensors-4703240. Version v2.0.1 corresponds to the revised manuscript. It contains the code of the EvalVSN tool, the modules added to or modified in ns-2.35, the simulation and measurement scripts, the results of each simulation and the tools that produce the tables and figures of the article; the README gives, for each table and each figure drawn from the data, the command that reproduces it. The source videos, taken from the FLAME 2 dataset, are not redistributed. Licenses: the EvalVSN tool and the scripts under the GNU GPL 3.0; in the ns-2 modules, the files written by the authors under the GNU GPL 2.0 or later, and the files derived from ns-2 and AOMDV under their original license; data and tables under CC BY 4.0; the images decoded from a FLAME 2 video keep the terms of that dataset; the Twemoji pictograms are under CC BY 4.0 (Twitter, Inc. and other contributors).",
+  "description": "Material that accompanies the article “Reinforcement Learning Agents in a Cross-Layer Stack for Forest Fire Video Surveillance over Wireless Sensor Networks”, by Mohammed Yassine Baziz, Larbi Sekhri and Bouabdellah Kechar, under revision in Sensors (MDPI), manuscript sensors-4703240. Version v2.0.2 corresponds to the revised manuscript. It contains the code of the EvalVSN tool, the modules added to or modified in ns-2.35, the simulation and measurement scripts, the results of each simulation and the tools that produce the tables and figures of the article; the README gives, for each table and each figure drawn from the data, the command that reproduces it. The source videos, taken from the FLAME 2 dataset, are not redistributed. Licenses: the EvalVSN tool and the scripts under the GNU GPL 3.0; in the ns-2 modules, the files written by the authors under the GNU GPL 2.0 or later, and the files derived from ns-2 and AOMDV under their original license; data and tables under CC BY 4.0; the images decoded from a FLAME 2 video keep the terms of that dataset; the Twemoji pictograms are under CC BY 4.0 (Twitter, Inc. and other contributors).",
   "keywords": [
     "wireless sensor networks",
     "video",
@@ -30,6 +30,13 @@
       "name": "Kechar, Bouabdellah",
       "affiliation": "Laboratory of Research in Industrial Computing and Networks (RIIR), Computer Science Department, Faculty of Exact and Applied Sciences, University of Oran 1 Ahmed Ben Bella, Oran, Algeria",
       "orcid": "0000-0001-8635-4667"
+    }
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.21227/swyw-6j78",
+      "relation": "isDerivedFrom",
+      "resource_type": "dataset"
     }
   ]
 }

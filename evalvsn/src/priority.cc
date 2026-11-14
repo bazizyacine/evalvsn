@@ -339,7 +339,7 @@ vector<prioritiesInfo> priorityDecoder(inputParameters IP, vector<prioritiesInfo
         // frames that was some 60 000 copies of strings of tens of
         // kilobytes, 8 GB of memory on the EG sets and, on the ST sets
         // whose strings are twice as long, hours of reallocation and an
-        // out-of-memory (13 September 2026, tier A, set GC-BIN-ST).
+        // out-of-memory (13 September 2026, set GC-BIN-ST).
         levelsInfo.push_back({PI.sendTime, PI.frameNb, PI.frameType, PI.dataPriority, PI.dataSize, string(), PI.blockNb, level, vector<int>(), vector<int>()});
     }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Compile study 08 (the learning agents on three use cases) into the thesis's data/feu-agents.tsv, one line per realisation, so
-that the thesis's tables are generated from data the repository keeps (the
+"""Compile study 08 (the learning agents on three use cases) into feu-agents.tsv, one line per realisation, so
+that its tables are generated from data a repository keeps (the
 sets are gitignored machine-local artifacts). Its trace readers serve
 compile_comparative.py too.
 

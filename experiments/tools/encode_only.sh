@@ -4,9 +4,9 @@
 #
 # Runs EvalVSN's encoding pass and its lossless decoding on one video for
 # one or more encoder files, without ns-2, and prints per point what the
-# thesis's rubric etude-comparative reads at that stage: the reference PSNR
+# comparative study reads at that stage: the reference PSNR
 # and SSIM, the encoded bytes and the compression ratio, the M and D frame
-# counts, and the trace statistics of paper 4 (mean frame size, coefficient
+# counts, and the trace statistics (mean frame size, coefficient
 # of variation, peak-to-mean ratio, mean and peak bit rate). Nothing here
 # touches sets/ or sets.conf: the outputs live under the directory given
 # with -od (default e1/, ignored by git), one subdirectory per video and

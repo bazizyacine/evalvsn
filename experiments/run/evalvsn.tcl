@@ -14,7 +14,7 @@
 #     and total number of video packets.
 #   - Sizes the interface queue from the radio's real transmit buffers through
 #     radio-params.tcl (-ifqlen radio, the default), or takes an explicit
-#     length (R48: no dynamic oracle, a real node cannot size its queue on
+#     length (no dynamic oracle: a real node cannot size its queue on
 #     traffic it has not seen).
 #   - Configures wireless node parameters, energy models, and the grid
 #     topology.
@@ -41,19 +41,18 @@
 #   -simt   : Simulation time in seconds (default: 12)
 #   -nn     : Number of nodes (default: 100)
 #   -rp     : Routing protocol ("AOMDV" or "AOMDV_QPV", default: "AOMDV_QPV")
-#             The radio is IEEE 802.15.4 alone - the thesis treats no other
-#             (the author's rule of 14 September 2026) - so the two
-#             configurations it compares, cross-layer 802.15.4 against plain
+#             The radio is IEEE 802.15.4 alone - this work treats no other -
+#             so the two configurations it compares, cross-layer 802.15.4 against plain
 #             802.15.4, run from the same script on the same binary;
 #             radio-params.tcl carries the constants, anchored to the
 #             AT86RF231 radio of the IoT-LAB M3 node, and branches on -rp.
 #   -ifqlen : Interface queue length in packets, or "radio" (default) to let
 #             radio-params.tcl apply the length the radio's real buffers
-#             justify: 16 frames (R48).
+#             justify: 16 frames.
 #   -dist   : Grid spacing in meters between neighbour nodes (default: 100).
 #   -initeng: Initial battery energy in Joules. Empty (default) applies the
-#             refonte model's one real pack - 650 mAh / 3.7 V, some 8,658 J -
-#             on every stack (R56); each stack drains it at its own radio's
+#             energy model's one real pack - 650 mAh / 3.7 V, some 8,658 J -
+#             on every stack; each stack drains it at its own radio's
 #             rates.
 #   -rule_power: 802.15.4 transmit power control of the cross-layer stack, 1
 #             or 0 (default: 1, the choice of 4 Oct 2026). Closed
@@ -108,7 +107,7 @@
 #   -prop   : Propagation model: "tworay" (default, the historical model -
 #             every existing configuration replays unchanged) or
 #             "shadowing" - ns-2's log-normal shadowing parameterised for
-#             the forest canopy (R19), its RNG seeded by -rndSeed so the
+#             the forest canopy, its RNG seeded by -rndSeed so the
 #             protocol's seed law applies to the channel draws too.
 #   -plexp  : Shadowing path-loss exponent (default 3.2; pine-forest
 #             measurements at 2.4 GHz report 3.1-3.3).
@@ -116,7 +115,7 @@
 #   -standby: Bi-regime standby flow, "period:size" in seconds and bytes
 #             (default 0 = off): scalar readings from the camera node to
 #             the sink for the whole mission - the network's first regime,
-#             which the video burst joins at detection (R15).
+#             which the video burst joins at detection.
 #
 # Notes:
 #   - Requires radio-params.tcl for the radio and protocol parameters.
@@ -207,8 +206,7 @@ set maxSeqNb_ [lindex $prio_pkt 1]
 puts "Max Priority Number (maxPrioNb_): $maxPrioNb_"
 puts "Number of video packets to transmit (maxSeqNb_): $maxSeqNb_"
 
-# The interface queue length (R48, then the author's removal of the dynamic
-# oracle): the default is the value radio-params.tcl anchors to the radio's
+# The interface queue length (no dynamic oracle): the default is the value radio-params.tcl anchors to the radio's
 # real buffers - 16 frames, the Contiki/TinyOS order - and an explicit
 # -ifqlen N is taken as given. The
 # historical packets-per-second computation is gone: no real node sizes its
@@ -235,7 +233,7 @@ recv trace: $val(rt)"
 set val(chan)       Channel/WirelessChannel       ;# Channel type
 # Propagation model (-prop): "tworay" - the historical default, every
 # existing configuration replays unchanged - or "shadowing" for the
-# survival campaign (the author's R19 answer of 23/08/2026): ns-2's own
+# survival campaign (23/08/2026): ns-2's own
 # log-normal shadowing, no code, parameterised for the forest canopy the
 # scenario films. 2.4 GHz propagation measurements in pine forest report
 # path-loss exponents around 3.1-3.3 and shadowing deviations near 7 dB;
@@ -303,7 +301,7 @@ if {![info exists val(hello_interval)]} {
     set val(hello_interval) ""                          ;# study knob: overrides the QPV HELLO_INTERVAL_ of radio-params.tcl
 }
 foreach knob {class_cost hello_queue rl_access rl_path rl_congestion rl_break rl_discovery rl_power rule_discard rl_discard rl_alpha rl_epsilon rl_mac_alpha rl_mac_epsilon rl_eps_start rl_eps_end rl_break_eps rl_trace aomdv_derived aomdv_tuned jitter camnode sinknode firefaildist} {
-    if {![info exists val($knob)]} { set val($knob) "" } ;# bench knobs: 0 turns off a chapter-4 mechanism of AOMDV_QPV, 1 turns on an agent or the early discard
+    if {![info exists val($knob)]} { set val($knob) "" } ;# bench knobs: 0 turns off a cross-layer mechanism of AOMDV_QPV, 1 turns on an agent or the early discard
 }
 if {![info exists val(rreq_timeout)]} {
     set val(rreq_timeout) ""                           ;# study knob: overrides the QPV MAX_RREQ_TIMEOUT_ of radio-params.tcl
@@ -318,8 +316,7 @@ if {![info exists val(firet0)]} { set val(firet0) 3 }
 if {![info exists val(firev)]}  { set val(firev)  1.0 }
 if {![info exists val(firex)]}  { set val(firex)  0 }
 if {![info exists val(firey)]}  { set val(firey)  0 }
-# Bi-regime standby traffic (-standby period:size, default 0 = off, the
-# thesis review's "Scénario applicatif" and the author's R15 answer): a
+# Bi-regime standby traffic (-standby period:size, default 0 = off): a
 # surveillance node samples scalar readings - temperature, smoke index -
 # for the whole mission, a few tens of bytes at a low cadence, and the
 # video burst joins them at detection (the capture calendar's detect
@@ -330,8 +327,8 @@ if {![info exists val(firey)]}  { set val(firey)  0 }
 if {![info exists val(standby)]} { set val(standby) 0 }
 set val(engmodel)   EnergyModel
 # The consumption rates belong to the radio chip, hence to the stack:
-# radio-params.tcl sets them (one model out of the stack, the author ruled).
-# The battery belongs to the stack (R56): radio-params.tcl sets it from the
+# radio-params.tcl sets them (one model out of the stack).
+# The battery belongs to the stack: radio-params.tcl sets it from the
 # radio's real node hardware; -initeng overrides for a study.
 if {![info exists val(initeng)]} { set val(initeng) "" }
 set val(simt)       $val(simt)                    ;# Simulation time in Secondes
@@ -676,7 +673,7 @@ $ns_ connect $udp $sink
 # Video setting
 puts "Video start..."
 # Traffic Video
-# The chain's own trace-file class, not ns-2's Tracefile: the application
+# EvalVSN's own trace-file class, not ns-2's Tracefile: the application
 # casts what it is given to evalvsnFile, whose end-of-trace flag sits past
 # the stock object's 72 bytes. A Tracefile here wrote that flag into the
 # next heap chunk at the end of every trace - the "free(): invalid pointer"
