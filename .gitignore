@@ -12,5 +12,13 @@ experiments/sets/
 article/src/tables/
 article/src/figures/
 
+# What the reader supplies or builds: the videos cut from FLAME 2, which the
+# repository does not redistribute, and the in-source build of EvalVSN
+evalvsn/videos/
+evalvsn/CMakeCache.txt
+evalvsn/CMakeFiles/
+evalvsn/Makefile
+evalvsn/cmake_install.cmake
+
 # Local reports, not part of the release.
 AUDIT-*.md

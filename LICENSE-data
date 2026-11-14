@@ -5,8 +5,7 @@ Attribution 4.0 International license (CC BY 4.0), whose legal code follows.
 They are:
 
   - experiments/studies/*/results/: the results of every simulation of
-    studies 09 and 10 (runs.tsv), their moments per set (sets.tsv) and their
-    routing counters (routing.tsv);
+    studies 09 and 10 (runs.tsv) and their routing counters (routing.tsv);
   - article/src/data/: the measurements behind the numbers of the article;
   - the tables and figures the tools of article/tools/ generate from them
     (article/src/tables/, article/src/figures/).

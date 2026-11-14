@@ -42,7 +42,6 @@ listed in `experiments/studies/10-revision/README.md`.
 | `rl_alpha=0`, `rl_epsilon=0`, `rl_mac_alpha=0`, `rl_mac_epsilon=0` | `RL_ALPHA_`, `RL_EPSILON_`, `RL_MAC_ALPHA_`, `RL_MAC_EPSILON_` | the frozen policy of E3: no learning and no exploration, each agent keeps its initial choice |
 | `rl_eps_start`, `rl_eps_end` | `RL_EPS_START_`, `RL_EPS_END_` | the decaying exploration of E3: the rate falls linearly to 0 between the two instants (s), on the routing agent and the derived MAC |
 | `rl_trace=1` | `RL_TRACE_` | the agents' traces: each agent's counters and values written to the routing trace every 20 s (`Q` lines); it only reads, and draws no random number |
-| `rl_break_eps` | `RL_BREAK_EPSILON_` | the link-break detection agent's own exploration rate; below 0, the default, it follows the common rate |
 | `aomdv_derived=1` | | classic AOMDV on the derived PHY and MAC, the control AOMDV of E1; never the reference |
 | `aomdv_tuned=1` | `HELLO_INTERVAL_`, `MAX_RREQ_TIMEOUT_`, `ACTIVE_ROUTE_TIMEOUT_`, `set-rtq-max-len` | the tuned AOMDV of E1: AOMDV with the cross-layer stacks' routing timers and route queue (hellos every 5 s, 10 s route-request cap, 35 s active route, 16 packets waiting for a route) instead of the release's (1 s, 1 s, 10 s, 64); the release's values stay the defaults |
 

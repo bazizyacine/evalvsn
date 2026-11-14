@@ -3,7 +3,7 @@
 Supporting material for the article *Reinforcement Learning Agents in a
 Cross-Layer Stack for Forest Fire Video Surveillance over Wireless Sensor
 Networks* (M. Y. Baziz, L. Sekhri and B. Kechar), under revision in
-*Sensors* (MDPI). This release, v2.0.4, is the version of the revised
+*Sensors* (MDPI). This release, v2.0.5, is the version of the revised
 manuscript: the code that ran the simulations, the results of every
 simulation and the commands that reproduce them.
 
@@ -11,10 +11,10 @@ simulation and the commands that reproduce them.
 |---|---|
 | `evalvsn/` | the EvalVSN tool, which codes the video of the camera and evaluates it at the sink (C++11 with GNU extensions, gnu++0x, OpenCV 4.6), with its `CMakeLists.txt` |
 | `ns-2-modules/` | every file added to or modified in ns-2.35, at its path under `ns-2.35/`: the cross-layer routing agent `aomdv_qpv/` (AOMDV Quality Prioritized Video, AOMDV_QPV) with its learning agents, the derived 802.15.4 MAC and PHY, the power monitor and the fire propagation model under `mac/`, the priority interface queue under `queue/`, the video source and sink under `evalvsn/`, and the release files they touch, `aomdv/` among them; its `README.md` lists them, with the switches of the revision's experiments |
-| `experiments/` | the simulation and measurement scripts: `run/` drives the simulations, `metrics/` extracts the measurements and holds the connectivity oracle, `ipFiles/` holds the encoder parameters, `sets.conf` declares every set; `studies/09-comparative/` (the 36 sets of the main study, experiment E0) and `studies/10-revision/` (the 261 sets of the other experiments) each hold `sets.txt`, a `README.md` and `results/`, with `runs.tsv`, one row per simulation |
+| `experiments/` | the simulation and measurement scripts: `run/` drives the simulations, `metrics/` extracts the measurements and holds the connectivity oracle, `ipFiles/` holds the encoder files of the sets, `sets.conf` declares the sets of the two studies; `studies/09-comparative/` (the 36 sets of the main study, experiment E0) and `studies/10-revision/` (the 261 sets of the other experiments) each hold `sets.txt`, a `README.md` and `results/`, with `runs.tsv`, one row per simulation |
 | `article/tools/` | the compilation of the simulations, the analysis of the codec, the paired tests with Holm correction, the analyses of variance, and the tables and figures of the article |
 | `article/src/data/` | the measurements behind every number of the article: `comparative.tsv` and `revision.tsv`, one row per simulation, and the files listed below |
-| `article/src/figures-src/icons/` | the Twemoji pictograms of Figures 1 and 2 (Twitter, Inc and other contributors, CC BY 4.0, license beside them) |
+| `article/src/figures-src/icons/` | the Twemoji pictograms of Figure 2 (Twitter, Inc and other contributors, CC BY 4.0, license beside them) |
 | `LICENSE`, `LICENSE-data`, `ns-2-modules/LICENSE-GPL-2.0` | the licenses: GPL-3.0 for the EvalVSN tool and the scripts, GPL-2.0 or later for the files of the ns-2 modules written by the authors, CC BY 4.0 for the data (see License) |
 | `CITATION.cff`, `.zenodo.json` | the reference of this release, and its record at Zenodo |
 
@@ -43,23 +43,43 @@ with a trace of the agents' choices and values every 20 s. The costs for a
 sensor node have no simulation of their own: they are measured on the
 simulations of E0 to E3, of E5 and of the traces.
 
-Study 10 also keeps the results of 12 sets (240 simulations)
-that its `sets.txt` no longer lists and that the article does not read: the
-first run of the quality coefficient 0.1, simulated for 165 s. The article
-reads their replay at 168 s, in E4. Their declarations stay in
-`experiments/sets.conf` (`experiments/studies/10-revision/README.md`).
-
 ## Building
 
-1. ns-2.35 from `ns-allinone-2.35`: copy `ns-2-modules/` over `ns-2.35/`,
-   then build as usual (`./configure && make` in `ns-2.35/`; `Makefile.in`
-   compiles with gcc-4.8 and g++-4.8). The release's 802.15.4 classes are
-   left untouched; the stack lives in derived classes.
+The build and the replays below were checked on Ubuntu 24.04 (4 cores),
+with gcc-4.8 and g++-4.8 4.8.5 for ns-2.35, gcc 13.3, CMake 3.28 and OpenCV
+4.6.0 for EvalVSN, FFmpeg 6.1.1, Python 3.12 with NumPy 2.5, Matplotlib 3.11
+and Pillow 12.3.
+
+1. ns-2.35, from the release `ns-allinone-2.35.tar.gz` (the ns-2 project,
+   nsnam on SourceForge,
+   https://sourceforge.net/projects/nsnam/files/allinone/ns-allinone-2.35/),
+   which this repository does not redistribute.
+   Unpack it, copy `ns-2-modules/` over its `ns-2.35/`, then run the
+   release's `install` script, which builds Tcl 8.5.10, Tk 8.5.10, OTcl 1.14,
+   TclCL 1.20 and then ns-2.35 (about 5 minutes):
+
+   ```bash
+   tar -xzf ns-allinone-2.35.tar.gz
+   cp -r ns-2-modules/. ns-allinone-2.35/ns-2.35/
+   (cd ns-allinone-2.35 && ./install)
+   export PATH=$PWD/ns-allinone-2.35/ns-2.35:$PATH
+   ```
+
+   `./configure && make` in `ns-2.35/` alone stops at configure, which
+   needs the Tcl, OTcl and TclCL that `install` builds first. The copied
+   `Makefile.in` compiles ns-2.35 with `gcc-4.8` and `g++-4.8`, which must
+   be on the `PATH` (Ubuntu 18.04 packages them): g++ 13 stops on a file of
+   the release, `ns-2.35/tcp/tcp-linux.cc`. Tk needs the X11 development headers
+   (`libx11-dev`). The optional `dei80211mr` library may fail to build;
+   ns-2.35 does not use it. The `ns` binary needs no other variable than the
+   `PATH`. The release's 802.15.4 classes are left untouched; the stack lives
+   in derived classes.
 2. The EvalVSN tool: `cmake . && make` under `evalvsn/`, which builds
-   `bin/evalvsn`.
+   `bin/evalvsn` (CMake 3.5 or later, the OpenCV 4.6 development files; the
+   default build type, Debug, is the one `analyse_codec.py` reproduces).
 3. The videos: each content is a 12 s cut of a video of the FLAME 2 dataset
-   (Hopkins et al., IEEE DataPort, 2022), which this repository does not
-   redistribute: in the YUV file, 300 frames at 25 frames per second,
+   (Hopkins et al., IEEE DataPort, 2022, https://doi.org/10.21227/swyw-6j78), which
+   this repository does not redistribute: in the YUV file, 300 frames at 25 frames per second,
    QCIF (176 × 144 pixels), YUV 4:2:0, under `evalvsn/videos/`; the encoder
    reads the AVI file and codes twelve frames of each in grayscale (Table
    2 of the article).
@@ -172,17 +192,15 @@ checked without rerunning a simulation.
 ## The raw results
 
 This release archives the raw result of every simulation of studies 09 and
-10, 720 and 5460 simulations: those of study 10 are the 5220
-the article reads and the 240 of the first run of the quality
-coefficient 0.1 at 165 s. The per-packet traces are not included.
+10, 720 and 5220 simulations, those the article reads. The
+per-packet traces are not included.
 
 ### What each file of the measurements is
 
 | File | Contents | Written by |
 |---|---|---|
 | `experiments/studies/09-comparative/results/runs.tsv` | the 720 simulations of study 09 (E0), one row each | `experiments/metrics/compile_runs.py` |
-| `experiments/studies/10-revision/results/runs.tsv` | the 5460 simulations of study 10, one row each: the 5220 of the 261 sets of `sets.txt`, then the 240 of the 12 sets the article does not read (the first run of the quality coefficient 0.1, at 165 s) | `experiments/metrics/compile_runs.py` |
-| `experiments/studies/*/results/sets.tsv` | one row per set, the 36 of study 09 and the 273 of study 10 (the 12 above included): its declaration, the mean, standard deviation, minimum and maximum over its realisations of each measure of `sim/mt.dat`, and the aggregates of `setGraphs.pl` for the others | `experiments/metrics/compile_sets.py` |
+| `experiments/studies/10-revision/results/runs.tsv` | the 5220 simulations of the 261 sets of study 10, one row each | `experiments/metrics/compile_runs.py` |
 | `experiments/studies/09-comparative/results/routing.tsv` | route requests, route errors, MAC drops, route-queue refusals, route replies and hellos per simulation, AOMDV and rule stacks at GOP 9-3 | `experiments/metrics/routing_events.py` |
 | `experiments/studies/10-revision/sets.txt`, `README.md` | the 261 sets of study 10, by experiment and series | |
 | `article/src/data/comparative.tsv` | one row per simulation of E0 (see above) | `compile_comparative.py` |
@@ -200,7 +218,7 @@ coefficient 0.1 at 165 s. The per-packet traces are not included.
 
 `runs.tsv` keys each row by `set` and `realisation`, gives the `seed` the
 simulation ran on, the keys of `revision.tsv` (`arm`, `fire`, `split`,
-`period`, `dist`; empty for a set the article does not read), then what the
+`period`, `dist`), then what the
 simulation measured, as the tools wrote it: the `sim/mt.dat` columns (PSNR,
 SSIM and their loss-free references in dB and [0, 1], packet loss overall, of the M
 and D frames and of each priority level M1 to M13 and D1 to D13, in %), the
@@ -218,13 +236,35 @@ Every set of studies 09 and 10 takes the seeds of
 `experiments/run/run_sets.sh`), the column `seed` of `runs.tsv`, checked
 against the seed each set's log recorded.
 
+### Replaying one simulation
+
+One realisation replays from its seed, the column `seed` of `runs.tsv`
+(`--sims=1` alone would run ns-2's own sequence, seed 0, which is no
+realisation of the campaigns). For the first realisation of the hybrid stack
+under F1 at GOP 9-3, about two minutes:
+
+```bash
+cd experiments/run
+bash run_sets.sh --sims=1 --seed=45026 set_AOMDV_QPV_GC-PN-0p03-13_p9-n100-d40-fire-hybrid
+```
+
+The run writes the realisation under `../sets/<set>/r01/`, whatever its
+index in the campaign; its `sim/mt.dat` holds, as written, the PSNR, SSIM and
+losses of the row (`set`, `r01`) of
+`experiments/studies/09-comparative/results/runs.tsv`. Built as above, the
+simulator and EvalVSN replay the campaigns bit for bit: on 14 November 2026,
+the 20 realisations of this set and one realisation of nine other sets of
+studies 09 and 10 wrote reception traces, packet traces and decoded images
+identical, byte for byte, to those of the campaigns.
+
 ### The exact commands, in order
 
 Prerequisites: ns-2.35 built with `ns-2-modules/` (see Building) and on the
-`PATH`, `evalvsn/bin/evalvsn`, perl, ffmpeg (ffprobe included), gnuplot,
-Python 3.12 with NumPy, Matplotlib and Pillow (pandas and statsmodels for
-`mixed_model.py`), and the videos under `evalvsn/videos/`. The files the
-simulations read have these SHA-256 sums:
+`PATH`, `evalvsn/bin/evalvsn`, perl, ffmpeg (ffprobe included), gnuplot and
+pdftoppm (poppler-utils) for the plots of `setGraphs.pl`, Python 3.12 with
+NumPy, Matplotlib and Pillow, the Liberation Sans font (fonts-liberation),
+with which the figures are drawn, and the videos under `evalvsn/videos/`.
+The files the simulations read have these SHA-256 sums:
 
 | File | SHA-256 |
 |---|---|
@@ -237,7 +277,13 @@ simulations read have these SHA-256 sums:
 
 1. The simulations, the commands the campaigns ran (each set ran with the
    options above; a set interrupted by a restart was completed with
-   `--resume`, which keeps the realisations already harvested):
+   `--resume`, which keeps the realisations already harvested). A
+   simulation takes 1.5 to 3.5 minutes on one core, a set of 20
+   simulations 30 to 70 minutes, and a set keeps about 3.8 GB of traces,
+   decoded frames and log: the 297 sets take about 250 hours of one core and 1.1 TB of
+   disk. `run/` holds one campaign at a time (`run_sets.sh`
+   takes a lock there): run sets in parallel from separate copies of the
+   repository.
 
    ```bash
    cd experiments/run
@@ -322,7 +368,7 @@ simulations read have these SHA-256 sums:
 | 10, Controls at GOP 9-3, means over 60 seeds | `make_tables_revision.py` | `analyse_revision.py` |
 | 11, Paired PSNR differences between the cross-layer stacks, means per cell | `make_tables_comparative.py` | `analyse_comparative.py` |
 | 12, Usable images, delay and missed deadlines of the four stacks, means over 60 seeds | `make_tables_quality.py` | `make_tables_quality.py --stats` |
-| 13, Repeated-measures analysis of the PSNR, 540 simulations over 60 seeds | `make_tables_comparative.py` | `analyse_comparative.py`; `mixed_model.py`, a further check the article does not report |
+| 13, Repeated-measures analysis of the PSNR, 540 simulations over 60 seeds | `make_tables_comparative.py` | `analyse_comparative.py` |
 | 14, GOP at T = 9 s and at equal rate, means over 60 seeds, T denoting the alarm period | `make_tables_volume.py` | `analyse_claims.py`, rows P26, the tests at equal rate |
 | 15, Quality coefficient (0.01 or 0.1) at GOP 9-3, means over 60 seeds | `make_tables_volume.py` | `analyse_qualite.py`, the tests of the coefficient 0.1 |
 | 16, Alarm period T at GOP 9-3, means over 60 seeds | `make_tables_charge.py` |  |
@@ -376,7 +422,7 @@ The licenses go by directory:
 
 ## Citation
 
-This release, v2.0.4, is archived at Zenodo. All its versions share the
+This release, v2.0.5, is archived at Zenodo. All its versions share the
 concept DOI [10.5281/zenodo.24147853](https://doi.org/10.5281/zenodo.24147853), which
 leads to the latest one; the Zenodo record of each version gives the DOI of
 that version.

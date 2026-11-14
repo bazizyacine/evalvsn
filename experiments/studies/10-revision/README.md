@@ -36,19 +36,11 @@ it simulates up to its last packet plus 3 s, as before.
 The sets were run in tranches, which some tools name: T0, the frozen policy;
 T1, the traces, the control AOMDV and the decaying exploration; T2, the agents
 one by one; T3, the load and the equal rate; T4, the fire; T5, the scenario;
-T8, the tuned AOMDV; T9, the quality coefficient 0.1 at 165 s; T10, the same
-at 168 s. T6 and T7 were dropped before they ran.
+T8, the tuned AOMDV; T10, the quality coefficient 0.1. T6, T7 and T9 name no
+set of this release.
 
 **Results.** `results/runs.tsv` holds one row per simulation, with its seed
-(`../../metrics/compile_runs.py`): 5460 rows, the 5220 simulations of
-the sets of `sets.txt`, then the 240 of the 12 sets of tranche T9,
-which `sets.txt` no longer lists and the article does not read (the article
-reads their replay of tranche T10); their keys of `revision.tsv` are empty.
-Their declarations stay in `../../sets.conf`. `results/sets.tsv` gives one row
-per set, the 12 of T9 included: the mean, standard deviation, minimum and
-maximum over its realisations of each measure of `sim/mt.dat`, and the
-aggregates of `../../metrics/setGraphs.pl` for the others
-(`../../metrics/compile_sets.py`).
-The routing counters come from each set's `events.tsv`
+(`../../metrics/compile_runs.py`): the 5220 simulations of the sets of
+`sets.txt`. The routing counters come from each set's `events.tsv`
 (`../../metrics/routing_events.py`), written before the packet traces were
 deleted.
